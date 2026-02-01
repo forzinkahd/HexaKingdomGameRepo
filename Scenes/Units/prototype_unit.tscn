@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://grijaagmqw4"]
+
+[ext_resource type="Script" uid="uid://j82fso57rw2q" path="res://scripts/unit.gd" id="1_spsi8"]
+[ext_resource type="PackedScene" uid="uid://dmtljlgvni37l" path="res://assets/Meshes/Units/test_character.glb" id="2_g7i07"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g46nc"]
+render_priority = 1
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 1)
+grow = true
+grow_amount = 0.06
+stencil_mode = 3
+stencil_flags = 1
+stencil_compare = 5
+metadata/_stencil_owned = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xvekn"]
+next_pass = SubResource("StandardMaterial3D_g46nc")
+albedo_color = Color(0.996945, 6.23293e-06, 1.54018e-06, 1)
+stencil_mode = 1
+stencil_flags = 2
+stencil_outline_thickness = 0.06
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_10dfy"]
+size = Vector3(1, 1.3196414, 1)
+
+[node name="PrototypeUnit" type="Node3D" groups=["units"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.100875854, -0.21856439, 0)
+script = ExtResource("1_spsi8")
+ground_offset = 1.0
+max_height_movement = 2
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0050256, 0)
+sides = 12
+smooth_faces = false
+material = SubResource("StandardMaterial3D_xvekn")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6593993, 0)
+shape = SubResource("BoxShape3D_10dfy")
+
+[node name="test_character" parent="." instance=ExtResource("2_g7i07")]

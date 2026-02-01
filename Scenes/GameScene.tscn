@@ -1,0 +1,144 @@
+[gd_scene format=3 uid="uid://cdf0etd2h0afb"]
+
+[ext_resource type="Script" uid="uid://divfigpu0u8i2" path="res://scripts/camera_script.gd" id="1_1xefc"]
+[ext_resource type="Texture2D" uid="uid://b23jrfa2h4i8l" path="res://Assets/Materials/SkyBG.png" id="2_l7mlp"]
+[ext_resource type="Script" uid="uid://cr1mxhuqd7thp" path="res://scripts/WorldGen/world_gen.gd" id="3_davhy"]
+[ext_resource type="Resource" uid="uid://c6hfos2qpgqth" path="res://Resources/GenerationSettings/test.tres" id="4_58wc8"]
+[ext_resource type="PackedScene" path="res://scenes/POI/VillageScene.tscn" id="7_yrli1"]
+[ext_resource type="PackedScene" path="res://scenes/Units/prototype_unit.tscn" id="8_r58of"]
+[ext_resource type="PackedScene" path="res://scenes/Cursors/path_overlay.tscn" id="9_6pl24"]
+[ext_resource type="Script" uid="uid://dal880y43rf11" path="res://scripts/WorldGen/object_placer.gd" id="9_p13dw"]
+[ext_resource type="Script" uid="uid://dxy4k3g3kax0c" path="res://scripts/pathfinder.gd" id="10_0b4my"]
+[ext_resource type="PackedScene" path="res://scenes/Cursors/hexagon_cursor.tscn" id="10_6pl24"]
+[ext_resource type="PackedScene" path="res://scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
+[ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
+[ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
+
+[sub_resource type="Environment" id="Environment_f2ci6"]
+background_mode = 3
+background_color = Color(0, 0.214146, 0.346416, 1)
+background_canvas_max_layer = -100
+reflected_light_source = 1
+tonemap_mode = 4
+tonemap_white = 2.0
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+glow_enabled = true
+fog_enabled = true
+fog_light_color = Color(0.395135, 0.482894, 0.519378, 1)
+fog_density = 0.015
+fog_sky_affect = 0.0
+fog_height = 1.0
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 40.0
+dof_blur_far_transition = 45.0
+
+[node name="World" type="Node3D" unique_id=96651091]
+
+[node name="CameraParent" type="Node3D" parent="." unique_id=88488618]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.117906, 15.1842, 10.1434)
+
+[node name="Camera3D" type="Camera3D" parent="CameraParent" unique_id=553882186 node_paths=PackedStringArray("sun")]
+transform = Transform3D(1, 0, 0, 0, 0.998537, -0.0540788, 0, 0.0540788, 0.998537, 0, 0, 0)
+script = ExtResource("1_1xefc")
+movespeed = 9
+zoom = Vector2(40, 90)
+height = Vector2(-10, 40)
+rot = Vector2(-20, -90)
+sun = NodePath("../../Scene/DirectionalLight3D")
+
+[node name="Scene" type="Node3D" parent="." unique_id=498803468]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Scene" unique_id=1979913615]
+environment = SubResource("Environment_f2ci6")
+camera_attributes = SubResource("CameraAttributesPractical_1lvu4")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Scene" unique_id=2040763329]
+transform = Transform3D(0.151402, -0.877164, 0.455698, 0.0622852, 0.468562, 0.881232, -0.986508, -0.105037, 0.125576, 0, 4.09007, 0)
+shadow_enabled = true
+directional_shadow_mode = 0
+sky_mode = 1
+
+[node name="BGCanvasLayer" type="CanvasLayer" parent="." unique_id=511985788]
+layer = -100
+visible = false
+
+[node name="SpaceBG_img" type="TextureRect" parent="BGCanvasLayer" unique_id=374089829]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("2_l7mlp")
+expand_mode = 3
+stretch_mode = 4
+
+[node name="Builder" type="Node" parent="." unique_id=1283482510]
+
+[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer")]
+script = ExtResource("3_davhy")
+settings = ExtResource("4_58wc8")
+object_placer = NodePath("../ObjectPlacer")
+
+[node name="ObjectPlacer" type="Node" parent="Builder" unique_id=1196252014]
+script = ExtResource("9_p13dw")
+village = ExtResource("7_yrli1")
+proto_unit = ExtResource("8_r58of")
+
+[node name="Pathfinder" type="Node" parent="Builder" unique_id=761877638]
+script = ExtResource("10_0b4my")
+highlight_marker = ExtResource("9_6pl24")
+
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator")]
+script = ExtResource("12_tt8b8")
+voxel_cursor_scene = ExtResource("10_6pl24")
+unit_cursor_scene = ExtResource("11_w22tq")
+main_camera = NodePath("../../CameraParent/Camera3D")
+p_finder = NodePath("../Pathfinder")
+selection_indicator = NodePath("../../Control/TextureRect")
+
+[node name="Control" type="Control" parent="." unique_id=1520664124]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=191441442]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 80.0
+
+[node name="Button" type="Button" parent="Control/VBoxContainer" unique_id=180875011]
+layout_mode = 2
+text = "Generate"
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Control/VBoxContainer" unique_id=1638208772]
+layout_mode = 2
+bbcode_enabled = true
+text = "Text Here"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="Control" unique_id=1729023714]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 552.0
+offset_right = 121.0
+offset_bottom = 665.0
+grow_vertical = 0
+texture = ExtResource("13_w22tq")
+expand_mode = 3
+stretch_mode = 4
+
+[node name="Chunks" type="Node3D" parent="." unique_id=1209535752]
+
+[connection signal="pressed" from="Control/VBoxContainer/Button" to="Builder/WorldGenerator" method="_ready"]

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://cs65a7b6fwiqr"]
+
+[ext_resource type="PackedScene" uid="uid://bghq4o8jc1xn1" path="res://assets/voxel_cursor.glb" id="1_rqovr"]
+[ext_resource type="Material" uid="uid://dmi1l2yaecsqy" path="res://assets/Materials/hex_cursor_mat.tres" id="2_vaki8"]
+
+[node name="voxel_cursor" instance=ExtResource("1_rqovr")]
+
+[node name="Cylinder" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_vaki8")

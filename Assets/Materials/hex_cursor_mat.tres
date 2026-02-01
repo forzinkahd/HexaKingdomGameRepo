@@ -1,0 +1,32 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://x4wrl2po7jer"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_np8xr"]
+render_priority = 1
+transparency = 1
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0.6392157, 0.5686275, 0.09411765, 0.5803922)
+grow_amount = 0.061
+stencil_mode = 3
+stencil_flags = 1
+stencil_compare = 5
+metadata/_stencil_owned = true
+
+[resource]
+next_pass = SubResource("StandardMaterial3D_np8xr")
+transparency = 1
+cull_mode = 2
+disable_ambient_light = true
+disable_fog = true
+albedo_color = Color(1, 1, 0, 0.67451)
+emission_enabled = true
+emission = Color(0.86079, 0.761297, 0.153579, 1)
+emission_energy_multiplier = 3.0
+rim = 0.5
+texture_filter = 0
+disable_receive_shadows = true
+proximity_fade_distance = 10.0
+stencil_mode = 2
+stencil_flags = 2
+stencil_color = Color(0.6392157, 0.5686275, 0.09411765, 0.5803922)
+stencil_outline_thickness = 0.061

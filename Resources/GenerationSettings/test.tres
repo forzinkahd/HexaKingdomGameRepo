@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="GenerationSettings" format=3 uid="uid://c6hfos2qpgqth"]
+
+[ext_resource type="Script" uid="uid://cmof4y4vdvgfm" path="res://scripts/WorldGen/generation_settings.gd" id="1_eiv65"]
+[ext_resource type="Material" path="res://assets/Materials/testmat.tres" id="1_x67sk"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fe1qq"]
+frequency = 0.02
+fractal_lacunarity = 1.735
+cellular_distance_function = 2
+cellular_return_type = 6
+domain_warp_frequency = -0.045
+domain_warp_fractal_type = 2
+
+[resource]
+script = ExtResource("1_eiv65")
+radius = 32
+max_height = 24
+terrace_steps = 2
+ground_to_air_ratio = 0.3
+flat_buffer = false
+noise = SubResource("FastNoiseLite_fe1qq")
+material = ExtResource("1_x67sk")
+map_edge_buffer = 1
+spacing = 4

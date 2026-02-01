@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://dcw7nje4jt2wj"]
+
+[ext_resource type="Texture2D" uid="uid://bi8k3r3hpiva8" path="res://assets/Materials/textureatlas.png" id="1_rl12s"]
+
+[resource]
+albedo_texture = ExtResource("1_rl12s")
+texture_filter = 0
+stencil_flags = 2
+stencil_reference = 8
+stencil_outline_thickness = 0.305
