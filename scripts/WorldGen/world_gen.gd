@@ -47,6 +47,7 @@ func generate_world():
 	chunks.add_child(new_chunk)
 	new_chunk.init_chunk()
 	interval["Create Voxel Mesh -- "] = Time.get_ticks_msec()
+	#print("World theme is: ", world_theme)
 
 	## Spawn villages and units
 	if settings.spawn_villages_and_units:

@@ -7,6 +7,7 @@ var voxel_layers: Dictionary[int, Array] = {}
 
 func init_chunk():
 	generate_collider()
+	layers = 0				# hide chunk visuals but keep colliders
 	add_to_group("voxels")
 	fill_pos_dict()
 

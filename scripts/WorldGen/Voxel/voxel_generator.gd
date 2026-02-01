@@ -24,6 +24,10 @@ const base_vertices = [
 
 
 func generate_chunk(_map : Array[Voxel], interval) -> Chunk:
+	
+	surface_voxels.clear()
+	map_dict.clear() # good hygiene, avoids stale lookups
+	
 	map = _map
 	settings = WorldMap.world_settings
 	var verts = PackedVector3Array()
@@ -70,7 +74,16 @@ func prepared_chunk(surface) -> Chunk:
 	chunk.mesh = surface.commit()
 	chunk.voxels = map
 	chunk.material_override = settings.material
+	
+	# Spawn custom visuals
+	_spawn_surface_tiles(chunk)
+	
 	return chunk
+	"""var chunk = Chunk.new()
+	chunk.mesh = surface.commit()
+	chunk.voxels = map
+	chunk.material_override = settings.material
+	return chunk"""
 
 
 func process_voxels() -> Vector2i:
@@ -317,8 +330,25 @@ func atlas_uv(local_uv: Vector2, tile: Vector2i) -> Vector2:
 	# Map local_uv [0..1] into this rectangle
 	return uv_min + local_uv * (uv_max - uv_min)
 
-# Given a voxel type, choose the according scene
-func _scene_for_voxel_type(t):
+
+func _spawn_surface_tiles(chunk: Chunk) -> void:
+	if theme == null:
+		push_warning("VoxelGenerator.theme is null - no tiles will be spawned.")
+		return
+
+	for v: Voxel in surface_voxels:
+		var scene := _scene_for_voxel_type(v.type)
+		if scene == null:
+			continue
+
+		var inst := scene.instantiate() as Node3D
+		# Place on top of the procedural prism
+		inst.position = v.world_position + Vector3(0, settings.voxel_height, 0)
+
+		chunk.add_child(inst)
+
+
+func _scene_for_voxel_type(t) -> PackedScene:
 	match t:
 		VoxelData.voxel_type.GRASS:
 			return theme.grass_tile_scene

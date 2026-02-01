@@ -1,7 +1,17 @@
 [gd_resource type="Resource" script_class="WorldTheme" format=3 uid="uid://dhdal01tj7qvh"]
 
+[ext_resource type="PackedScene" uid="uid://cpkut0wimmfj6" path="res://Scenes/TerrainVoxels/tile_base_grass.tscn" id="1_icrjr"]
 [ext_resource type="Script" uid="uid://bfdmepmayfg4u" path="res://Resources/world_theme.gd" id="1_n8hqk"]
 
 [resource]
 script = ExtResource("1_n8hqk")
+grass_tile_scene = ExtResource("1_icrjr")
+grass_side_scene = ExtResource("1_icrjr")
+grass_bottom_scene = ExtResource("1_icrjr")
+stone_tile_scene = ExtResource("1_icrjr")
+stone_side_scene = ExtResource("1_icrjr")
+stone_bottom_scene = ExtResource("1_icrjr")
+dirt_tile_scene = ExtResource("1_icrjr")
+dirt_side_scene = ExtResource("1_icrjr")
+dirt_bottom_scene = ExtResource("1_icrjr")
 metadata/_custom_type_script = "uid://bfdmepmayfg4u"
