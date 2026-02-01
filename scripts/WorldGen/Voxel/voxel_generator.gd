@@ -5,6 +5,7 @@ var map_dict : Dictionary[Vector3i, Voxel]
 const sides = 6
 var settings : GenerationSettings
 var surface_voxels : Array[Voxel]
+var theme: WorldTheme
 
 const ATLAS_RES   = Vector2i(512, 512)	# full atlas resolution in pixels
 const TILE_SIZE   = Vector2i(16, 16)	# usable area of one tile
