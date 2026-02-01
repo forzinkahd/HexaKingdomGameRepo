@@ -1,3 +1,8 @@
 [gd_scene format=3 uid="uid://cpkut0wimmfj6"]
 
+[ext_resource type="PackedScene" uid="uid://b0ab0f65syp4s" path="res://Assets/Meshes/Terrain/base/hex_grass.gltf" id="1_36lg7"]
+
 [node name="Tile_BaseGrass" type="Node3D" unique_id=742239584]
+
+[node name="hex_grass2" parent="." unique_id=1467486147 instance=ExtResource("1_36lg7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

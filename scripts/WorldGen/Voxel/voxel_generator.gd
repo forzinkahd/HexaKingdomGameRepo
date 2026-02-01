@@ -5,7 +5,7 @@ var map_dict : Dictionary[Vector3i, Voxel]
 const sides = 6
 var settings : GenerationSettings
 var surface_voxels : Array[Voxel]
-var theme: WorldTheme
+var theme: WorldTheme					# 1.2.2026
 
 const ATLAS_RES   = Vector2i(512, 512)	# full atlas resolution in pixels
 const TILE_SIZE   = Vector2i(16, 16)	# usable area of one tile
@@ -316,3 +316,13 @@ func atlas_uv(local_uv: Vector2, tile: Vector2i) -> Vector2:
 	
 	# Map local_uv [0..1] into this rectangle
 	return uv_min + local_uv * (uv_max - uv_min)
+
+# Given a voxel type, choose the according scene
+func _scene_for_voxel_type(t):
+	match t:
+		VoxelData.voxel_type.GRASS:
+			return theme.grass_tile_scene
+		VoxelData.voxel_type.STONE:
+			return theme.stone_tile_scene
+		_:
+			return theme.dirt_tile_scene

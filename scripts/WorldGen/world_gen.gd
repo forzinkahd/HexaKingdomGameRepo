@@ -6,6 +6,7 @@ extends Node
 @export var object_placer : ObjectPlacer
 @onready var interaction_tracker: Node3D = $"../Interaction_tracker"
 @onready var chunks: Node3D = $"../../Chunks"
+@export var world_theme: WorldTheme
 
 #UI
 @onready var label: RichTextLabel = $"../../Control/VBoxContainer/RichTextLabel"
@@ -41,6 +42,7 @@ func generate_world():
 	interval["Calculate Map Positions -- "] = Time.get_ticks_msec()
 
 	var vg = VoxelGenerator.new()
+	vg.theme = world_theme				# 1.2.2026
 	var new_chunk = vg.generate_chunk(voxels, interval)
 	chunks.add_child(new_chunk)
 	new_chunk.init_chunk()
