@@ -76,7 +76,10 @@ func prepared_chunk(surface) -> Chunk:
 	chunk.material_override = settings.material
 	
 	# Spawn custom visuals
-	_spawn_surface_tiles(chunk)
+	_spawn_columns(chunk)		# bottom geometry
+	_spawn_surface_tiles(chunk)	# top caps
+	
+	#_spawn_surface_tiles(chunk)
 	
 	return chunk
 	"""var chunk = Chunk.new()
@@ -330,6 +333,7 @@ func atlas_uv(local_uv: Vector2, tile: Vector2i) -> Vector2:
 	# Map local_uv [0..1] into this rectangle
 	return uv_min + local_uv * (uv_max - uv_min)
 
+#################################################################
 
 func _spawn_surface_tiles(chunk: Chunk) -> void:
 	if theme == null:
@@ -346,6 +350,75 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		inst.position = v.world_position + Vector3(0, settings.voxel_height, 0)
 
 		chunk.add_child(inst)
+
+
+func _spawn_columns(chunk: Chunk) -> void:
+	if theme == null:
+		push_warning("No theme assigned; skipping tile spawn.")
+		return
+	
+	# Dictionary: Vector2i -> Array[Voxel]
+	var columns := {}
+	
+	for v: Voxel in map:
+		if v.type == VoxelData.voxel_type.AIR:
+			continue
+		var key: Vector2i = v.grid_position_xz
+		if not columns.has(key):
+			columns[key] = [] as Array[Voxel]
+		(columns[key] as Array[Voxel]).append(v)
+	
+	for key in columns.keys():
+		var col: Array[Voxel] = columns[key] as Array[Voxel]
+		col.sort_custom(func(a: Voxel, b: Voxel) -> bool:
+			return a.grid_position_xyz.y < b.grid_position_xyz.y
+		)
+		
+		var top_voxel: Voxel = col[col.size() - 1]
+		var top_y: int = top_voxel.grid_position_xyz.y
+		
+		# Count consecutive solid voxels downward from the top (same x,z)
+		var height_voxels := 0
+		var y := top_y
+		while true:
+			var p := Vector3i(top_voxel.grid_position_xyz.x, y, top_voxel.grid_position_xyz.z)
+			var vv: Voxel = map_dict.get(p)
+			if vv == null or vv.type == VoxelData.voxel_type.AIR:
+				break
+			height_voxels += 1
+			y -= 1
+		
+		var bottom_scene := _bottom_scene_for_voxel_type(top_voxel.type)
+		if bottom_scene == null:
+			continue
+		
+		var bottom := bottom_scene.instantiate() as Node3D
+		
+		# Stretch column to cover the stack. If your bottom mesh is 1 voxel tall at scale.y=1, this is correct.
+		bottom.scale.y = float(height_voxels)
+		
+		# Place the TOP of the column at the top surface of the top voxel
+		bottom.position = top_voxel.world_position + Vector3(0, settings.voxel_height, 0)
+		
+		chunk.add_child(bottom)
+
+
+func _top_scene_for_voxel_type(t) -> PackedScene:
+	match t:
+		VoxelData.voxel_type.STONE:
+			return theme.stone_top_scene
+		_:
+			return theme.grass_top_scene
+
+
+func _bottom_scene_for_voxel_type(t) -> PackedScene:
+	match t:
+		VoxelData.voxel_type.STONE:
+			return theme.stone_bottom_scene
+		_:
+			return theme.grass_bottom_scene
+
+##########################################
 
 
 func _scene_for_voxel_type(t) -> PackedScene:
