@@ -78,6 +78,7 @@ func prepared_chunk(surface) -> Chunk:
 	# Spawn custom visuals
 	_spawn_columns(chunk)		# bottom geometry
 	_spawn_surface_tiles(chunk)	# top caps
+	#_spawn_padding(chunk) 		# half steps
 	
 	#_spawn_surface_tiles(chunk)
 	
@@ -381,17 +382,85 @@ func _spawn_columns(chunk: Chunk) -> void:
 
 		var bottom := bottom_scene.instantiate() as Node3D
 
-		# Column runs from y=0 up to the TOP of the top voxel (cap will sit above that).
+		"""# Column runs from y=0 up to the TOP of the top voxel (cap will sit above that).
 		# If your bottom mesh is "1 voxel tall" at scale.y = 1, then this is correct:
-		var column_voxel_height := float(top_y + 0)	# was + 1
-		bottom.scale.y = -column_voxel_height
+		var column_voxel_height := float(top_y + 0)	# was + 1, better with 0
+		bottom.scale.y = -column_voxel_height 		# scale upwards rather than downwards
 
 		# Place bottom at base. Use the x/z of the column and y=0.
 		# IMPORTANT: this assumes voxel.world_position is at the voxel base for y=0.
 		# We can use the top voxel's x/z because all in column share it.
-		bottom.position = Vector3(top_voxel.world_position.x, 0.0, top_voxel.world_position.z)
+		bottom.position = Vector3(top_voxel.world_position.x, 0.0, top_voxel.world_position.z)"""
+		
+		# Looks good so far 05.02.2026
+		
+		# Height in full voxel steps from base (y=0) to top surface of top voxel
+		var height_steps := float(top_y + 0)
+
+		# Cap plane (top surface) in world Y
+		var cap_y := height_steps * settings.voxel_height
+
+		# Scale normally (positive)
+		bottom.scale.y = height_steps
+
+		# Now force the bottom column to end at cap_y (so it never overlaps the cap)
+		# This assumes your bottom mesh at scale.y=1 has height == settings.voxel_height and is authored with its BASE at y=0.
+		# If your bottom mesh is authored with its TOP at y=0, swap the formula (see note below).
+		bottom.position = Vector3(top_voxel.world_position.x, cap_y, top_voxel.world_position.z)
 
 		chunk.add_child(bottom)
+
+
+func _spawn_padding(chunk: Chunk) -> void:
+	if theme == null:
+		return
+	if theme.grass_padding_scene == null:
+		return
+
+	var dirs = VoxelData.get_tile_neighbor_table(0) # we’ll request per x later if needed
+	var pad_h := settings.voxel_height * theme.padding_height_fraction
+
+	for v: Voxel in surface_voxels:
+		var v_y := v.grid_position_xyz.y
+		var table = VoxelData.get_tile_neighbor_table(v.grid_position_xyz.x)
+
+		for i in range(6):
+			var npos := Vector3i(
+				v.grid_position_xyz.x + table[i].x,
+				v.grid_position_xyz.y,
+				v.grid_position_xyz.z + table[i].y
+			)
+
+			# Find the neighbor surface height by scanning downward until solid, then surface
+			# Simplest: look for voxel at same y and below
+			var ny := v_y
+			while ny >= 0:
+				var nv: Voxel = map_dict.get(Vector3i(npos.x, ny, npos.z))
+				if nv != null and nv.type != VoxelData.voxel_type.AIR:
+					break
+				ny -= 1
+
+			# If neighbor column is exactly 1 lower, place padding at half step
+			if ny == v_y - 1:
+				var pad_scene := _padding_scene_for_voxel_type(v.type)
+				if pad_scene == null:
+					continue
+
+				var pad := pad_scene.instantiate() as Node3D
+
+				# place at edge midpoint between v and neighbor, at half height below v cap
+				var a: Vector3 = base_vertices[i] * settings.voxel_size
+				var b: Vector3 = base_vertices[(i + 1) % 6] * settings.voxel_size
+				var mid: Vector3 = (a + b) * 0.5
+
+				var cap_y := float(v_y + 1) * settings.voxel_height
+				pad.position = Vector3(v.world_position.x + mid.x, cap_y - pad_h, v.world_position.z + mid.z)
+
+				# rotate to face outward along that edge (if your padding mesh needs it)
+				pad.rotation.y = atan2(mid.z, mid.x)
+
+				chunk.add_child(pad)
+
 
 
 func _top_scene_for_voxel_type(t) -> PackedScene:
@@ -408,6 +477,14 @@ func _bottom_scene_for_voxel_type(t) -> PackedScene:
 			return theme.stone_bottom_scene
 		_:
 			return theme.grass_bottom_scene
+
+
+func _padding_scene_for_voxel_type(t) -> PackedScene:
+	match t:
+		VoxelData.voxel_type.STONE:
+			return theme.stone_padding_scene
+		_:
+			return theme.grass_padding_scene
 
 ##########################################
 

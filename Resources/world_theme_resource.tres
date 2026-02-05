@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cpkut0wimmfj6" path="res://Scenes/TerrainVoxels/tile_base_grass.tscn" id="1_icrjr"]
 [ext_resource type="Script" uid="uid://bfdmepmayfg4u" path="res://Resources/world_theme.gd" id="1_n8hqk"]
 [ext_resource type="PackedScene" uid="uid://bl352o7gs21jg" path="res://Scenes/TerrainVoxels/tile_base_grass_bottom.tscn" id="2_p2yq6"]
+[ext_resource type="PackedScene" uid="uid://ct484gotrc7f7" path="res://Scenes/TerrainVoxels/tile_base_grass_padding.tscn" id="3_vxiry"]
 
 [resource]
 script = ExtResource("1_n8hqk")
@@ -12,4 +13,5 @@ dirt_top_scene = ExtResource("1_icrjr")
 grass_bottom_scene = ExtResource("2_p2yq6")
 stone_bottom_scene = ExtResource("2_p2yq6")
 dirt_bottom_scene = ExtResource("2_p2yq6")
+grass_padding_scene = ExtResource("3_vxiry")
 metadata/_custom_type_script = "uid://bfdmepmayfg4u"

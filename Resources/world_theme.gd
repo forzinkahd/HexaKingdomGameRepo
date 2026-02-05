@@ -13,3 +13,7 @@ class_name WorldTheme
 @export var grass_bottom_scene: PackedScene
 @export var stone_bottom_scene: PackedScene
 @export var dirt_bottom_scene: PackedScene
+
+@export_category("Padding tiles")
+@export var grass_padding_scene: PackedScene
+@export var padding_height_fraction: float = 0.5		# half step
