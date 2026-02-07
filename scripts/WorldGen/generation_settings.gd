@@ -30,3 +30,8 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 @export var spawn_villages_and_units = true
 @export var map_edge_buffer = 2
 @export_range(1, 99) var spacing = 6
+
+# Overworking half steps
+@export_category("Half steps")
+@export var use_half_steps: bool = true
+@export_range(1, 256, 1) var max_height_units: int = 8

@@ -90,7 +90,7 @@ func print_generation_results(start : float, dict : Dictionary):
 func get_placeable_voxels() -> Array[Voxel]:
 	var placeable_tiles : Array[Voxel] = []
 	for key in WorldMap.surface_layer:
-		var voxel = WorldMap.surface_layer[key]
+		var voxel: Voxel = WorldMap.surface_layer[key]
 		if voxel.buffer or not voxel.placeable:
 			continue
 		placeable_tiles.append(voxel)

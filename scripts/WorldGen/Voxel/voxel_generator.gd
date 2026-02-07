@@ -64,6 +64,7 @@ func generate_chunk(_map : Array[Voxel], interval) -> Chunk:
 	surface.optimize_indices_for_cache()
 	surface.generate_normals()
 	surface.generate_tangents()
+	_build_xz_lookup()
 	WorldMap.set_map(map, surface_voxels)
 	
 	return prepared_chunk(surface)
@@ -75,12 +76,14 @@ func prepared_chunk(surface) -> Chunk:
 	chunk.voxels = map
 	chunk.material_override = settings.material
 	
+	var surface_tiles: Array[Voxel] = _build_surface_from_map()
+	surface_voxels = surface_tiles
+	WorldMap.set_map(map, surface_voxels)
+	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
+	
 	# Spawn custom visuals
 	_spawn_columns(chunk)		# bottom geometry
 	_spawn_surface_tiles(chunk)	# top caps
-	#_spawn_padding(chunk) 		# half steps
-	
-	#_spawn_surface_tiles(chunk)
 	
 	return chunk
 
@@ -332,135 +335,108 @@ func atlas_uv(local_uv: Vector2, tile: Vector2i) -> Vector2:
 #################################################################
 
 func _spawn_surface_tiles(chunk: Chunk) -> void:
-	if theme == null:
-		push_warning("VoxelGenerator.theme is null - no tiles will be spawned.")
-		return
+	var half_step_h := settings.voxel_height * 0.5
 
-	for v: Voxel in surface_voxels:
+	for v: Voxel in map:
 		var scene := _top_scene_for_voxel_type(v.type)
 		if scene == null:
 			continue
 
-		var inst := scene.instantiate() as Node3D
-
-		# Put cap on the top surface of this voxel.
-		# This is robust even if world_position.y has been altered elsewhere.
-		var cap_y := float(v.grid_position_xyz.y + 1) * settings.voxel_height
-		inst.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
-
-		chunk.add_child(inst)
+		var cap := scene.instantiate() as Node3D
+		var cap_y := float(v.height_units) * half_step_h
+		cap.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+		chunk.add_child(cap)
 
 
 
 func _spawn_columns(chunk: Chunk) -> void:
-	if theme == null:
-		push_warning("No theme assigned; skipping tile spawn.")
-		return
+	var half_step_h := settings.voxel_height * 0.5
 
-	var columns := {} # Dictionary: Vector2i -> Array[Voxel]
+	for v: Voxel in map:
+		if v.height_units <= 0:
+			continue
+
+		var scene := _bottom_scene_for_voxel_type(v.type)
+		if scene == null:
+			continue
+
+		var bottom := scene.instantiate() as Node3D
+
+		# height in world units
+		var height_world := float(v.height_units) * half_step_h
+
+		# If bottom mesh is 1.0 world unit tall at scale.y=1, scale directly:
+		bottom.scale.y = height_world
+
+		# Base at y=0
+		bottom.position = Vector3(v.world_position.x, 0.0, v.world_position.z)
+
+		chunk.add_child(bottom)
+
+
+func _build_surface_from_map() -> Array[Voxel]:
+	var surface := {} # Dictionary: Vector2i -> Voxel (topmost)
 
 	for v: Voxel in map:
 		if v.type == VoxelData.voxel_type.AIR:
 			continue
 		var key: Vector2i = v.grid_position_xz
-		if not columns.has(key):
-			columns[key] = [] as Array[Voxel]
-		(columns[key] as Array[Voxel]).append(v)
+		if not surface.has(key) or v.grid_position_xyz.y > (surface[key] as Voxel).grid_position_xyz.y:
+			surface[key] = v
 
-	for key in columns.keys():
-		var col: Array[Voxel] = columns[key] as Array[Voxel]
-		col.sort_custom(func(a: Voxel, b: Voxel) -> bool:
-			return a.grid_position_xyz.y < b.grid_position_xyz.y
-		)
-
-		var top_voxel: Voxel = col[col.size() - 1]
-		var top_y: int = top_voxel.grid_position_xyz.y
-
-		var bottom_scene := _bottom_scene_for_voxel_type(top_voxel.type)
-		if bottom_scene == null:
-			continue
-
-		var bottom := bottom_scene.instantiate() as Node3D
-
-		"""# Column runs from y=0 up to the TOP of the top voxel (cap will sit above that).
-		# If your bottom mesh is "1 voxel tall" at scale.y = 1, then this is correct:
-		var column_voxel_height := float(top_y + 0)	# was + 1, better with 0
-		bottom.scale.y = -column_voxel_height 		# scale upwards rather than downwards
-
-		# Place bottom at base. Use the x/z of the column and y=0.
-		# IMPORTANT: this assumes voxel.world_position is at the voxel base for y=0.
-		# We can use the top voxel's x/z because all in column share it.
-		bottom.position = Vector3(top_voxel.world_position.x, 0.0, top_voxel.world_position.z)"""
-		
-		# Looks good so far 05.02.2026
-		
-		# Height in full voxel steps from base (y=0) to top surface of top voxel
-		var height_steps := float(top_y + 0)
-
-		# Cap plane (top surface) in world Y
-		var cap_y := height_steps * settings.voxel_height
-
-		# Scale normally (positive)
-		bottom.scale.y = height_steps
-
-		# Now force the bottom column to end at cap_y (so it never overlaps the cap)
-		# This assumes your bottom mesh at scale.y=1 has height == settings.voxel_height and is authored with its BASE at y=0.
-		# If your bottom mesh is authored with its TOP at y=0, swap the formula (see note below).
-		bottom.position = Vector3(top_voxel.world_position.x, cap_y, top_voxel.world_position.z)
-
-		chunk.add_child(bottom)
+	# convert dict values to array
+	var out: Array[Voxel] = []
+	for k in surface.keys():
+		out.append(surface[k] as Voxel)
+	return out
 
 
 func _spawn_padding(chunk: Chunk) -> void:
-	if theme == null:
-		return
-	if theme.grass_padding_scene == null:
+	if theme == null or theme.grass_padding_scene == null:
 		return
 
-	var dirs = VoxelData.get_tile_neighbor_table(0) # we’ll request per x later if needed
-	var pad_h := settings.voxel_height * theme.padding_height_fraction
+	var half_step_h := settings.voxel_height * 0.5
 
-	for v: Voxel in surface_voxels:
-		var v_y := v.grid_position_xyz.y
-		var table = VoxelData.get_tile_neighbor_table(v.grid_position_xyz.x)
+	for v: Voxel in map:
+		var table = VoxelData.get_tile_neighbor_table(v.grid_position_xz.x)
 
 		for i in range(6):
-			var npos := Vector3i(
-				v.grid_position_xyz.x + table[i].x,
-				v.grid_position_xyz.y,
-				v.grid_position_xyz.z + table[i].y
-			)
+			var nx: int = v.grid_position_xz.x + int(table[i].x)
+			var nz: int = v.grid_position_xz.y + int(table[i].y)
 
-			# Find the neighbor surface height by scanning downward until solid, then surface
-			# Simplest: look for voxel at same y and below
-			var ny := v_y
-			while ny >= 0:
-				var nv: Voxel = map_dict.get(Vector3i(npos.x, ny, npos.z))
-				if nv != null and nv.type != VoxelData.voxel_type.AIR:
-					break
-				ny -= 1
+			# You need a lookup by xz. Build it once:
+			# map_xz[key] = voxel
+			# (see note below)
 
-			# If neighbor column is exactly 1 lower, place padding at half step
-			if ny == v_y - 1:
+			var n: Voxel = _map_xz.get(Vector2i(nx, nz))
+			if n == null:
+				continue
+
+			if v.height_units - n.height_units == 1:
 				var pad_scene := _padding_scene_for_voxel_type(v.type)
 				if pad_scene == null:
 					continue
 
 				var pad := pad_scene.instantiate() as Node3D
 
-				# place at edge midpoint between v and neighbor, at half height below v cap
 				var a: Vector3 = base_vertices[i] * settings.voxel_size
 				var b: Vector3 = base_vertices[(i + 1) % 6] * settings.voxel_size
 				var mid: Vector3 = (a + b) * 0.5
 
-				var cap_y := float(v_y + 1) * settings.voxel_height
-				pad.position = Vector3(v.world_position.x + mid.x, cap_y - pad_h, v.world_position.z + mid.z)
+				# place at the “half step” between the two
+				var pad_y := float(n.height_units) * half_step_h
+				pad.position = Vector3(v.world_position.x + mid.x, pad_y, v.world_position.z + mid.z)
 
-				# rotate to face outward along that edge (if your padding mesh needs it)
 				pad.rotation.y = atan2(mid.z, mid.x)
-
 				chunk.add_child(pad)
 
+
+var _map_xz: Dictionary = {}
+
+func _build_xz_lookup() -> void:
+	_map_xz.clear()
+	for v: Voxel in map:
+		_map_xz[v.grid_position_xz] = v
 
 
 func _top_scene_for_voxel_type(t) -> PackedScene:
@@ -486,14 +462,6 @@ func _padding_scene_for_voxel_type(t) -> PackedScene:
 		_:
 			return theme.grass_padding_scene
 
-##########################################
 
-
-"""func _scene_for_voxel_type(t) -> PackedScene:
-	match t:
-		VoxelData.voxel_type.GRASS:
-			return theme.grass_tile_scene
-		VoxelData.voxel_type.STONE:
-			return theme.stone_tile_scene
-		_:
-			return theme.dirt_tile_scene"""
+func _step_h() -> float:
+	return settings.voxel_height * 0.5

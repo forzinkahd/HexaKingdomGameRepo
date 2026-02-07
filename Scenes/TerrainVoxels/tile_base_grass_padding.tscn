@@ -5,4 +5,4 @@
 [node name="tile_base_grass_padding" type="Node3D" unique_id=951288435]
 
 [node name="hex_grass2" parent="." unique_id=1467486147 instance=ExtResource("1_67b5l")]
-transform = Transform3D(0.8660254, 0, 0.5, 0, 0.5, 0, -0.5, 0, 0.8660254, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.5, 0, 0, 0, 1, 0, 0, 0)

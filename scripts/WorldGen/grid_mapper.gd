@@ -25,7 +25,10 @@ func calculate_map_positions() -> Array[Voxel]:
 		3:
 			stagger = true
 			voxels = generate_map(rectangle_bounds(), stagger, circular_buffer_filter, circle_shape_filter)
-
+	
+	for v in voxels:
+		assign_height_units(v)
+	
 	print("Created ", voxels.size(), " positions")
 	print("Noise Range: ", noise_range)
 	WorldMap.noise_range = noise_range
@@ -37,13 +40,24 @@ func generate_map(bounds: Callable, stagger: bool, buffer_filter: Callable, shap
 	var voxel_array: Array[Voxel] = []
 	for c in bounds.call():
 		for r in bounds.call(c):
-			for h in range(settings.max_height):
-				if shape_filter and not shape_filter.call(c, r):
-					continue
-				var pos = Vector3(c, h, r) #column, height, row
-				var voxel = generate_voxel(pos, stagger)
-				modify_voxel(voxel, buffer_filter) #Hills, ocean, buffer
-				voxel_array.append(voxel)
+			if shape_filter and not shape_filter.call(c, r):
+				continue
+
+			var v := Voxel.new()
+			v.grid_position_xyz = Vector3i(c, 0, r)
+			v.grid_position_xz = Vector2i(c, r)
+
+			# World position is BASE position (y=0)
+			v.world_position = tile_to_world(Vector3(c, 0, r), stagger)
+
+			# Noise computed from xz at base
+			v.noise = noise_at_tile(v.world_position, settings.noise)
+
+			if buffer_filter.call(c, r, settings.radius - settings.map_edge_buffer):
+				v.buffer = true
+
+			voxel_array.append(v)
+
 	return voxel_array
 
 
@@ -87,6 +101,25 @@ func noise_at_tile(pos : Vector3, texture : FastNoiseLite) -> float:
 		noise_range.y = value
 		
 	return value
+
+
+func assign_height_units(v: Voxel) -> void:
+	# normalize noise [-1..1-ish] to [0..1]
+	var n: float = float(v.noise)
+	var min_n: float = float(noise_range.x)
+	var max_n: float = float(noise_range.y)
+	
+	var denom: float = max(0.000001, max_n - min_n)
+	
+	var t: float = clampf((n - min_n) / denom, 0.0, 1.0)
+
+	# map to integer half-steps
+	v.height_units = int(round(t * float(settings.max_height_units)))
+
+	# optional: keep buffer flatter / lower
+	if v.buffer:
+		v.height_units = min(v.height_units, 2)
+
 
 
 ### Bounds

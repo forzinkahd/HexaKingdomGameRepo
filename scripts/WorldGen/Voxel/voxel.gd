@@ -15,3 +15,5 @@ var neighbors = []
 var placeable = true
 var occupier : Unit
 var collider
+
+var height_units: int = 0	# column height in half-steps
