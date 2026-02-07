@@ -112,9 +112,16 @@ func assign_height_units(v: Voxel) -> void:
 	var denom: float = max(0.000001, max_n - min_n)
 	
 	var t: float = clampf((n - min_n) / denom, 0.0, 1.0)
+	t = pow(t, settings.height_curve)						# >1 -> more lowlands, sharper peaks; <1 -> more highlands
+	if t > settings.cliff_threshold:
+		v.height_units = min(settings.max_height_units, v.height_units + settings.cliff_boost_units)
 
 	# map to integer half-steps
 	v.height_units = int(round(t * float(settings.max_height_units)))
+
+	# quantize into bigger steps (cliffs/terraces)
+	var q: int = max(1, settings.terrace_quantum_units)
+	v.height_units = int(round(float(v.height_units) / float(q))) * q
 
 	# optional: keep buffer flatter / lower
 	if v.buffer:

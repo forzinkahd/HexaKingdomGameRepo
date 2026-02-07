@@ -1,11 +1,11 @@
 extends Camera3D
 
 @export_category("Movement")
-@export var movespeed = 20
+@export var movespeed = 100
 @export var zoomspeed = 2
 @export var zoom = Vector2(25.0, 90.0)
 @export var height = Vector2(0, 40)
-@export var rot = Vector2(-20, -80)
+@export var rot = Vector2(-10, -80)
 @export var sun: DirectionalLight3D
 var parent
 
@@ -33,9 +33,9 @@ func move_camera(delta):
 		move_vector += parent.transform.basis.x
 	## Rotation
 	if Input.is_action_pressed("RotateCameraLeft"):
-		parent.rotate(Vector3.UP, 0.008)
+		parent.rotate(Vector3.UP, 0.01)
 	if Input.is_action_pressed("RotateCameraRight"):
-		parent.rotate(Vector3.UP, -0.008)
+		parent.rotate(Vector3.UP, -0.01)
 	## Apply movement & rotation
 	if move_vector != Vector3.ZERO:
 		move_vector = move_vector.normalized() * movespeed * delta

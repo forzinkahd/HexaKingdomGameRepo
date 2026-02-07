@@ -45,7 +45,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.117906, 15.1842, 10.1434)
 [node name="Camera3D" type="Camera3D" parent="CameraParent" unique_id=553882186 node_paths=PackedStringArray("sun")]
 transform = Transform3D(1, 0, 0, 0, 0.998537, -0.0540788, 0, 0.0540788, 0.998537, 0, 0, 0)
 script = ExtResource("1_1xefc")
-movespeed = 9
+movespeed = 18
 zoom = Vector2(40, 90)
 height = Vector2(-10, 40)
 rot = Vector2(-20, -90)

@@ -363,7 +363,7 @@ func _spawn_columns(chunk: Chunk) -> void:
 		var bottom := scene.instantiate() as Node3D
 
 		# height in world units
-		var height_world := float(v.height_units) * half_step_h
+		var height_world := float(v.height_units - 2) * half_step_h
 
 		# If bottom mesh is 1.0 world unit tall at scale.y=1, scale directly:
 		bottom.scale.y = height_world
