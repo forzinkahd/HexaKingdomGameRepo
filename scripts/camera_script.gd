@@ -14,6 +14,7 @@ func _ready() -> void:
 	parent = get_parent()
 	adjust_height()
 	adjust_rotation()
+	make_current()
 
 
 func _process(delta: float) -> void:

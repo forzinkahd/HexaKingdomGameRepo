@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cdf0etd2h0afb"]
 
 [ext_resource type="Script" uid="uid://divfigpu0u8i2" path="res://scripts/camera_script.gd" id="1_1xefc"]
+[ext_resource type="Environment" uid="uid://c2ser6hsgkgxm" path="res://Resources/environment.tres" id="1_124qp"]
 [ext_resource type="Texture2D" uid="uid://b23jrfa2h4i8l" path="res://Assets/Materials/SkyBG.png" id="2_l7mlp"]
 [ext_resource type="Script" uid="uid://cr1mxhuqd7thp" path="res://scripts/WorldGen/world_gen.gd" id="3_davhy"]
 [ext_resource type="Resource" uid="uid://c6hfos2qpgqth" path="res://Resources/GenerationSettings/test.tres" id="4_58wc8"]
@@ -15,37 +16,6 @@
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7rq2r"]
-sky_energy_multiplier = 1.1
-
-[sub_resource type="Sky" id="Sky_124qp"]
-sky_material = SubResource("ProceduralSkyMaterial_7rq2r")
-
-[sub_resource type="Environment" id="Environment_f2ci6"]
-background_mode = 2
-background_color = Color(0, 0.214146, 0.346416, 1)
-background_canvas_max_layer = -100
-sky = SubResource("Sky_124qp")
-ambient_light_source = 3
-ambient_light_sky_contribution = 0.6
-ambient_light_energy = 1.3
-reflected_light_source = 1
-tonemap_mode = 3
-tonemap_exposure = 1.1
-tonemap_white = 2.0
-ssao_enabled = true
-ssil_enabled = true
-sdfgi_enabled = true
-glow_enabled = true
-fog_enabled = true
-fog_light_color = Color(0.395135, 0.482894, 0.519378, 1)
-fog_density = 0.015
-fog_sky_affect = 0.0
-fog_height = 1.0
-adjustment_enabled = true
-adjustment_contrast = 1.1
-adjustment_saturation = 1.2
-
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
 dof_blur_far_distance = 40.0
@@ -57,7 +27,8 @@ dof_blur_far_transition = 45.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.117906, 15.1842, 10.1434)
 
 [node name="Camera3D" type="Camera3D" parent="CameraParent" unique_id=553882186 node_paths=PackedStringArray("sun")]
-transform = Transform3D(1, 0, 0, 0, 0.998537, -0.0540788, 0, 0.0540788, 0.998537, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.9985367, -0.054078784, 0, 0.054078784, 0.9985367, 0, 0, 0)
+current = true
 script = ExtResource("1_1xefc")
 movespeed = 18
 zoom = Vector2(40, 90)
@@ -68,12 +39,17 @@ sun = NodePath("../../Scene/DirectionalLight3D")
 [node name="Scene" type="Node3D" parent="." unique_id=498803468]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Scene" unique_id=1979913615]
-environment = SubResource("Environment_f2ci6")
+environment = ExtResource("1_124qp")
 camera_attributes = SubResource("CameraAttributesPractical_1lvu4")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Scene" unique_id=2040763329]
 transform = Transform3D(0.151402, -0.877164, 0.455698, 0.0622852, 0.468562, 0.881232, -0.986508, -0.105037, 0.125576, 0, 4.09007, 0)
+light_color = Color(1, 0.92941177, 0.84705883, 1)
+light_indirect_energy = 0.6
 shadow_enabled = true
+shadow_bias = 0.07
+shadow_normal_bias = 1.3
+shadow_blur = 1.1
 directional_shadow_mode = 0
 sky_mode = 1
 
