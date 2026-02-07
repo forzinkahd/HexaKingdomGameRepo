@@ -159,14 +159,14 @@ func shape_geometry(prism) -> bool:
 	# Terrace shaping
 	if settings.terrace_steps >= 1:
 		push_warning("Terrace shaping code is disabled and may be obsolete")
-		"""var table = VoxelData.get_tile_neighbor_table(prism.grid_position_xz.x)
+		var table = VoxelData.get_tile_neighbor_table(prism.grid_position_xz.x)
 		for dir in table:
 			var neighbor_pos = Vector3i(prism.grid_position_xyz.x + dir.x,
 										prism.grid_position_xyz.y - settings.terrace_steps,
 										prism.grid_position_xyz.z + dir.y)
 			if air_at_pos(neighbor_pos):
 				prism.type = VoxelData.voxel_type.AIR
-				return true"""
+				return true
 	
 	return false
 
