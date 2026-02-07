@@ -8,7 +8,7 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 @export var map_seed : int
 @export_range(0, 64, 1) var radius: int = 24
 @export_range(1, 128, 1) var max_height: int = 16
-@export_range(0, 8) var terrace_steps = 2
+@export_range(0, 8) var terrace_steps = 0
 @export var remove_overhang = true
 @export_range(0.0, 1.0, 0.1) var noise_height_bias : float = 0.4
 @export_range(0.0, 1.0, 0.1) var ground_to_air_ratio : float = 0.6
