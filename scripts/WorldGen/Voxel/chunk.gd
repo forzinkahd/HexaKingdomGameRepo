@@ -21,47 +21,93 @@ func generate_collider():
 	body.add_child(col)
 
 
+var voxels_by_xz: Dictionary = {} # Vector2i -> Voxel
+
 func fill_pos_dict():
+	voxel_layers.clear()
+	voxels_by_xz.clear()
 	for v: Voxel in voxels:
-		var y = v.grid_position_xyz.y
-		if not voxel_layers.has(y):
-			voxel_layers[y] = []
-			#print("Voxel layer: ", y)
-		voxel_layers[y].append(v)
+		voxels_by_xz[v.grid_position_xz] = v
+		# you can keep voxel_layers if other systems still use it
 
 
 func voxel_at_point(hd: HitData) -> Voxel:
-	# convert hit point to approx grid xz using nearest neighbor search
-	# simplest: pick random surface voxel and greedy across planar neighbors (same as you do, but ignore y)
-	var corrected_pos: Vector3 = hd.point
+	# Move slightly into the surface so we don't get edge ambiguity
+	var p: Vector3 = hd.point - hd.normal * 0.01
 
-	# pick any voxel as start
-	if voxels.is_empty():
-		return null
+	var key: Vector2i
+	if WorldMap.is_map_staggered:
+		key = _pick_offset_hex_xz(p)
+	else:
+		key = _pick_axial_hex_xz(p)
 
-	var current: Voxel = voxels.pick_random()
-	var current_dist: float = Vector2(current.world_position.x, current.world_position.z).distance_to(
-		Vector2(corrected_pos.x, corrected_pos.z)
-	)
+	var v: Voxel = voxels_by_xz.get(key)
+	if v != null:
+		return v
 
-	var visited: Array[Voxel] = []
+	# Fallback: if something went out of bounds, return nearest by scan (rare)
+	return _fallback_nearest_by_xz(p)
 
-	while true:
-		var found_better := false
-		var neighbors: Array[Voxel] = WorldMap.get_tile_neighbors_surface(current) # NEW function
-		for n in neighbors:
-			if visited.has(n):
-				continue
-			var dist := Vector2(n.world_position.x, n.world_position.z).distance_to(
-				Vector2(corrected_pos.x, corrected_pos.z)
-			)
-			if dist < current_dist:
-				current = n
-				current_dist = dist
-				found_better = true
 
-		visited.append(current)
-		if not found_better:
-			break
+func _pick_axial_hex_xz(p: Vector3) -> Vector2i:
+	var size: float = WorldMap.world_settings.voxel_size
+	var sqrt3: float = sqrt(3.0)
 
-	return current
+	# Normalize to "hex space"
+	var px: float = p.x / size
+	var pz: float = p.z / size
+
+	# Axial fractional coords (q,r)
+	var qf: float = (2.0 / 3.0) * px
+	var rf: float = (-1.0 / 3.0) * px + (1.0 / sqrt3) * pz
+
+	# Convert to cube (x=q, z=r, y=-x-z) then cube-round
+	var xf: float = qf
+	var zf: float = rf
+	var yf: float = -xf - zf
+
+	var rx: int = int(round(xf))
+	var ry: int = int(round(yf))
+	var rz: int = int(round(zf))
+
+	var x_diff: float = abs(rx - xf)
+	var y_diff: float = abs(ry - yf)
+	var z_diff: float = abs(rz - zf)
+
+	if x_diff > y_diff and x_diff > z_diff:
+		rx = -ry - rz
+	elif y_diff > z_diff:
+		ry = -rx - rz
+	else:
+		rz = -rx - ry
+
+	# Axial (q=rx, r=rz) matches your (col,row) => Vector2i(x,z)
+	return Vector2i(rx, rz)
+
+
+func _pick_offset_hex_xz(p: Vector3) -> Vector2i:
+	# This matches your stagger=true mapping:
+	# x = 1.5 * col * size
+	# z = sqrt3 * row * size + parity(col) * (sqrt3/2) * size
+	var size: float = WorldMap.world_settings.voxel_size
+	var sqrt3: float = sqrt(3.0)
+
+	var col_f: float = (2.0 / 3.0) * (p.x / size)
+	var col: int = int(round(col_f))
+
+	var parity: int = ((col % 2) + 2) % 2
+	var row_f: float = (p.z / (sqrt3 * size)) - float(parity) * 0.5
+	var row: int = int(round(row_f))
+
+	return Vector2i(col, row)
+
+
+func _fallback_nearest_by_xz(p: Vector3) -> Voxel:
+	var best: Voxel = null
+	var best_d := INF
+	for v: Voxel in voxels:
+		var d := Vector2(v.world_position.x, v.world_position.z).distance_squared_to(Vector2(p.x, p.z))
+		if d < best_d:
+			best_d = d
+			best = v
+	return best

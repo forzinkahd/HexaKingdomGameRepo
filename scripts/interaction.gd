@@ -61,7 +61,7 @@ func _process(_delta: float) -> void:
 			elif interact_mode == mode.BUILD:
 				attempt_build(hit_data.object)
 		elif Input.is_action_just_pressed("RightClick"):
-			attempt_move_unit(hit_data)
+			print("RightClick currently does nothing, check interaction.gd")
 
 
 func raycast_at_mouse(origin, end) -> HitData:
@@ -107,7 +107,7 @@ func attempt_select(hit: HitData):
 		select_unit(hit.object.get_parent())
 
 
-func attempt_move_unit(hitdata : HitData):
+"""func attempt_move_unit(hitdata : HitData):
 	if not selected_unit:
 		print("Select a unit first")
 		return
@@ -122,7 +122,7 @@ func attempt_move_unit(hitdata : HitData):
 		selected_unit.place_unit(hit_voxel)
 	else:
 		print("Invalid Voxel")
-	deselect()
+	deselect()"""
 
 
 func select_unit(unit : Unit):
@@ -136,16 +136,25 @@ func select_unit(unit : Unit):
 
 
 # We have clicked somewhere on a chunk of voxels
-func highlight_voxel(hit: HitData): #hit is hit_data
+func highlight_voxel(hit: HitData):
 	selected_unit = null
 	hide_cursor(unit_cursor)
-	var hit_chunk : Chunk = hit.object.get_parent()
-	var hit_voxel : Voxel = hit_chunk.voxel_at_point(hit)
+
+	var hit_chunk: Chunk = _chunk_from_hit(hit.object)
+	if hit_chunk == null:
+		return
+
+	var hit_voxel: Voxel = hit_chunk.voxel_at_point(hit)
 	if hit_voxel == null:
 		print("Hit voxel is null!")
 		return
+
 	selected_voxel = hit_voxel
-	move_cursor(voxel_cursor, hit_voxel.world_position, 1)
+
+	var cap_y := _voxel_cap_y(hit_voxel)
+	var cursor_pos := Vector3(hit_voxel.world_position.x, cap_y, hit_voxel.world_position.z)
+
+	move_cursor(voxel_cursor, cursor_pos) # no "+1" anymore
 	voxel_cursor.visible = true
 	animate_cursor(voxel_cursor)
 
@@ -156,10 +165,8 @@ func highlight_unit(unit):
 
 
 ## move cursor with optional height difference
-func move_cursor(cursor : Node3D, pos : Vector3, height : float = 0):
+func move_cursor(cursor : Node3D, pos : Vector3):
 	cursor.position = pos
-	if height != 0:
-		voxel_cursor.position.y += height
 
 
 func animate_cursor(cursor : Node3D):
@@ -174,5 +181,18 @@ func animate_cursor(cursor : Node3D):
 
 func hide_cursor(cursor : Node3D):
 	if cursor:
-		move_cursor(cursor, Vector3.ZERO, -10)
+		move_cursor(cursor, Vector3.ZERO)
 		cursor.visible = false
+
+
+func _voxel_cap_y(v: Voxel) -> float:
+	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)
+
+
+func _chunk_from_hit(node: Node) -> Chunk:
+	var n := node
+	while n != null:
+		if n is Chunk:
+			return n as Chunk
+		n = n.get_parent()
+	return null
