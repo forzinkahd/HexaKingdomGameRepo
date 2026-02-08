@@ -4,6 +4,9 @@
 [ext_resource type="Script" uid="uid://bfdmepmayfg4u" path="res://Resources/world_theme.gd" id="1_n8hqk"]
 [ext_resource type="PackedScene" uid="uid://bl352o7gs21jg" path="res://Scenes/TerrainVoxels/tile_base_grass_bottom.tscn" id="2_p2yq6"]
 [ext_resource type="PackedScene" uid="uid://ct484gotrc7f7" path="res://Scenes/TerrainVoxels/tile_base_grass_padding.tscn" id="3_vxiry"]
+[ext_resource type="PackedScene" uid="uid://du1nc7olqmlcm" path="res://Scenes/TerrainVoxels/tile_base_mountain_a.tscn" id="4_87rje"]
+[ext_resource type="PackedScene" uid="uid://byphhysv82hgg" path="res://Scenes/TerrainVoxels/tile_base_mountain_b.tscn" id="5_ckmn6"]
+[ext_resource type="PackedScene" uid="uid://byhc0yq1qpn5n" path="res://Scenes/TerrainVoxels/tile_base_mountain_c.tscn" id="6_dmiqk"]
 
 [resource]
 script = ExtResource("1_n8hqk")
@@ -14,4 +17,5 @@ grass_bottom_scene = ExtResource("2_p2yq6")
 stone_bottom_scene = ExtResource("2_p2yq6")
 dirt_bottom_scene = ExtResource("2_p2yq6")
 grass_padding_scene = ExtResource("3_vxiry")
+mountain_scenes = Array[PackedScene]([ExtResource("4_87rje"), ExtResource("5_ckmn6"), ExtResource("6_dmiqk")])
 metadata/_custom_type_script = "uid://bfdmepmayfg4u"

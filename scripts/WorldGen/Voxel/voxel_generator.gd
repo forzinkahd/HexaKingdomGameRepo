@@ -84,6 +84,7 @@ func prepared_chunk(surface) -> Chunk:
 	# Spawn custom visuals
 	_spawn_columns(chunk)		# bottom geometry
 	_spawn_surface_tiles(chunk)	# top caps
+	_spawn_mountains(chunk)
 	
 	return chunk
 
@@ -430,6 +431,58 @@ func _spawn_padding(chunk: Chunk) -> void:
 
 				pad.rotation.y = atan2(mid.z, mid.x)
 				chunk.add_child(pad)
+
+
+func _spawn_mountains(chunk: Chunk) -> void:
+	if theme == null:
+		return
+	if theme.mountain_scenes.is_empty():
+		return
+
+	var half_step_h: float = settings.voxel_height * 0.5
+
+	for v: Voxel in surface_voxels:
+		# Only above threshold
+		if v.height_units < theme.mountain_min_height_units:
+			continue
+
+		# Optional chance
+		if theme.mountain_chance < 1.0:
+			var rng_chance := RandomNumberGenerator.new()
+			rng_chance.seed = _tile_seed(v, 912367) # salt
+			if rng_chance.randf() > theme.mountain_chance:
+				continue
+
+		# Pick one of the 3 variants deterministically
+		var rng := RandomNumberGenerator.new()
+		rng.seed = _tile_seed(v, 44519) # different salt
+		var idx := rng.randi_range(0, theme.mountain_scenes.size() - 1)
+
+		var scene := theme.mountain_scenes[idx]
+		if scene == null:
+			continue
+
+		var m := scene.instantiate() as Node3D
+
+		# Put it on the cap surface of this tile
+		var cap_y := float(v.height_units) * half_step_h
+		m.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+
+		# If your tile caps already have a fixed yaw baked in, do nothing here.
+		# If you need per-tile random yaw:
+		m.rotation.y = rng.randi_range(0, 5) * PI / 3
+
+		chunk.add_child(m)
+
+
+func _tile_seed(v: Voxel, salt: int) -> int:
+	# Deterministic per tile, also stable across runs if your world seed is stable
+	# Mix world seed + x/z + salt.
+	# (If map_seed can be 0, you can also use settings.noise.seed.)
+	var s: int = int(settings.map_seed)
+	var x: int = v.grid_position_xz.x
+	var z: int = v.grid_position_xz.y
+	return hash(Vector3i(x, s + salt, z))
 
 
 var _map_xz: Dictionary = {}

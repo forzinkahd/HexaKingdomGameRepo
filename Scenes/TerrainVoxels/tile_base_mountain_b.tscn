@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://byphhysv82hgg"]
+
+[ext_resource type="PackedScene" uid="uid://cei5soduylgkj" path="res://Assets/Meshes/Decorations/Nature/mountain_B.gltf" id="1_snovp"]
+
+[node name="tile_base_mountainB" type="Node3D" unique_id=1636464998]
+
+[node name="mountain_B2" parent="." unique_id=47221957 instance=ExtResource("1_snovp")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 0, 0)
