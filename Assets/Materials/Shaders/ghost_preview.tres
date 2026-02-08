@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://ua40iqp1j8ef"]
+
+[ext_resource type="Shader" uid="uid://csybrym4dxw4i" path="res://Assets/Materials/Shaders/ghost_preview.gdshader" id="1_ktw73"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ktw73")
+shader_parameter/ghost_color = Color(0.2, 0.6, 1, 0.4)
+shader_parameter/emission_strength = 0.3

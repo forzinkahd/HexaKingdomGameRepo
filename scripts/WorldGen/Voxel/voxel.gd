@@ -17,3 +17,6 @@ var occupier : Unit
 var collider
 
 var height_units: int = 0	# column height in half-steps
+
+var has_town_center: bool = false
+var town_center_rotation_y: float = 0.0

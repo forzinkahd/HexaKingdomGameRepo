@@ -16,6 +16,8 @@
 [ext_resource type="PackedScene" path="res://scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
+[ext_resource type="PackedScene" uid="uid://ht15kmkvhv1k" path="res://Scenes/Kingdom/Buildings/obj_blue_banner.tscn" id="16_ry528"]
+[ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -89,13 +91,16 @@ proto_unit = ExtResource("8_r58of")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root")]
 script = ExtResource("12_tt8b8")
 voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
 main_camera = NodePath("../../CameraParent/Camera3D")
 p_finder = NodePath("../Pathfinder")
 selection_indicator = NodePath("../../Control/TextureRect")
+placed_objects_root = NodePath("../../PlacedObjects")
+town_center_banner_scene = ExtResource("16_ry528")
+ghost_material = ExtResource("17_yhlfj")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
@@ -135,5 +140,65 @@ expand_mode = 3
 stretch_mode = 4
 
 [node name="Chunks" type="Node3D" parent="." unique_id=1209535752]
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1102239484]
+
+[node name="BuildPanel" type="Panel" parent="HUD" unique_id=1532613484]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TownCenterButton" type="Button" parent="HUD/BuildPanel" unique_id=1202341235]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 238.0
+offset_right = 137.0
+offset_bottom = 269.0
+text = "Town Center"
+
+[node name="ConfirmButton" type="Button" parent="HUD/BuildPanel" unique_id=1351332747]
+visible = false
+layout_mode = 0
+offset_left = 30.0
+offset_top = 274.0
+offset_right = 101.0
+offset_bottom = 305.0
+text = "Confirm"
+
+[node name="CancelButton" type="Button" parent="HUD/BuildPanel" unique_id=1909977597]
+visible = false
+layout_mode = 0
+offset_left = 30.0
+offset_top = 310.0
+offset_right = 90.0
+offset_bottom = 341.0
+text = "Cancel"
+
+[node name="RotateLeftButton" type="Button" parent="HUD/BuildPanel" unique_id=975939322]
+visible = false
+layout_mode = 0
+offset_left = 30.0
+offset_top = 346.0
+offset_right = 124.0
+offset_bottom = 377.0
+text = "Rotate Left"
+
+[node name="RotateRightButton" type="Button" parent="HUD/BuildPanel" unique_id=75588407]
+visible = false
+layout_mode = 0
+offset_left = 30.0
+offset_top = 382.0
+offset_right = 131.0
+offset_bottom = 413.0
+text = "Rotate right"
+
+[node name="PopupFounded" type="AcceptDialog" parent="HUD" unique_id=1212512145]
+oversampling_override = 1.0
+title = "Achievement"
+initial_position = 2
+size = Vector2i(200, 100)
+dialog_text = "Wazzup"
+
+[node name="PlacedObjects" type="Node3D" parent="." unique_id=2018501954]
 
 [connection signal="pressed" from="Control/VBoxContainer/Button" to="Builder/WorldGenerator" method="_ready"]
