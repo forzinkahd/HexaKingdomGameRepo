@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://co5lj142ldel1"]
+
+[ext_resource type="PackedScene" uid="uid://d4lksdy2m7kpm" path="res://Assets/Meshes/Decorations/Nature/trees_A_small.gltf" id="1_vrpb7"]
+[ext_resource type="Script" uid="uid://35qkb2aohnbk" path="res://Scenes/NatureResources/tree_cluster.gd" id="1_x0rjd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bm528"]
+size = Vector3(1, 0.83618164, 1)
+
+[node name="obj_base_tree_small" type="Node3D" unique_id=2041389557]
+script = ExtResource("1_x0rjd")
+
+[node name="trees_A_small2" parent="." unique_id=1092405069 instance=ExtResource("1_vrpb7")]
+transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=386930949]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=343452440]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.41638184, 0)
+shape = SubResource("BoxShape3D_bm528")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=1638090540]

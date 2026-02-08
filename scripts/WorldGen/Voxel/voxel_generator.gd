@@ -85,6 +85,7 @@ func prepared_chunk(surface) -> Chunk:
 	_spawn_columns(chunk)		# bottom geometry
 	_spawn_surface_tiles(chunk)	# top caps
 	_spawn_mountains(chunk)
+	_spawn_forests(chunk)
 	
 	return chunk
 
@@ -440,6 +441,8 @@ func _spawn_padding(chunk: Chunk) -> void:
 				chunk.add_child(pad)
 
 
+var _has_mountain_by_xz: Dictionary = {}
+
 func _spawn_mountains(chunk: Chunk) -> void:
 	if theme == null:
 		return
@@ -480,6 +483,7 @@ func _spawn_mountains(chunk: Chunk) -> void:
 		m.rotation.y = rng.randi_range(0, 5) * PI / 3
 
 		chunk.add_child(m)
+		_has_mountain_by_xz[v.grid_position_xz] = true
 		
 		# replace foundation of mountain tile
 		if theme.mountain_foundation_scene != null:
@@ -515,6 +519,54 @@ func _spawn_mountains(chunk: Chunk) -> void:
 				chunk.add_child(new_bottom)
 				_bottom_by_xz[key] = new_bottom
 
+
+func _spawn_forests(chunk: Chunk) -> void:
+	if theme == null:
+		return
+	if theme.tree_cluster_scenes.is_empty():
+		return
+
+	var half_step_h: float = settings.voxel_height * 0.5
+
+	for v: Voxel in surface_voxels:
+		if v.buffer:
+			continue
+
+		# height band
+		if v.height_units < theme.forest_min_height_units:
+			continue
+		if v.height_units > theme.forest_max_height_units:
+			continue
+
+		# don't place on mountain tiles
+		if theme.forest_avoid_mountains and _has_mountain_by_xz.has(v.grid_position_xz):
+			continue
+
+		# chance (deterministic)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = _tile_seed(v, 771231) # salt
+		if rng.randf() > theme.forest_chance:
+			continue
+
+		# pick variant
+		var idx := rng.randi_range(0, theme.tree_cluster_scenes.size() - 1)
+		var scene := theme.tree_cluster_scenes[idx]
+		if scene == null:
+			continue
+
+		var inst := scene.instantiate() as Node3D
+
+		# place on cap height
+		var y := float(v.height_units) * half_step_h
+		inst.position = Vector3(v.world_position.x, y, v.world_position.z)
+
+		# small random rotation looks nice
+		inst.rotation.y = rng.randf_range(0.0, TAU)
+
+		chunk.add_child(inst)
+
+		# mark tile unplaceable for villages/units if you want
+		v.placeable = false
 
 
 func _tile_seed(v: Voxel, salt: int) -> int:

@@ -14,7 +14,7 @@ func create_starting_units(count : int):
 			var random_key = WorldMap.surface_layer.keys().pick_random()
 			voxel = WorldMap.surface_layer[random_key]
 
-		if voxel.occupier != null: #voxel.type == VoxelData.voxel_type.WATER or 
+		if voxel.occupier != null or not voxel.placeable: #voxel.type == VoxelData.voxel_type.WATER or 
 			safety_count += 1
 			continue
 			
