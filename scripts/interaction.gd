@@ -65,14 +65,16 @@ func _process(_delta: float) -> void:
 
 
 func raycast_at_mouse(origin, end) -> HitData:
-		var query = PhysicsRayQueryParameters3D.create(origin, end)
-		var collision = get_world_3d().direct_space_state.intersect_ray(query)
+		var query := PhysicsRayQueryParameters3D.create(origin, end)
+		var collision := get_world_3d().direct_space_state.intersect_ray(query)
 		if collision and collision.has("collider"):
 			var hit = collision.collider
 			var data = HitData.new()
-			data.object = hit
+			data.object = collision.collider
 			data.point = collision.position
 			data.normal = collision.normal
+			data.ray_origin = origin
+			data.ray_dir = (end - origin).normalized()
 			return data
 		else:
 			deselect()

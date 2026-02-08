@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://divfigpu0u8i2" path="res://scripts/camera_script.gd" id="1_1xefc"]
 [ext_resource type="Environment" uid="uid://c2ser6hsgkgxm" path="res://Resources/environment.tres" id="1_124qp"]
+[ext_resource type="Script" uid="uid://regx54qdcye7" path="res://Scenes/camera_rig.gd" id="1_qolck"]
 [ext_resource type="Texture2D" uid="uid://b23jrfa2h4i8l" path="res://Assets/Materials/SkyBG.png" id="2_l7mlp"]
 [ext_resource type="Script" uid="uid://cr1mxhuqd7thp" path="res://scripts/WorldGen/world_gen.gd" id="3_davhy"]
 [ext_resource type="Resource" uid="uid://c6hfos2qpgqth" path="res://Resources/GenerationSettings/test.tres" id="4_58wc8"]
@@ -23,8 +24,10 @@ dof_blur_far_transition = 45.0
 
 [node name="World" type="Node3D" unique_id=96651091]
 
-[node name="CameraParent" type="Node3D" parent="." unique_id=88488618]
+[node name="CameraParent" type="Node3D" parent="." unique_id=88488618 node_paths=PackedStringArray("cam")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.117906, 15.1842, 10.1434)
+script = ExtResource("1_qolck")
+cam = NodePath("Camera3D")
 
 [node name="Camera3D" type="Camera3D" parent="CameraParent" unique_id=553882186 node_paths=PackedStringArray("sun")]
 transform = Transform3D(1, 0, 0, 0, 0.9985367, -0.054078784, 0, 0.054078784, 0.9985367, 0, 0, 0)

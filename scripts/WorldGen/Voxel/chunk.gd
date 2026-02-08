@@ -32,8 +32,11 @@ func fill_pos_dict():
 
 
 func voxel_at_point(hd: HitData) -> Voxel:
-	# Move slightly into the surface so we don't get edge ambiguity
-	var p: Vector3 = hd.point - hd.normal * 0.01
+	# Prefer ray intersection with ground plane (y = 0) to avoid cliffs blocking selection.
+	var p: Vector3 = _ray_hit_ground_plane(hd)
+	# Small bias so exact edges don’t flicker
+	p.x += 0.0001
+	p.z += 0.0001
 
 	var key: Vector2i
 	if WorldMap.is_map_staggered:
@@ -45,8 +48,26 @@ func voxel_at_point(hd: HitData) -> Voxel:
 	if v != null:
 		return v
 
-	# Fallback: if something went out of bounds, return nearest by scan (rare)
 	return _fallback_nearest_by_xz(p)
+
+
+func _ray_hit_ground_plane(hd: HitData) -> Vector3:
+	# Plane y=0 (world base). If your base isn’t 0, change this.
+	var plane_y: float = 0.0
+
+	var dir_y: float = hd.ray_dir.y
+	if abs(dir_y) < 0.00001:
+		# Ray is almost parallel to plane; fallback to collision point
+		return hd.point
+
+	var t: float = (plane_y - hd.ray_origin.y) / dir_y
+
+	# If plane is behind the camera (t < 0), fallback to collision point
+	if t < 0.0:
+		return hd.point
+
+	return hd.ray_origin + hd.ray_dir * t
+
 
 
 func _pick_axial_hex_xz(p: Vector3) -> Vector2i:
