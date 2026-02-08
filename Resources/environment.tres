@@ -5,7 +5,7 @@ sky_top_color = Color(0.4509804, 0.6509804, 0.9490196, 1)
 sky_horizon_color = Color(0.9490196, 0.8509804, 0.6, 1)
 sky_energy_multiplier = 0.8
 ground_bottom_color = Color(0.86341727, 0.90720284, 0.9228439, 1)
-ground_horizon_color = Color(0.5727776, 0.6782748, 0.6883938, 1)
+ground_horizon_color = Color(0.53008115, 0.6712253, 0.8123879, 1)
 ground_energy_multiplier = 0.4
 energy_multiplier = 0.8
 

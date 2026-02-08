@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://4klafvl10mep"]
+
+[ext_resource type="PackedScene" uid="uid://b0ab0f65syp4s" path="res://Assets/Meshes/Terrain/base/hex_grass.gltf" id="1_3ftup"]
+
+[node name="tile_base_mountain_foundation" type="Node3D" unique_id=827766065]
+
+[node name="hex_grass2" parent="." unique_id=1467486147 instance=ExtResource("1_3ftup")]
