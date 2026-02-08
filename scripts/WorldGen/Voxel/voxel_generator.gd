@@ -336,7 +336,11 @@ func atlas_uv(local_uv: Vector2, tile: Vector2i) -> Vector2:
 
 #################################################################
 
+var _cap_by_xz := {}
+var _bottom_by_xz := {}
+
 func _spawn_surface_tiles(chunk: Chunk) -> void:
+	_cap_by_xz.clear()
 	var half_step_h := settings.voxel_height * 0.5
 
 	for v: Voxel in map:
@@ -348,10 +352,12 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var cap_y := float(v.height_units) * half_step_h
 		cap.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
 		chunk.add_child(cap)
+		_cap_by_xz[v.grid_position_xz] = cap
 
 
 
 func _spawn_columns(chunk: Chunk) -> void:
+	_bottom_by_xz.clear()
 	var half_step_h := settings.voxel_height * 0.5
 
 	for v: Voxel in map:
@@ -374,6 +380,7 @@ func _spawn_columns(chunk: Chunk) -> void:
 		bottom.position = Vector3(v.world_position.x, 0.0, v.world_position.z)
 
 		chunk.add_child(bottom)
+		_bottom_by_xz[v.grid_position_xz] = bottom
 
 
 func _build_surface_from_map() -> Array[Voxel]:
@@ -473,6 +480,41 @@ func _spawn_mountains(chunk: Chunk) -> void:
 		m.rotation.y = rng.randi_range(0, 5) * PI / 3
 
 		chunk.add_child(m)
+		
+		# replace foundation of mountain tile
+		if theme.mountain_foundation_scene != null:
+			var key: Vector2i = v.grid_position_xz
+			var old_cap: Node3D = _cap_by_xz.get(key)
+			
+			if old_cap != null:
+				var pos := old_cap.position
+				var rot := old_cap.rotation
+				old_cap.queue_free()
+				
+				var new_cap := theme.mountain_foundation_scene.instantiate() as Node3D
+				new_cap.position = pos
+				new_cap.rotation = rot
+				chunk.add_child(new_cap)
+				_cap_by_xz[key] = new_cap
+		
+		# replace bottom column of mountain tile
+		if theme.mountain_foundation_bottom_scene != null:
+			var key: Vector2i = v.grid_position_xz
+			var old_bottom: Node3D = _bottom_by_xz.get(key)
+
+			if old_bottom != null:
+				var pos_b := old_bottom.position
+				var rot_b := old_bottom.rotation
+				var scale_b := old_bottom.scale
+				old_bottom.queue_free()
+
+				var new_bottom := theme.mountain_foundation_bottom_scene.instantiate() as Node3D
+				new_bottom.position = pos_b
+				new_bottom.rotation = rot_b
+				new_bottom.scale = scale_b # IMPORTANT: keep same height scaling
+				chunk.add_child(new_bottom)
+				_bottom_by_xz[key] = new_bottom
+
 
 
 func _tile_seed(v: Voxel, salt: int) -> int:

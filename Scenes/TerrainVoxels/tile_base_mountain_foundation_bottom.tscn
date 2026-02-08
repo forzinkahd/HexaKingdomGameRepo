@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://rt1qpmhcyumk"]
+
+[ext_resource type="PackedScene" uid="uid://cfhtherimhbmd" path="res://Scenes/TerrainVoxels/hex_mountain_bottom_color.tscn" id="1_kslkp"]
+
+[node name="Tile_base_mountain_foundation_bottom" type="Node3D" unique_id=1895134628]
+
+[node name="hex_mountain_bottom" parent="." unique_id=1077968790 instance=ExtResource("1_kslkp")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 1, 0)

@@ -20,5 +20,7 @@ class_name WorldTheme
 
 @export_category("Mountains")
 @export var mountain_scenes: Array[PackedScene] = []
+@export var mountain_foundation_scene: PackedScene
+@export var mountain_foundation_bottom_scene: PackedScene
 @export var mountain_min_height_units: int = 10
 @export_range(0.0, 1.0) var mountain_chance: float = 1.0

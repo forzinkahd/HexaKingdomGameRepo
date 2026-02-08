@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://cvbk55xqvdsjc"]
+
+[ext_resource type="PackedScene" uid="uid://b0ab0f65syp4s" path="res://Assets/Meshes/Terrain/base/hex_grass.gltf" id="1_poikb"]
+[ext_resource type="Material" uid="uid://810qp6o1r85h" path="res://Assets/Materials/tile_mountain_material.tres" id="2_k35dj"]
+
+[node name="hex_mountain" unique_id=1467486147 instance=ExtResource("1_poikb")]
+
+[node name="hex_grass" parent="." index="0" unique_id=448530669]
+material_override = ExtResource("2_k35dj")
