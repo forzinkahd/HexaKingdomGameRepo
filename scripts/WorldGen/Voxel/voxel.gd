@@ -29,4 +29,12 @@ func has_building() -> bool:
 
 
 func can_place_building() -> bool:
-	return placeable and not has_building() and occupier == null
+	if not placeable:
+		return false
+	if has_building():
+		return false
+	if occupier != null:
+		return false
+	#if water:
+	#	return false
+	return true

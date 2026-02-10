@@ -20,7 +20,7 @@ func can_place(building_id: StringName, v: Voxel) -> bool:
 	if def == null or def.scene == null:
 		return false
 
-	if def.unique and WorldMap.has_town_center():
+	if def.unique and WorldMap.has_unique_building(def.id):
 		return false
 
 	return true
@@ -41,13 +41,13 @@ func place(building_id: StringName, v: Voxel, rotation_y: float) -> Node3D:
 	inst.rotation.y = rotation_y
 	placed_root.add_child(inst)
 
-	v.building_id = building_id
+	v.building_id = def.id # was building_id
 	v.building_node = inst
+	v.building_rotation_y = rotation_y
 	v.placeable = false
 
 	if def.unique:
-		WorldMap.town_center_voxel = v
-		WorldMap.town_center_node = inst
+		WorldMap.register_unique_building(def.id, v)
 
 	return inst
 

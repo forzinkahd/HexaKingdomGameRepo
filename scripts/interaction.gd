@@ -241,22 +241,15 @@ func _set_build_panel_visible(on: bool) -> void:
 
 func _on_tc_pressed() -> void:
 	active_building_id = &"town_center"
-	if selected_voxel != null:
-		_spawn_ghost_on_voxel(selected_voxel)
-	"""if selected_voxel == null:
+	if selected_voxel == null or building_placer == null:
 		return
 
-	if building_placer == null:
-		push_warning("BuildingPlacer not assigned.")
+	if not building_placer.can_place(active_building_id, selected_voxel):
+		push_warning("Can't place Town Center here (occupied, not placeable, or already exists).")
 		return
 
-	if not building_placer.can_place(&"town_center", selected_voxel):
-		push_warning("Can't place Town Center here (occupied or already exists).")
-		return
-
-	active_tool = build_tool.TOWN_CENTER
 	_spawn_ghost_on_voxel(selected_voxel)
-	_set_build_panel_visible(true)"""
+	_set_build_panel_visible(true)
 
 
 func _spawn_ghost_on_voxel(v: Voxel) -> void:

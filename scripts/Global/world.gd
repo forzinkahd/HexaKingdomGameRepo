@@ -10,8 +10,18 @@ var surface_layer: Dictionary[Vector2i, Voxel] = {}		# Overworking half steps
 var town_center_voxel: Voxel = null
 var town_center_node: Node3D = null
 
+var unique_buildings: Dictionary = {} # StringName -> Voxel
+
 func has_town_center() -> bool:
 	return town_center_voxel != null and is_instance_valid(town_center_node)
+
+
+func has_unique_building(id: StringName) -> bool:
+	return unique_buildings.has(id)
+
+
+func register_unique_building(id: StringName, v: Voxel) -> void:
+	unique_buildings[id] = v
 
 
 ## Construct a dictionary for our 2d top layer of voxels
