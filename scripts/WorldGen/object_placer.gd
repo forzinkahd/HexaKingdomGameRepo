@@ -3,8 +3,7 @@ class_name ObjectPlacer
 
 # from Prototype, either rework for props or delete at some point 10.02.2026
 
-@export var village : PackedScene
-@export var proto_unit : PackedScene
+
 
 
 # Spawn an object on a tile
