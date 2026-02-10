@@ -21,7 +21,6 @@ var initialized = false
 ###########################################################
 # setup for building HUD
 @export var placed_objects_root: Node3D
-@export var town_center_banner_scene: PackedScene  # your obj_blue_banner (final)
 @export var ghost_material: Material   # optional (override look)
 @export var building_placer: BuildingPlacer
 
@@ -46,7 +45,6 @@ const ROT_STEP := deg_to_rad(30.0)
 
 
 var active_building_id: StringName = &""			# replacing hardcoded scenes
-
 
 func init():
 	if initialized:
@@ -271,21 +269,19 @@ func _spawn_ghost_on_voxel(v: Voxel) -> void:
 		push_warning("No active building selected.")
 		return
 
-	var scene: PackedScene = building_placer.get_scene(active_building_id)
-	if scene == null:
-		push_warning("No scene registered for building_id: %s" % [active_building_id])
+	var def := building_placer.get_definition(active_building_id)
+	if def == null or def.scene == null:
+		push_warning("No BuildingDefinition/scene for building_id: %s" % [active_building_id])
 		return
 
-	ghost = scene.instantiate() as Node3D
+	ghost = def.scene.instantiate() as Node3D
 	ghost_voxel = v
 	ghost_yaw = 0.0
 
-	# place at tile center + cap height
 	var cap_y: float = _voxel_cap_y(v)
 	ghost.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
 	ghost.rotation.y = ghost_yaw
 
-	# preview look
 	_make_node_transparent(ghost)
 
 	var root := _placed_root()
@@ -300,7 +296,6 @@ func _spawn_ghost_on_voxel(v: Voxel) -> void:
 	confirm_button.disabled = false
 	rotate_left_button.disabled = false
 	rotate_right_button.disabled = false
-
 
 
 func _rotate_ghost(dir: int) -> void:
@@ -340,26 +335,23 @@ func _on_cancel_pressed() -> void:
 func _on_confirm_pressed() -> void:
 	if ghost == null or ghost_voxel == null:
 		return
-
 	if building_placer == null:
-		push_warning("BuildingPlacer not assigned.")
+		return
+	if active_building_id == &"":
 		return
 
-	var v := ghost_voxel
-	var building_id: StringName = &"town_center" # since tool is town center
-
-	# Ask authority to place
-	var placed := building_placer.place(building_id, v, ghost_yaw)
+	var placed := building_placer.place(active_building_id, ghost_voxel, ghost_yaw)
 	if placed == null:
-		push_warning("Cannot place building here.")
+		push_warning("Cannot place building.")
 		return
 
 	_cancel_ghost()
-	active_tool = build_tool.NONE
 	_set_build_panel_visible(false)
 
-	popup_founded.dialog_text = "Congratulations! You founded your kingdom."
-	popup_founded.popup_centered()
+	# if you want: popup only for town_center
+	if active_building_id == &"town_center":
+			popup_founded.dialog_text = "Congratulations! You founded your kingdom."
+			popup_founded.popup_centered()
 
 
 func _cancel_ghost() -> void:

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3 uid="uid://bispph7vljlug"]
+
+[ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="1_4arlo"]
+[ext_resource type="PackedScene" uid="uid://ht15kmkvhv1k" path="res://Scenes/Kingdom/Buildings/obj_blue_banner.tscn" id="1_ur424"]
+
+[resource]
+script = ExtResource("1_4arlo")
+id = &"town_center"
+scene = ExtResource("1_ur424")
+unique = true
+metadata/_custom_type_script = "uid://kcjwafuybtl5"

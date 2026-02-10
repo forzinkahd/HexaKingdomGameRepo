@@ -16,9 +16,10 @@
 [ext_resource type="PackedScene" path="res://scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
-[ext_resource type="PackedScene" uid="uid://ht15kmkvhv1k" path="res://Scenes/Kingdom/Buildings/obj_blue_banner.tscn" id="16_ry528"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 [ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
+[ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="19_v7xhk"]
+[ext_resource type="Resource" uid="uid://bispph7vljlug" path="res://Scenes/Kingdom/Buildings/blue_banner_tc.tres" id="20_wukv0"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -99,14 +100,13 @@ main_camera = NodePath("../../CameraParent/Camera3D")
 p_finder = NodePath("../Pathfinder")
 selection_indicator = NodePath("../../Control/TextureRect")
 placed_objects_root = NodePath("../../PlacedObjects")
-town_center_banner_scene = ExtResource("16_ry528")
 ghost_material = ExtResource("17_yhlfj")
 building_placer = NodePath("../BuildingPlacer")
 
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root")]
 script = ExtResource("18_gipt1")
 placed_root = NodePath("../../PlacedObjects")
-town_center_scene = ExtResource("16_ry528")
+buildings = Array[ExtResource("19_v7xhk")]([ExtResource("20_wukv0")])
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
