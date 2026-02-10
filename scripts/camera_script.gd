@@ -3,7 +3,7 @@ extends Camera3D
 @export_category("Movement")
 @export var movespeed = 100
 @export var zoomspeed = 2
-@export var zoom = Vector2(25.0, 90.0)
+@export var zoom = Vector2(20.0, 90.0)
 @export var height = Vector2(0, 40)
 @export var rot = Vector2(-10, -80)
 @export var sun: DirectionalLight3D

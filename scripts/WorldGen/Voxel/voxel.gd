@@ -2,8 +2,8 @@ class_name Voxel
 
 var grid_position_xyz : Vector3i
 var grid_position_xz : Vector2i
-
 var world_position : Vector3
+
 var type = VoxelData.voxel_type.GRASS
 var noise : float = 0.0
 var buffer : bool = false
@@ -18,5 +18,15 @@ var collider
 
 var height_units: int = 0	# column height in half-steps
 
-var has_town_center: bool = false
-var town_center_rotation_y: float = 0.0
+# future proof building slot
+var building_id: StringName = &""
+var building_node: Node3D = null
+var building_rotation_y: float = 0.0
+
+
+func has_building() -> bool:
+	return building_id != &""
+
+
+func can_place_building() -> bool:
+	return placeable and not has_building() and occupier == null

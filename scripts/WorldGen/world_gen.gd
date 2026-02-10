@@ -48,13 +48,6 @@ func generate_world():
 	new_chunk.init_chunk()
 	interval["Create Voxel Mesh -- "] = Time.get_ticks_msec()
 	#print("World theme is: ", world_theme)
-
-	## Spawn villages and units
-	"""if settings.spawn_villages_and_units:
-		var placeable = get_placeable_voxels()
-		object_placer.place_villages(placeable, settings.spacing)
-		object_placer.create_starting_units(floori(settings.radius*0.5))
-		interval["Spawn Villages -- "] = Time.get_ticks_msec()"""
 	
 	print_generation_results(starttime, interval)
 	interaction_tracker.init()

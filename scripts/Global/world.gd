@@ -6,6 +6,13 @@ var world_settings : GenerationSettings
 var noise_range : Vector2
 var surface_layer: Dictionary[Vector2i, Voxel] = {}		# Overworking half steps
 
+# protect unique buildings
+var town_center_voxel: Voxel = null
+var town_center_node: Node3D = null
+
+func has_town_center() -> bool:
+	return town_center_voxel != null and is_instance_valid(town_center_node)
+
 
 ## Construct a dictionary for our 2d top layer of voxels
 func set_map(all_voxels, top_voxels):

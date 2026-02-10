@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 [ext_resource type="PackedScene" uid="uid://ht15kmkvhv1k" path="res://Scenes/Kingdom/Buildings/obj_blue_banner.tscn" id="16_ry528"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
+[ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -36,7 +37,6 @@ transform = Transform3D(1, 0, 0, 0, 0.9985367, -0.054078784, 0, 0.054078784, 0.9
 current = true
 script = ExtResource("1_1xefc")
 movespeed = 18
-zoom = Vector2(40, 90)
 height = Vector2(-10, 40)
 rot = Vector2(-20, -90)
 sun = NodePath("../../Scene/DirectionalLight3D")
@@ -91,7 +91,7 @@ proto_unit = ExtResource("8_r58of")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer")]
 script = ExtResource("12_tt8b8")
 voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
@@ -101,6 +101,12 @@ selection_indicator = NodePath("../../Control/TextureRect")
 placed_objects_root = NodePath("../../PlacedObjects")
 town_center_banner_scene = ExtResource("16_ry528")
 ghost_material = ExtResource("17_yhlfj")
+building_placer = NodePath("../BuildingPlacer")
+
+[node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root")]
+script = ExtResource("18_gipt1")
+placed_root = NodePath("../../PlacedObjects")
+town_center_scene = ExtResource("16_ry528")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
@@ -157,7 +163,6 @@ offset_bottom = 269.0
 text = "Town Center"
 
 [node name="ConfirmButton" type="Button" parent="HUD/BuildPanel" unique_id=1351332747]
-visible = false
 layout_mode = 0
 offset_left = 30.0
 offset_top = 274.0
@@ -166,7 +171,6 @@ offset_bottom = 305.0
 text = "Confirm"
 
 [node name="CancelButton" type="Button" parent="HUD/BuildPanel" unique_id=1909977597]
-visible = false
 layout_mode = 0
 offset_left = 30.0
 offset_top = 310.0
@@ -175,7 +179,6 @@ offset_bottom = 341.0
 text = "Cancel"
 
 [node name="RotateLeftButton" type="Button" parent="HUD/BuildPanel" unique_id=975939322]
-visible = false
 layout_mode = 0
 offset_left = 30.0
 offset_top = 346.0
@@ -184,7 +187,6 @@ offset_bottom = 377.0
 text = "Rotate Left"
 
 [node name="RotateRightButton" type="Button" parent="HUD/BuildPanel" unique_id=75588407]
-visible = false
 layout_mode = 0
 offset_left = 30.0
 offset_top = 382.0

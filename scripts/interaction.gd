@@ -23,6 +23,7 @@ var initialized = false
 @export var placed_objects_root: Node3D
 @export var town_center_banner_scene: PackedScene  # your obj_blue_banner (final)
 @export var ghost_material: Material   # optional (override look)
+@export var building_placer: BuildingPlacer
 
 @onready var build_panel: Panel = $"../../HUD/BuildPanel"
 @onready var town_center_button: Button = $"../../HUD/BuildPanel/TownCenterButton"
@@ -42,6 +43,10 @@ var ghost_yaw: float = 0.0
 const ROT_STEP := deg_to_rad(30.0)
 
 ##############################################################
+
+
+var active_building_id: StringName = &""			# replacing hardcoded scenes
+
 
 func init():
 	if initialized:
@@ -77,25 +82,41 @@ func _process(_delta: float) -> void:
 	elif Input.is_action_just_pressed("Select"):
 		interact_mode = mode.SELECT
 		selection_indicator.texture = SELECTSPRITE
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		var mb := event as InputEventMouseButton
 		
-	# Setup raycast
-	if Input.is_action_just_pressed("Click") or Input.is_action_just_pressed("RightClick"):
-		var mouse_pos = get_viewport().get_mouse_position()
-		var origin = main_camera.project_ray_origin(mouse_pos)
-		var dir = main_camera.project_ray_normal(mouse_pos)
-		var end = origin + dir * 1000
-		var hit_data = raycast_at_mouse(origin, end)
-		if not hit_data:
-			print("hit data is empty")
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			_handle_world_click(false)
+			get_viewport().set_input_as_handled()
+			return
+		
+		if mb.button_index == MOUSE_BUTTON_RIGHT:
+			_handle_world_click(true)
+			get_viewport().set_input_as_handled()
 			return
 
-		if Input.is_action_just_pressed("Click"):
-			if interact_mode == mode.SELECT:
-				attempt_select(hit_data)
-			elif interact_mode == mode.BUILD:
-				attempt_build(hit_data.object)
-		elif Input.is_action_just_pressed("RightClick"):
-			print("RightClick currently does nothing, check interaction.gd")
+
+func _handle_world_click(is_right_click: bool) -> void:
+	var mouse_pos := get_viewport().get_mouse_position()
+	var origin := main_camera.project_ray_origin(mouse_pos)
+	var dir := main_camera.project_ray_normal(mouse_pos)
+	var end := origin + dir * 1000.0
+	
+	var hit_data := raycast_at_mouse(origin, end)
+	if hit_data == null:
+		return
+		
+	if is_right_click:
+		print("RightClick currently does nothing, check interaction.gd")
+		return
+		
+	if interact_mode == mode.SELECT:
+		attempt_select(hit_data)
+	elif interact_mode == mode.BUILD:
+		attempt_build(hit_data.object)
 
 
 func raycast_at_mouse(origin, end) -> HitData:
@@ -139,20 +160,6 @@ func attempt_select(hit: HitData):
 	if hit.object.is_in_group("voxels") or hit.object.get_parent().is_in_group("voxels"):
 		highlight_voxel(hit)
 		return
-	"""if hit.object.is_in_group("units"):
-		select_unit(hit.object)
-	elif hit.object.get_parent().is_in_group("units"):
-		select_unit(hit.object.get_parent())"""
-
-
-"""func select_unit(unit : Unit):
-	selected_voxel = null
-	selected_unit = unit
-	hide_cursor(voxel_cursor)
-	if unit is Unit:
-		highlight_unit(unit)
-		unit_moves = p_finder.find_reachable_voxels(unit.occupied_voxel, unit)
-		p_finder.highlight_voxel(unit_moves)"""
 
 
 # We have clicked somewhere on a chunk of voxels
@@ -235,53 +242,72 @@ func _set_build_panel_visible(on: bool) -> void:
 
 
 func _on_tc_pressed() -> void:
-	print("tc pressed")
-	if selected_voxel == null:
+	active_building_id = &"town_center"
+	if selected_voxel != null:
+		_spawn_ghost_on_voxel(selected_voxel)
+	"""if selected_voxel == null:
 		return
-	if selected_voxel.has_town_center:
-		push_warning("This tile already has a town center.")
+
+	if building_placer == null:
+		push_warning("BuildingPlacer not assigned.")
 		return
-	if not selected_voxel.placeable:
-		push_warning("Tile not placeable.")
+
+	if not building_placer.can_place(&"town_center", selected_voxel):
+		push_warning("Can't place Town Center here (occupied or already exists).")
 		return
 
 	active_tool = build_tool.TOWN_CENTER
 	_spawn_ghost_on_voxel(selected_voxel)
-	_set_build_panel_visible(true)
+	_set_build_panel_visible(true)"""
 
 
 func _spawn_ghost_on_voxel(v: Voxel) -> void:
 	_cancel_ghost()
 
-	if town_center_banner_scene == null:
-		push_warning("town_center_banner_scene not assigned.")
+	if building_placer == null:
+		push_warning("BuildingPlacer not assigned.")
+		return
+	if active_building_id == &"":
+		push_warning("No active building selected.")
 		return
 
-	ghost = town_center_banner_scene.instantiate() as Node3D
-	
-	for child in ghost.get_children():
-		if child is MeshInstance3D:
-			child.material_override = ghost_material
-	
+	var scene: PackedScene = building_placer.get_scene(active_building_id)
+	if scene == null:
+		push_warning("No scene registered for building_id: %s" % [active_building_id])
+		return
+
+	ghost = scene.instantiate() as Node3D
 	ghost_voxel = v
 	ghost_yaw = 0.0
 
-	# position at tile center + cap height
-	var cap_y := _voxel_cap_y(v)
+	# place at tile center + cap height
+	var cap_y: float = _voxel_cap_y(v)
 	ghost.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+	ghost.rotation.y = ghost_yaw
 
-	# make it look like a preview:
+	# preview look
 	_make_node_transparent(ghost)
 
 	var root := _placed_root()
 	if root == null:
 		push_warning("PlacedObjects root not assigned/found.")
+		ghost.queue_free()
+		ghost = null
 		return
+
 	root.add_child(ghost)
-	
+
 	confirm_button.disabled = false
 	rotate_left_button.disabled = false
 	rotate_right_button.disabled = false
+
+
+
+func _rotate_ghost(dir: int) -> void:
+	if ghost == null:
+		return
+	ghost_yaw = wrapf(ghost_yaw + float(dir) * ROT_STEP, -PI, PI)
+	ghost.rotation.y = ghost_yaw
 
 
 func _make_node_transparent(n: Node) -> void:
@@ -305,13 +331,6 @@ func _make_node_transparent(n: Node) -> void:
 			stack.append(ch)
 
 
-func _rotate_ghost(dir: int) -> void:
-	if ghost == null:
-		return
-	ghost_yaw = wrapf(ghost_yaw + float(dir) * ROT_STEP, -PI, PI)
-	ghost.rotation.y = ghost_yaw
-
-
 func _on_cancel_pressed() -> void:
 	_cancel_ghost()
 	active_tool = build_tool.NONE
@@ -322,41 +341,23 @@ func _on_confirm_pressed() -> void:
 	if ghost == null or ghost_voxel == null:
 		return
 
-	# place final banner (non-transparent)
+	if building_placer == null:
+		push_warning("BuildingPlacer not assigned.")
+		return
+
 	var v := ghost_voxel
+	var building_id: StringName = &"town_center" # since tool is town center
 
-	# Prevent double placement
-	if v.has_town_center:
-		_cancel_ghost()
+	# Ask authority to place
+	var placed := building_placer.place(building_id, v, ghost_yaw)
+	if placed == null:
+		push_warning("Cannot place building here.")
 		return
 
-	# Remove ghost
-	ghost.queue_free()
-	ghost = null
-
-	# Spawn the real instance
-	var placed := town_center_banner_scene.instantiate() as Node3D
-	var cap_y := _voxel_cap_y(v)
-	placed.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
-	placed.rotation.y = ghost_yaw
-
-	var root := _placed_root()
-	if root == null:
-		push_warning("PlacedObjects root not assigned/found.")
-		return
-	root.add_child(placed)
-
-	# Mark voxel state
-	v.has_town_center = true
-	v.town_center_rotation_y = ghost_yaw
-	v.placeable = false
-
+	_cancel_ghost()
 	active_tool = build_tool.NONE
-	ghost_voxel = null
-
 	_set_build_panel_visible(false)
 
-	# Popup
 	popup_founded.dialog_text = "Congratulations! You founded your kingdom."
 	popup_founded.popup_centered()
 
