@@ -37,7 +37,70 @@ func await_reach_target() -> void:
 	await reached_target
 
 
+func can_carry_more() -> bool:
+	# keep your capacity logic if you have it
+	return true
 
+
+func face_point_yaw(p: Vector3) -> void:
+	var dir := p - global_position
+	dir.y = 0.0
+	if dir.length() < 0.0001:
+		return
+
+	# Godot forward is -Z, so yaw from X/Z:
+	var yaw := atan2(dir.x, dir.z)
+	rotation.y = yaw
+
+	# hard lock pitch/roll so nothing accumulates
+	rotation.x = 0.0
+	rotation.z = 0.0
+
+
+
+func pickup_log_with_animation(log: LogPickup) -> bool:
+	if log == null or not is_instance_valid(log):
+		return false
+
+	# reserve first so others don’t steal it during animation
+	if not log.reserve():
+		return false
+
+	# face it
+	face_point_yaw(log.global_position)
+
+	# small lunge forward (optional but feels good)
+	var start_pos := global_position
+	var dir := (log.global_position - global_position)
+	dir.y = 0.0
+	if dir.length() > 0.001:
+		dir = dir.normalized()
+		global_position = start_pos + dir * pickup_lunge_distance
+
+	# play a tiny “pickup” tween on the visual (optional)
+	var t := get_tree().create_tween()
+	if visual != null:
+		var start_rot := visual.rotation
+		t.tween_property(visual, "rotation:x", start_rot.x + deg_to_rad(10.0), pickup_time * 0.4)
+		t.tween_property(visual, "rotation:x", start_rot.x, pickup_time * 0.6)
+	else:
+		# no visual node, just wait the beat
+		t.tween_interval(pickup_time)
+
+	await t.finished
+	
+	if visual != null:
+		visual.rotation.x = 0.0
+		visual.rotation.z = 0.0
+	
+	# log might be gone (collected by someone else / freed)
+	if not is_instance_valid(log):
+		return false
+
+	# collect
+	carrying_logs += log.amount
+	log.collect_and_free() # safe free + prevents double collect
+	return true
 
 
 func _physics_process(delta: float) -> void:
