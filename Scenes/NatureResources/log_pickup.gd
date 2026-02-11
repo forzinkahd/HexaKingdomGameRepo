@@ -7,16 +7,15 @@ var is_reserved: bool = false
 var _reserved := false
 var _collected := false
 
-
 func _ready() -> void:
 	var s: float = clamp(1.0 + float(amount - 1) * 0.12, 1.0, 1.8)
 	scale = Vector3.ONE * s
 
 
 func reserve() -> bool:
-	if is_reserved:
+	if _reserved or _collected:
 		return false
-	is_reserved = true
+	_reserved = true
 	return true
 
 func collect_and_free() -> void:

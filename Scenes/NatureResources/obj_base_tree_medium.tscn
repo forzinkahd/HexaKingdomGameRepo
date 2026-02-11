@@ -7,11 +7,10 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_picay"]
 size = Vector3(0.9042969, 0.8828125, 0.9277344)
 
-[node name="obj_base_tree_medium" type="Node3D" unique_id=78286678 node_paths=PackedStringArray("visual")]
+[node name="obj_base_tree_medium" type="Node3D" unique_id=78286678]
 script = ExtResource("1_picay")
 logs_scene = ExtResource("2_fem1v")
 logs_count = 2
-visual = NodePath("Visual")
 
 [node name="trees_A_medium2" parent="." unique_id=1539728674 instance=ExtResource("1_nvlej")]
 transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)
@@ -23,5 +22,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.022583008, 0.4345703, 0.06
 shape = SubResource("BoxShape3D_picay")
 
 [node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=2019684039]
-
-[node name="Visual" type="Node3D" parent="." unique_id=2020605451]
