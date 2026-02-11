@@ -23,6 +23,9 @@ var initialized = false
 @export var placed_objects_root: Node3D
 @export var ghost_material: Material   # optional (override look)
 @export var building_placer: BuildingPlacer
+@export var unit_manager: UnitManager
+@export var task_manager: TaskManager
+@export var resource_root: Node3D
 
 @onready var build_panel: Panel = $"../../HUD/BuildPanel"
 @onready var town_center_button: Button = $"../../HUD/BuildPanel/TownCenterButton"
@@ -31,6 +34,7 @@ var initialized = false
 @onready var rotate_left_button: Button = $"../../HUD/BuildPanel/RotateLeftButton"
 @onready var rotate_right_button: Button = $"../../HUD/BuildPanel/RotateRightButton"
 @onready var popup_founded: AcceptDialog = $"../../HUD/PopupFounded"
+
 
 enum build_tool { NONE, TOWN_CENTER }
 var active_tool: build_tool = build_tool.NONE
@@ -45,6 +49,8 @@ const ROT_STEP := deg_to_rad(30.0)
 
 
 var active_building_id: StringName = &""			# replacing hardcoded scenes
+
+var _task_running: bool = false
 
 func init():
 	if initialized:
@@ -154,6 +160,12 @@ func deselect():
 
 
 func attempt_select(hit: HitData):
+	# handle tree clusters
+	var tree := _tree_from_hit(hit.object)
+	if tree != null:
+		_command_chop_tree(tree, hit)
+		return
+	
 	deselect()
 	if hit.object.is_in_group("voxels") or hit.object.get_parent().is_in_group("voxels"):
 		highlight_voxel(hit)
@@ -333,7 +345,9 @@ func _on_confirm_pressed() -> void:
 	if active_building_id == &"":
 		return
 
-	var placed := building_placer.place(active_building_id, ghost_voxel, ghost_yaw)
+	var id := active_building_id # capture it BEFORE you clear/reset anything
+
+	var placed := building_placer.place(id, ghost_voxel, ghost_yaw)
 	if placed == null:
 		push_warning("Cannot place building.")
 		return
@@ -341,10 +355,16 @@ func _on_confirm_pressed() -> void:
 	_cancel_ghost()
 	_set_build_panel_visible(false)
 
-	# if you want: popup only for town_center
-	if active_building_id == &"town_center":
-			popup_founded.dialog_text = "Congratulations! You founded your kingdom."
-			popup_founded.popup_centered()
+	if id == &"town_center":
+		# spawn villager now that WorldMap.town_center_voxel is guaranteed set
+		#var um := get_node_or_null("../../Managers/UnitManager") as UnitManager
+		if unit_manager != null:
+			unit_manager.spawn_first_villager_at_town_center()
+
+		popup_founded.dialog_text = "Congratulations! You founded your kingdom."
+		popup_founded.popup_centered()
+
+	active_building_id = &""
 
 
 func _cancel_ghost() -> void:
@@ -361,3 +381,165 @@ func _placed_root() -> Node3D:
 	# fallback: try to find it by absolute path if you forget to assign
 	var n := get_tree().root.get_node_or_null("World/PlacedObjects")
 	return n as Node3D
+
+
+func _tree_from_hit(n: Node) -> TreeCluster:
+	var current := n
+	while current != null:
+		if current is TreeCluster:
+			return current as TreeCluster
+		if current.is_in_group("harvestable_tree"):
+			# if you didn't use TreeCluster class_name
+			return current as TreeCluster
+		current = current.get_parent()
+	return null
+
+
+func _command_chop_tree(tree: TreeCluster, hit: HitData) -> void:
+	if task_manager == null:
+		return
+
+	# pick the surface voxel under the tree:
+	# simplest: use currently selected_voxel if it matches; better: raycast hit voxel
+	var v: Voxel = null
+	if hit != null:
+		var hit_chunk := _chunk_from_hit(hit.object)
+		if hit_chunk != null:
+			v = hit_chunk.voxel_at_point(hit)
+
+	if v == null:
+		push_warning("Couldn't resolve target voxel for tree.")
+		return
+
+	if not task_manager.create_chop_task(tree, v):
+		push_warning("Could not create chop task (busy, invalid, or already claimed).")
+		return
+
+	_assign_task_to_first_villager()
+
+
+func _assign_task_to_first_villager() -> void:
+	if _task_running:
+		return
+	if unit_manager == null or task_manager == null:
+		return
+	if not task_manager.has_task():
+		return
+
+	var villager := unit_manager.get_first_villager()
+	if villager == null:
+		push_warning("No villager available.")
+		task_manager.clear_task()
+		return
+	if villager.is_busy:
+		return
+
+	_task_running = true
+	villager.is_busy = true
+	_run_active_task(villager)
+
+
+func _run_active_task(villager: Villager) -> void:
+	var task_type := task_manager.get_task_type()
+
+	if task_type == &"chop_tree":
+		await _run_task_chop_tree(villager)
+	else:
+		push_warning("Unknown task: %s" % [task_type])
+		task_manager.clear_task()
+
+	villager.is_busy = false
+	_task_running = false
+
+
+func _run_task_chop_tree(villager: Villager) -> void:
+	var tree := task_manager.get_treecluster()
+	if tree == null or not is_instance_valid(tree):
+		task_manager.clear_task()
+		return
+
+	# walk to tree
+	var approach: Vector3 = tree.global_position + (villager.global_position - tree.global_position).normalized() * 0.6
+	villager.move_to_world(approach)
+	await villager.await_reach_target()
+
+	# tree might have been removed while walking
+	if tree == null or not is_instance_valid(tree):
+		task_manager.clear_task()
+		return
+
+	# IMPORTANT: since TaskManager already set tree.is_being_chopped=true,
+	# TreeCluster.chop_and_harvest() should NOT early-return because of that.
+	# So: remove the "is_being_chopped" check inside chop_and_harvest OR
+	# don't set it in TaskManager. Pick ONE owner of that flag.
+	#
+	# I recommend: TaskManager claims by setting is_being_chopped=true,
+	# and TreeCluster.chop_and_harvest() should accept that state.
+	#
+	# Quick fix: change TreeCluster.can_harvest() for external checks,
+	# and in chop_and_harvest() remove "or is_being_chopped" from the guard.
+
+	var logs: Array[Node3D] = await tree.chop_and_harvest(task_manager.resources_root)
+
+	# if logs empty, tree might have been removed/cancelled
+	if logs.is_empty():
+		task_manager.clear_task()
+		return
+
+	# pickup (prototype)
+	villager.carrying_logs += logs.size()
+	for l in logs:
+		if is_instance_valid(l):
+			l.queue_free()
+
+	# deliver (prototype)
+	if WorldMap.town_center_voxel != null:
+		var drop := Vector3(
+			WorldMap.town_center_voxel.world_position.x,
+			villager.global_position.y,
+			WorldMap.town_center_voxel.world_position.z
+		)
+		villager.move_to_world(drop)
+		await villager.await_reach_target()
+		villager.carrying_logs = 0
+		print("Delivered logs to Town Center!")
+
+	task_manager.clear_task()
+
+
+
+func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
+	# wait until close (validity FIRST)
+	while is_instance_valid(tree) and villager.global_position.distance_to(tree.global_position) > 0.9:
+		await get_tree().process_frame
+
+	if not is_instance_valid(tree):
+		return
+
+	# do the full chop inside the tree (tree may free itself)
+	var logs := await tree.chop_and_harvest(resource_root)
+
+	if logs.is_empty():
+		return
+
+	# instantly “pick up” logs for now
+	villager.carrying_logs += logs.size()
+	for l in logs:
+		if is_instance_valid(l):
+			l.queue_free()
+
+	# haul back to town center
+	if WorldMap.town_center_voxel != null:
+		var drop := Vector3(
+			WorldMap.town_center_voxel.world_position.x,
+			villager.global_position.y,
+			WorldMap.town_center_voxel.world_position.z
+		)
+		villager.move_to_world(drop)
+
+		while villager.global_position.distance_to(drop) > 0.6:
+			await get_tree().process_frame
+
+		villager.carrying_logs = 0
+		print("Delivered logs to Town Center!")
+		villager.is_busy = false

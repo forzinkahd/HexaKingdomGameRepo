@@ -16,6 +16,8 @@ func generate_collider():
 	var body = StaticBody3D.new()
 	var col = CollisionShape3D.new()
 	var shape = mesh.create_trimesh_shape()
+	body.collision_layer = 1  # layer 1
+	body.collision_mask = 1
 	col.shape = shape
 	add_child(body)
 	body.add_child(col)

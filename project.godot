@@ -40,6 +40,8 @@ folder_colors={
 
 tiles=""
 units=""
+harvestable_tree=""
+pickup_logs=""
 
 [input]
 

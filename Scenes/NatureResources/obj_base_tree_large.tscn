@@ -4,11 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://cljgvvesstrv2" path="res://Assets/Meshes/Decorations/Nature/trees_A_large.gltf" id="2_am77c"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3ajte"]
-size = Vector3(1.3953857, 0.7597656, 1.3218384)
+size = Vector3(1.0524902, 0.7597656, 1.1552734)
 
-[node name="obj_base_tree_large" type="Node3D" unique_id=841573127]
+[node name="obj_base_tree_large" type="Node3D" unique_id=841573127 groups=["harvestable_tree"]]
 script = ExtResource("1_ld8l3")
-max_hp = 10
 
 [node name="trees_A_large2" parent="." unique_id=143512085 instance=ExtResource("2_am77c")]
 transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)

@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bxpsbswj83o8m"]
+
+[ext_resource type="Script" uid="uid://1ig66veu4vnp" path="res://Scenes/NatureResources/log_pickup.gd" id="1_6fbmn"]
+[ext_resource type="PackedScene" uid="uid://dwqmbawoi1d8n" path="res://Assets/Meshes/Decorations/Props/resource_lumber.gltf" id="2_bv3c8"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bv3c8"]
+size = Vector3(0.529541, 0.26452637, 0.47265625)
+
+[node name="LogPickup" type="Node3D" unique_id=1665369728 groups=["pickup_logs"]]
+script = ExtResource("1_6fbmn")
+
+[node name="resource_lumber2" parent="." unique_id=985809178 instance=ExtResource("2_bv3c8")]
+transform = Transform3D(0.6, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Area3D" type="Area3D" parent="." unique_id=402181425]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1174278465]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14056396, 0)
+shape = SubResource("BoxShape3D_bv3c8")

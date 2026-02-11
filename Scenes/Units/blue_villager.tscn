@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://b4tb1r4fpi0y3"]
+
+[ext_resource type="Script" uid="uid://ckdpxga5dy0dw" path="res://Scenes/Units/villager.gd" id="1_kko5t"]
+[ext_resource type="PackedScene" uid="uid://41qrh6gcveqa" path="res://Assets/Meshes/Units/BlueUnits/unit_blue_accent.gltf" id="2_sh04b"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_urku7"]
+radius = 0.07861328
+height = 0.29882813
+
+[node name="BlueVillager" type="CharacterBody3D" unique_id=1483137485]
+script = ExtResource("1_kko5t")
+
+[node name="unit_blue_accent2" parent="." unique_id=1017251160 instance=ExtResource("2_sh04b")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1576987767]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15673828, 0)
+shape = SubResource("CapsuleShape3D_urku7")

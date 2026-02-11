@@ -16,7 +16,10 @@
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 [ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
+[ext_resource type="Script" uid="uid://c0esfdcq17by5" path="res://scripts/Managers/task_manager.gd" id="18_pgw7i"]
+[ext_resource type="Script" uid="uid://c3rn4fk4pr1lk" path="res://scripts/Managers/unit_manager.gd" id="18_v7xhk"]
 [ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="19_v7xhk"]
+[ext_resource type="PackedScene" uid="uid://b4tb1r4fpi0y3" path="res://Scenes/Units/blue_villager.tscn" id="19_wukv0"]
 [ext_resource type="Resource" uid="uid://bispph7vljlug" path="res://Scenes/Kingdom/Buildings/blue_banner_tc.tres" id="20_wukv0"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
@@ -88,7 +91,7 @@ script = ExtResource("9_p13dw")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root")]
 script = ExtResource("12_tt8b8")
 voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
@@ -98,11 +101,25 @@ selection_indicator = NodePath("../../Control/TextureRect")
 placed_objects_root = NodePath("../../PlacedObjects")
 ghost_material = ExtResource("17_yhlfj")
 building_placer = NodePath("../BuildingPlacer")
+unit_manager = NodePath("../UnitManager")
+task_manager = NodePath("../TaskManager")
+resource_root = NodePath("../../NatResources")
 
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root")]
 script = ExtResource("18_gipt1")
 placed_root = NodePath("../../PlacedObjects")
 buildings = Array[ExtResource("19_v7xhk")]([ExtResource("20_wukv0")])
+
+[node name="UnitManager" type="Node" parent="Builder" unique_id=1615816696 node_paths=PackedStringArray("units_root")]
+script = ExtResource("18_v7xhk")
+units_root = NodePath("../../Units")
+villager_scene = ExtResource("19_wukv0")
+
+[node name="TaskManager" type="Node" parent="Builder" unique_id=455829252 node_paths=PackedStringArray("resources_root")]
+script = ExtResource("18_pgw7i")
+resources_root = NodePath("../../NatResources")
+
+[node name="NatResourceManager" type="Node" parent="Builder" unique_id=335318962]
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
@@ -198,5 +215,9 @@ size = Vector2i(200, 100)
 dialog_text = "Wazzup"
 
 [node name="PlacedObjects" type="Node3D" parent="." unique_id=2018501954]
+
+[node name="Units" type="Node3D" parent="." unique_id=487589458]
+
+[node name="NatResources" type="Node3D" parent="." unique_id=1726380045]
 
 [connection signal="pressed" from="Control/VBoxContainer/Button" to="Builder/WorldGenerator" method="_ready"]

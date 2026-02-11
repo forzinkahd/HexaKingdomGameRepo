@@ -6,7 +6,7 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_bm528"]
 size = Vector3(1, 0.83618164, 1)
 
-[node name="obj_base_tree_small" type="Node3D" unique_id=2041389557]
+[node name="obj_base_tree_small" type="Node3D" unique_id=2041389557 groups=["harvestable_tree"]]
 script = ExtResource("1_x0rjd")
 
 [node name="trees_A_small2" parent="." unique_id=1092405069 instance=ExtResource("1_vrpb7")]
