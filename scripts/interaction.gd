@@ -480,7 +480,6 @@ func _run_task_chop_tree(villager: Villager) -> void:
 	# and in chop_and_harvest() remove "or is_being_chopped" from the guard.
 
 	var spawn_y := _terrain_cap_y_at(tree.global_position)
-	print("spawn_y: ", spawn_y)
 	var logs: Array[LogPickup] = await tree.chop_and_harvest(resource_root, spawn_y)
 
 	# if logs empty, tree might have been removed/cancelled
@@ -488,11 +487,20 @@ func _run_task_chop_tree(villager: Villager) -> void:
 		task_manager.clear_task()
 		return
 
-	# pickup (prototype)
-	"""villager.carrying_logs += logs.size()
-	for l in logs:
-		if is_instance_valid(l):
-			l.queue_free()"""
+	# pickup
+	for log in logs:
+		if not is_instance_valid(log):
+			continue
+		if not villager.can_carry_more():
+			break
+
+		# move to log
+		villager.move_to_world(log.global_position)
+		await villager.await_reach_target()
+
+		# pickup (includes reserve + animation + queue_free)
+		await villager.pickup_log_with_animation(log)
+
 
 	# deliver (prototype)
 	if WorldMap.town_center_voxel != null:
@@ -503,13 +511,14 @@ func _run_task_chop_tree(villager: Villager) -> void:
 		)
 		villager.move_to_world(drop)
 		await villager.await_reach_target()
+		WorldMap.wood_logs += villager.carrying_logs
 		villager.carrying_logs = 0
-		print("Delivered logs to Town Center!")
+		print("Delivered logs to Town Center! Total: ", WorldMap.wood_logs)
 
 	task_manager.clear_task()
 
 
-func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
+"""func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
 	# approach
 	while is_instance_valid(tree) and villager.global_position.distance_to(tree.global_position) > 0.9:
 		await get_tree().process_frame
@@ -561,7 +570,7 @@ func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
 		# deposit to a global counter (prototype)
 		WorldMap.wood_logs += villager.carrying_logs
 		villager.carrying_logs = 0
-		print("Deposited logs. Total wood:", WorldMap.wood_logs)
+		print("Deposited logs. Total wood:", WorldMap.wood_logs)"""
 
 
 func _terrain_cap_y_at(world_xz: Vector3) -> float:

@@ -38,7 +38,7 @@ func create_chop_task(tree: TreeCluster, target_voxel: Voxel) -> bool:
 		return false
 
 	# claim it here (optional but recommended)
-	tree.is_being_chopped = true
+	#tree.is_being_chopped = true # not needed anymore
 
 	active_task = {
 		"type": &"chop_tree",
