@@ -5,8 +5,8 @@ class_name TreeCluster
 @export var logs_count: int = 3
 @export var chop_time: float = 1.5
 
-@export var squish_y: float = 0.78                  # smaller = more squish
-@export var squish_xz: float = 1.15                 # bigger = more bulge
+@export var squish_y: float = 0.82                  # smaller = more squish
+@export var squish_xz: float = 1.10                 # bigger = more bulge
 @export var squish_in_time: float = 0.08
 @export var squish_out_time: float = 0.30
 
@@ -38,7 +38,8 @@ func start_shake() -> void:
 	_shake_tween.set_trans(Tween.TRANS_SINE)
 	_shake_tween.set_ease(Tween.EASE_IN_OUT)
 
-	var squished := Vector3(_base_scale.x * squish_xz, _base_scale.y * squish_y, _base_scale.z * squish_xz)
+	var intensity := 1.0 + float(logs_count) * 0.01
+	var squished := Vector3(_base_scale.x * squish_xz * intensity, _base_scale.y * squish_y / intensity, _base_scale.z * squish_xz * intensity)
 
 	# squash -> rebound -> back to base
 	_shake_tween.tween_property(_squish_target, "scale", squished, squish_in_time)

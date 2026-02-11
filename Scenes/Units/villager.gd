@@ -3,7 +3,7 @@ class_name Villager
 
 signal reached_target
 
-@export var move_speed: float = 3.0
+@export var move_speed: float = 2.5
 @export var arrive_distance: float = 0.25
 @export var pickup_time: float = 0.45
 @export var pickup_lunge_distance: float = 0.12
