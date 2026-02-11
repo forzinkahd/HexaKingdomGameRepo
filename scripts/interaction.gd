@@ -480,13 +480,14 @@ func _run_task_chop_tree(villager: Villager) -> void:
 	# and in chop_and_harvest() remove "or is_being_chopped" from the guard.
 
 	var spawn_y := _terrain_cap_y_at(tree.global_position)
+	print("spawn_y: ", spawn_y)
 	var logs: Array[LogPickup] = await tree.chop_and_harvest(resource_root, spawn_y)
 
 	# if logs empty, tree might have been removed/cancelled
 	if logs.is_empty():
 		task_manager.clear_task()
 		return
-
+	
 	# pickup
 	for log in logs:
 		if not is_instance_valid(log):
@@ -500,7 +501,11 @@ func _run_task_chop_tree(villager: Villager) -> void:
 
 		# pickup (includes reserve + animation + queue_free)
 		await villager.pickup_log_with_animation(log)
-
+	# pickup (prototype)
+	"""villager.carrying_logs += logs.size()
+	for l in logs:
+		if is_instance_valid(l):
+			l.queue_free()"""
 
 	# deliver (prototype)
 	if WorldMap.town_center_voxel != null:

@@ -7,9 +7,10 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_3ajte"]
 size = Vector3(0.8574219, 0.7597656, 0.93847656)
 
-[node name="obj_base_tree_large" type="Node3D" unique_id=841573127 groups=["harvestable_tree"]]
+[node name="obj_base_tree_large" type="Node3D" unique_id=841573127 node_paths=PackedStringArray("visual") groups=["harvestable_tree"]]
 script = ExtResource("1_ld8l3")
 logs_scene = ExtResource("2_3ajte")
+visual = NodePath("Visual")
 
 [node name="trees_A_large2" parent="." unique_id=143512085 instance=ExtResource("2_am77c")]
 transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)
@@ -21,3 +22,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.034240723, 0.3857422, 0.02
 shape = SubResource("BoxShape3D_3ajte")
 
 [node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=971890130]
+
+[node name="Visual" type="Node3D" parent="." unique_id=299875502]

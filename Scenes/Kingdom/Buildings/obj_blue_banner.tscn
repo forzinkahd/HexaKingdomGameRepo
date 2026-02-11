@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://t4mvoqygq5tj" path="res://Assets/Meshes/Units/BlueUnits/banner_blue_accent.gltf" id="1_32aug"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7shlr"]
-size = Vector3(0.07836914, 0.49658203, 0.03515625)
+size = Vector3(0.087646484, 0.49658203, 0.028320313)
 
 [node name="obj_blue_banner" type="Node3D" unique_id=643537312]
 
