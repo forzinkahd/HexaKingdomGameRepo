@@ -513,64 +513,9 @@ func _run_task_chop_tree(villager: Villager) -> void:
 		await villager.await_reach_target()
 		WorldMap.wood_logs += villager.carrying_logs
 		villager.carrying_logs = 0
-		print("Delivered logs to Town Center! Total: ", WorldMap.wood_logs)
+		#print("Delivered logs to Town Center! Total: ", WorldMap.wood_logs)
 
 	task_manager.clear_task()
-
-
-"""func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
-	# approach
-	while is_instance_valid(tree) and villager.global_position.distance_to(tree.global_position) > 0.9:
-		await get_tree().process_frame
-	if not is_instance_valid(tree):
-		return
-
-	# chop -> logs remain in world
-	var spawn_y := _terrain_cap_y_at(tree.global_position)
-	var logs: Array[LogPickup] = await tree.chop_and_harvest(resource_root, spawn_y)
-	if logs.is_empty():
-		return
-
-	# collect logs (walk to each, pick up)
-	for log in logs:
-		if not is_instance_valid(log):
-			continue
-		if not villager.can_carry_more():
-			break
-
-		# reserve so future villagers won't steal it
-		if not log.reserve():
-			continue
-
-		# move to log
-		var pick_pos: Vector3 = log.global_position
-		villager.move_to_world(pick_pos)
-		await villager.await_reach_target()
-
-		# tiny “pickup beat” so you can see the log
-		await get_tree().create_timer(villager.pickup_time).timeout
-
-		# log might have been collected/destroyed while we waited
-		if not is_instance_valid(log):
-			continue
-
-		villager.pickup_log(log)
-
-
-	# haul to town center + deposit
-	if WorldMap.town_center_voxel != null:
-		var drop := Vector3(
-			WorldMap.town_center_voxel.world_position.x,
-			villager.global_position.y,
-			WorldMap.town_center_voxel.world_position.z
-		)
-		villager.move_to_world(drop)
-		await villager.reached_target
-
-		# deposit to a global counter (prototype)
-		WorldMap.wood_logs += villager.carrying_logs
-		villager.carrying_logs = 0
-		print("Deposited logs. Total wood:", WorldMap.wood_logs)"""
 
 
 func _terrain_cap_y_at(world_xz: Vector3) -> float:

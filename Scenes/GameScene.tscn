@@ -21,6 +21,7 @@
 [ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="19_v7xhk"]
 [ext_resource type="PackedScene" uid="uid://b4tb1r4fpi0y3" path="res://Scenes/Units/blue_villager.tscn" id="19_wukv0"]
 [ext_resource type="Resource" uid="uid://bispph7vljlug" path="res://Scenes/Kingdom/Buildings/blue_banner_tc.tres" id="20_wukv0"]
+[ext_resource type="Script" uid="uid://x168kplgypou" path="res://scripts/hud.gd" id="22_wukv0"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -161,6 +162,7 @@ stretch_mode = 4
 [node name="Chunks" type="Node3D" parent="." unique_id=1209535752]
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1102239484]
+script = ExtResource("22_wukv0")
 
 [node name="BuildPanel" type="Panel" parent="HUD" unique_id=1532613484]
 visible = false
@@ -213,6 +215,19 @@ title = "Achievement"
 initial_position = 2
 size = Vector2i(200, 100)
 dialog_text = "Wazzup"
+
+[node name="WoodLabel" type="Label" parent="HUD" unique_id=1117784124]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -63.0
+offset_top = -11.5
+offset_bottom = 11.5
+grow_horizontal = 0
+grow_vertical = 2
+text = "Wood: 0"
 
 [node name="PlacedObjects" type="Node3D" parent="." unique_id=2018501954]
 

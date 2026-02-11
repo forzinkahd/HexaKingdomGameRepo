@@ -3,7 +3,7 @@ class_name LogPickup
 
 #var claimed: bool = false
 @export var amount: int = 1
-var is_reserved: bool = false
+#var is_reserved: bool = false
 var _reserved := false
 var _collected := false
 

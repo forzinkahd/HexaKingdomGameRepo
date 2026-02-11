@@ -10,7 +10,7 @@ func spawn_first_villager_at_town_center() -> Villager:
 	if WorldMap.town_center_voxel == null:
 		return null
 	
-	print("villager spawned")
+	#print("villager spawned")
 	var v := villager_scene.instantiate() as Villager
 	units_root.add_child(v)
 	v.place_on_voxel(WorldMap.town_center_voxel)
