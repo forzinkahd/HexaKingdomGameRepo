@@ -12,7 +12,9 @@ script = ExtResource("1_picay")
 logs_scene = ExtResource("2_fem1v")
 logs_count = 2
 
-[node name="trees_A_medium2" parent="." unique_id=1539728674 instance=ExtResource("1_nvlej")]
+[node name="Visual" type="Node3D" parent="." unique_id=1851414944]
+
+[node name="trees_A_medium2" parent="Visual" unique_id=1539728674 instance=ExtResource("1_nvlej")]
 transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=381057864]

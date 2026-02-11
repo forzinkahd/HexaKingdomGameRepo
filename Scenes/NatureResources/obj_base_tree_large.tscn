@@ -11,7 +11,9 @@ size = Vector3(0.8574219, 0.7597656, 0.93847656)
 script = ExtResource("1_ld8l3")
 logs_scene = ExtResource("2_3ajte")
 
-[node name="trees_A_large2" parent="." unique_id=143512085 instance=ExtResource("2_am77c")]
+[node name="Visual" type="Node3D" parent="." unique_id=563721512]
+
+[node name="trees_A_large2" parent="Visual" unique_id=143512085 instance=ExtResource("2_am77c")]
 transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1822453748]
