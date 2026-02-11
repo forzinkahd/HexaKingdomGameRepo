@@ -2,13 +2,15 @@
 
 [ext_resource type="PackedScene" uid="uid://frf1h0dthwum" path="res://Assets/Meshes/Decorations/Nature/trees_A_medium.gltf" id="1_nvlej"]
 [ext_resource type="Script" uid="uid://35qkb2aohnbk" path="res://Scenes/NatureResources/tree_cluster.gd" id="1_picay"]
+[ext_resource type="PackedScene" uid="uid://bxpsbswj83o8m" path="res://Scenes/NatureResources/log_pickup.tscn" id="2_fem1v"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_picay"]
-size = Vector3(1.451416, 0.8828125, 1.4310608)
+size = Vector3(0.9042969, 0.8828125, 0.9277344)
 
 [node name="obj_base_tree_medium" type="Node3D" unique_id=78286678]
 script = ExtResource("1_picay")
-max_hp = 7
+logs_scene = ExtResource("2_fem1v")
+logs_count = 2
 
 [node name="trees_A_medium2" parent="." unique_id=1539728674 instance=ExtResource("1_nvlej")]
 transform = Transform3D(0.85, 0, 0, 0, 1, 0, 0, 0, 0.85, 0, 0, 0)

@@ -10,11 +10,22 @@ var active_task: Dictionary = {}		# 1-task prototype
 func has_task() -> bool:
 	return not active_task.is_empty()
 
+
 func clear_task() -> void:
 	active_task.clear()
 
+
 func get_task_type() -> StringName:
 	return active_task.get("type", &"") as StringName
+
+
+func get_treecluster() -> TreeCluster:
+	return active_task.get("tree") as TreeCluster
+
+
+func get_target_voxel() -> Voxel:
+	return active_task.get("voxel") as Voxel
+
 
 func create_chop_task(tree: TreeCluster, target_voxel: Voxel) -> bool:
 	if tree == null or not is_instance_valid(tree):
@@ -26,7 +37,7 @@ func create_chop_task(tree: TreeCluster, target_voxel: Voxel) -> bool:
 	if not tree.can_harvest():
 		return false
 
-	# Claim immediately to stop double-chops
+	# claim it here (optional but recommended)
 	tree.is_being_chopped = true
 
 	active_task = {
@@ -35,10 +46,3 @@ func create_chop_task(tree: TreeCluster, target_voxel: Voxel) -> bool:
 		"voxel": target_voxel
 	}
 	return true
-
-func get_treecluster() -> TreeCluster:
-	var t: Variant = active_task.get("tree")
-	return t as TreeCluster
-
-func get_voxel() -> Voxel:
-	return active_task.get("voxel") as Voxel

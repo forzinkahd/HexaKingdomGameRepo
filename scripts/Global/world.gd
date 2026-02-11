@@ -12,6 +12,9 @@ var town_center_node: Node3D = null
 
 var unique_buildings: Dictionary = {} # StringName -> Voxel
 
+# Resource inventory
+var wood_logs: int = 0
+
 func has_town_center() -> bool:
 	return town_center_voxel != null and is_instance_valid(town_center_node)
 

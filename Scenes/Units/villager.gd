@@ -10,6 +10,8 @@ signal reached_target
 @export var height_lerp_speed: float = 14.0    # how fast y follows ground
 @export var ground_offset: float = 0.02        # tiny lift to avoid z-fighting
 @export var voxel_collision_mask: int = 1      # set this to your voxels' physics layer mask
+@export var carry_capacity: int = 5
+@export var pickup_time: float = 0.5
 
 
 var occupied_voxel: Voxel
@@ -66,37 +68,75 @@ func _cap_y(v: Voxel) -> float:
 	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)
 
 
-func _terrain_cap_y_at(world_xz: Vector3) -> float:
-	var from := world_xz + Vector3(0.0, height_ray_start, 0.0)
-	var to   := from + Vector3(0.0, -height_ray_length, 0.0)
+func _terrain_cap_y_at(world_pos: Vector3) -> float:
+	var key: Vector2i
+	if WorldMap.is_map_staggered:
+		key = _pick_offset_hex_xz(world_pos)
+	else:
+		key = _pick_axial_hex_xz(world_pos)
 
-	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collide_with_areas = false
-	query.collide_with_bodies = true
-	query.collision_mask = voxel_collision_mask
-
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return global_position.y
-
-	# Determine which voxel that ray hit
-	var collider := hit["collider"] as Object
-	if collider == null:
-		return global_position.y
-
-	var chunk := collider
-	while chunk != null and not (chunk is Chunk):
-		chunk = chunk.get_parent()
-	if chunk == null:
-		return global_position.y
-
-	var hd := HitData.new()
-	hd.object = collider
-	hd.point = hit["position"]
-	hd.normal = hit["normal"]
-
-	var v := (chunk as Chunk).voxel_at_point(hd)
+	var v: Voxel = WorldMap.surface_layer.get(key)
 	if v == null:
 		return global_position.y
 
 	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5) + ground_offset
+
+
+func _pick_axial_hex_xz(p: Vector3) -> Vector2i:
+	var size: float = WorldMap.world_settings.voxel_size
+	var sqrt3: float = sqrt(3.0)
+
+	var px: float = p.x / size
+	var pz: float = p.z / size
+
+	var qf: float = (2.0 / 3.0) * px
+	var rf: float = (-1.0 / 3.0) * px + (1.0 / sqrt3) * pz
+
+	var xf: float = qf
+	var zf: float = rf
+	var yf: float = -xf - zf
+
+	var rx: int = int(round(xf))
+	var ry: int = int(round(yf))
+	var rz: int = int(round(zf))
+
+	var x_diff: float = abs(rx - xf)
+	var y_diff: float = abs(ry - yf)
+	var z_diff: float = abs(rz - zf)
+
+	if x_diff > y_diff and x_diff > z_diff:
+		rx = -ry - rz
+	elif y_diff > z_diff:
+		ry = -rx - rz
+	else:
+		rz = -rx - ry
+
+	return Vector2i(rx, rz)
+
+
+func _pick_offset_hex_xz(p: Vector3) -> Vector2i:
+	var size: float = WorldMap.world_settings.voxel_size
+	var sqrt3: float = sqrt(3.0)
+
+	var col_f: float = (2.0 / 3.0) * (p.x / size)
+	var col: int = int(round(col_f))
+
+	var parity: int = ((col % 2) + 2) % 2
+	var row_f: float = (p.z / (sqrt3 * size)) - float(parity) * 0.5
+	var row: int = int(round(row_f))
+
+	return Vector2i(col, row)
+
+
+func can_carry_more() -> bool:
+	return carrying_logs < carry_capacity
+
+
+func pickup_log(log: LogPickup) -> bool:
+	if log == null or not is_instance_valid(log):
+		return false
+	if not can_carry_more():
+		return false
+	carrying_logs += log.amount
+	log.queue_free()
+	return true

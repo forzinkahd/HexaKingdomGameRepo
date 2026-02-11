@@ -479,7 +479,9 @@ func _run_task_chop_tree(villager: Villager) -> void:
 	# Quick fix: change TreeCluster.can_harvest() for external checks,
 	# and in chop_and_harvest() remove "or is_being_chopped" from the guard.
 
-	var logs: Array[Node3D] = await tree.chop_and_harvest(task_manager.resources_root)
+	var spawn_y := _terrain_cap_y_at(tree.global_position)
+	print("spawn_y: ", spawn_y)
+	var logs: Array[LogPickup] = await tree.chop_and_harvest(resource_root, spawn_y)
 
 	# if logs empty, tree might have been removed/cancelled
 	if logs.is_empty():
@@ -487,10 +489,10 @@ func _run_task_chop_tree(villager: Villager) -> void:
 		return
 
 	# pickup (prototype)
-	villager.carrying_logs += logs.size()
+	"""villager.carrying_logs += logs.size()
 	for l in logs:
 		if is_instance_valid(l):
-			l.queue_free()
+			l.queue_free()"""
 
 	# deliver (prototype)
 	if WorldMap.town_center_voxel != null:
@@ -507,28 +509,46 @@ func _run_task_chop_tree(villager: Villager) -> void:
 	task_manager.clear_task()
 
 
-
 func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
-	# wait until close (validity FIRST)
+	# approach
 	while is_instance_valid(tree) and villager.global_position.distance_to(tree.global_position) > 0.9:
 		await get_tree().process_frame
-
 	if not is_instance_valid(tree):
 		return
 
-	# do the full chop inside the tree (tree may free itself)
-	var logs := await tree.chop_and_harvest(resource_root)
-
+	# chop -> logs remain in world
+	var spawn_y := _terrain_cap_y_at(tree.global_position)
+	var logs: Array[LogPickup] = await tree.chop_and_harvest(resource_root, spawn_y)
 	if logs.is_empty():
 		return
 
-	# instantly “pick up” logs for now
-	villager.carrying_logs += logs.size()
-	for l in logs:
-		if is_instance_valid(l):
-			l.queue_free()
+	# collect logs (walk to each, pick up)
+	for log in logs:
+		if not is_instance_valid(log):
+			continue
+		if not villager.can_carry_more():
+			break
 
-	# haul back to town center
+		# reserve so future villagers won't steal it
+		if not log.reserve():
+			continue
+
+		# move to log
+		var pick_pos: Vector3 = log.global_position
+		villager.move_to_world(pick_pos)
+		await villager.await_reach_target()
+
+		# tiny “pickup beat” so you can see the log
+		await get_tree().create_timer(villager.pickup_time).timeout
+
+		# log might have been collected/destroyed while we waited
+		if not is_instance_valid(log):
+			continue
+
+		villager.pickup_log(log)
+
+
+	# haul to town center + deposit
 	if WorldMap.town_center_voxel != null:
 		var drop := Vector3(
 			WorldMap.town_center_voxel.world_position.x,
@@ -536,10 +556,55 @@ func _run_chop_sequence(villager: Villager, tree: TreeCluster) -> void:
 			WorldMap.town_center_voxel.world_position.z
 		)
 		villager.move_to_world(drop)
+		await villager.reached_target
 
-		while villager.global_position.distance_to(drop) > 0.6:
-			await get_tree().process_frame
-
+		# deposit to a global counter (prototype)
+		WorldMap.wood_logs += villager.carrying_logs
 		villager.carrying_logs = 0
-		print("Delivered logs to Town Center!")
-		villager.is_busy = false
+		print("Deposited logs. Total wood:", WorldMap.wood_logs)
+
+
+func _terrain_cap_y_at(world_xz: Vector3) -> float:
+	var from := world_xz + Vector3(0, 50.0, 0)
+	var to := world_xz + Vector3(0, -50.0, 0)
+
+	var q := PhysicsRayQueryParameters3D.create(from, to)
+	q.collide_with_bodies = true
+	q.collide_with_areas = false
+	q.collision_mask = 1 # your voxel collision layer
+
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty():
+		return world_xz.y
+
+	# Find chunk
+	var col := hit["collider"] as Object
+	var node := col as Node
+	while node != null and not (node is Chunk):
+		node = node.get_parent()
+	if node == null:
+		return hit["position"].y
+
+	# Build HitData for voxel lookup
+	var hd := HitData.new()
+	hd.object = col
+	hd.point = hit["position"]
+	hd.normal = hit["normal"]
+	hd.ray_origin = from
+	hd.ray_dir = (to - from).normalized()
+
+	var v := (node as Chunk).voxel_at_point(hd)
+	if v == null:
+		return hit["position"].y
+
+	return _voxel_cap_y(v) + 0.03
+
+
+func _cap_y_for_world_xz(world_pos: Vector3) -> float:
+	# Find surface voxel at this xz and use its cap height
+	var v: Variant = WorldMap.surface_layer.get(Vector2i(
+		int(round(world_pos.x / (WorldMap.world_settings.voxel_size * 1.5))), # rough fallback, not used if you do chunk mapping
+		0
+	))
+	# ^ ignore this fallback if you do the chunk mapping approach below
+	return world_pos.y

@@ -29,41 +29,48 @@ func stop_shake() -> void:
 	_shake_tween = null
 	rotation.y = snapped(rotation.y, deg_to_rad(1.0))
 
-func harvest_spawn_logs(spawn_root: Node3D) -> Array[Node3D]:
+
+func harvest_spawn_logs(spawn_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 	if is_depleted:
 		return []
 	is_depleted = true
 	stop_shake()
 
-	var out: Array[Node3D] = []
+	var out: Array[LogPickup] = []
 	if logs_scene != null and spawn_root != null:
-		for i in range(logs_count):
-			var inst := logs_scene.instantiate() as Node3D
-			# small random scatter around cluster center
-			var off := Vector3(randf_range(-0.3,0.3), 0.0, randf_range(-0.3,0.3))
-			inst.position = global_position + off
-			spawn_root.add_child(inst)
-			out.append(inst)
+		var inst := logs_scene.instantiate() as LogPickup
+		if inst == null:
+			push_warning("logs_scene root must be LogPickup.")
+			return []
 
-	# “poof away”
+		# represent the whole cluster as one pickup
+		inst.amount = logs_count
+
+		spawn_root.add_child(inst)
+
+		# place at cluster center (tiny random offset is fine)
+		var off := Vector3(randf_range(-0.25, 0.25), 0.0, randf_range(-0.25, 0.25))
+		inst.global_position = Vector3(global_position.x + off.x, spawn_y + 0.08, global_position.z + off.z)
+
+		out.append(inst)
+
 	queue_free()
 	return out
 
 
-func chop_and_harvest(resource_root: Node3D) -> Array[Node3D]:
+
+func chop_and_harvest(resource_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 	if is_depleted:
 		return []
-	is_being_chopped = true
 
+	# allow TaskManager to be the “owner” of is_being_chopped
 	start_shake()
 	await get_tree().create_timer(chop_time).timeout
 
-	# if removed mid-chop, unlock and abort
 	if not is_inside_tree():
-		is_being_chopped = false
+		is_being_chopped = false # release claim if cancelled
+		stop_shake()
 		return []
 
 	stop_shake()
-	var out := harvest_spawn_logs(resource_root)
-	# harvest_spawn_logs() queue_free()'s the tree, so nothing after this should touch it
-	return out
+	return harvest_spawn_logs(resource_root, spawn_y)
