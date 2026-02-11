@@ -58,7 +58,7 @@ func face_point_yaw(p: Vector3) -> void:
 	rotation.z = 0.0
 
 
-
+# works nicely
 func pickup_log_with_animation(log: LogPickup) -> bool:
 	if log == null or not is_instance_valid(log):
 		return false
