@@ -35,6 +35,9 @@ var initialized = false
 @onready var rotate_left_button: Button = $"../../HUD/BuildPanel/RotateLeftButton"
 @onready var rotate_right_button: Button = $"../../HUD/BuildPanel/RotateRightButton"
 @onready var popup_founded: AcceptDialog = $"../../HUD/PopupFounded"
+@onready var workshop_panel: Panel = $"../../HUD/WorkshopPanel"
+@onready var train_builder_button: Button = $"../../HUD/WorkshopPanel/TrainBuilderButton"
+@onready var close_workshop_button: Button = $"../../HUD/WorkshopPanel/CloseWorkshopButton"
 
 
 enum build_tool { NONE, TOWN_CENTER }
@@ -52,6 +55,8 @@ const ROT_STEP := deg_to_rad(30.0)
 var active_building_id: StringName = &""			# replacing hardcoded scenes
 
 var _task_running: bool = false
+
+var _open_workshop: BuilderWorkshop = null
 
 func init():
 	if initialized:
@@ -74,6 +79,12 @@ func init():
 	cancel_button.pressed.connect(_on_cancel_pressed)
 	rotate_left_button.pressed.connect(func(): _rotate_ghost(1))
 	rotate_right_button.pressed.connect(func(): _rotate_ghost(-1))
+	train_builder_button.pressed.connect(_on_train_builder_pressed)
+	close_workshop_button.pressed.connect(func():
+		_open_workshop = null
+		workshop_panel.visible = false
+	)
+	workshop_panel.visible = false
 	
 	_set_build_panel_visible(false)
 	
@@ -162,6 +173,13 @@ func deselect():
 
 
 func attempt_select(hit: HitData):
+	var ws := _workshop_from_hit(hit.object)
+	if ws != null:
+		_open_workshop = ws
+		workshop_panel.visible = true
+		train_builder_button.disabled = not ws.can_train_builder()
+		return
+	
 	# handle tree clusters
 	var tree := _tree_from_hit(hit.object)
 	if tree != null:
@@ -471,6 +489,32 @@ func _run_active_task(villager: Villager) -> void:
 
 	villager.is_busy = false
 	_task_running = false
+
+
+func _workshop_from_hit(n: Node) -> BuilderWorkshop:
+	var current := n
+	while current != null:
+		if current is BuilderWorkshop:
+			return current as BuilderWorkshop
+		current = current.get_parent()
+	return null
+
+
+func _on_train_builder_pressed() -> void:
+	if _open_workshop == null or not is_instance_valid(_open_workshop):
+		workshop_panel.visible = false
+		return
+	if unit_manager == null:
+		return
+
+	var b := _open_workshop.train_builder(unit_manager)
+	if b == null:
+		# not enough logs etc.
+		train_builder_button.disabled = true
+		return
+
+	# update UI state after purchase
+	train_builder_button.disabled = not _open_workshop.can_train_builder()
 
 
 func _run_task_chop_tree(villager: Villager) -> void:

@@ -42,6 +42,8 @@ tiles=""
 units=""
 harvestable_tree=""
 pickup_logs=""
+buildings=""
+workshop=""
 
 [input]
 

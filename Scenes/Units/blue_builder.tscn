@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://3v4vv8oddvo6"]
+
+[ext_resource type="Script" uid="uid://dfycpudt7m77k" path="res://Scenes/Units/blue_builder.gd" id="1_0ylji"]
+[ext_resource type="PackedScene" uid="uid://41qrh6gcveqa" path="res://Assets/Meshes/Units/BlueUnits/unit_blue_accent.gltf" id="2_fnqfa"]
+[ext_resource type="PackedScene" uid="uid://4fr2mxo1wonl" path="res://Assets/Meshes/Units/NeutralUnits/hammer.gltf" id="3_ihjkx"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fnqfa"]
+radius = 0.067871094
+height = 0.29248047
+
+[node name="blue_builder" type="CharacterBody3D" unique_id=1500896791]
+script = ExtResource("1_0ylji")
+
+[node name="Visual" type="Node3D" parent="." unique_id=1440230390]
+
+[node name="unit_blue_accent2" parent="Visual" unique_id=1017251160 instance=ExtResource("2_fnqfa")]
+
+[node name="hammer2" parent="Visual" unique_id=586588322 instance=ExtResource("3_ihjkx")]
+transform = Transform3D(-3.090862e-08, 3.090862e-08, 1, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, -4.371139e-08, -0.1, 0.1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=743740710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16821289, 0)
+shape = SubResource("CapsuleShape3D_fnqfa")

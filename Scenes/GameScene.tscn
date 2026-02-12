@@ -22,6 +22,7 @@
 [ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="19_v7xhk"]
 [ext_resource type="PackedScene" uid="uid://b4tb1r4fpi0y3" path="res://Scenes/Units/blue_villager.tscn" id="19_wukv0"]
 [ext_resource type="Resource" uid="uid://bispph7vljlug" path="res://Scenes/Kingdom/Buildings/blue_banner_tc.tres" id="20_wukv0"]
+[ext_resource type="PackedScene" uid="uid://3v4vv8oddvo6" path="res://Scenes/Units/blue_builder.tscn" id="21_ebcm8"]
 [ext_resource type="Script" uid="uid://x168kplgypou" path="res://scripts/hud.gd" id="22_wukv0"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
@@ -116,6 +117,7 @@ buildings = Array[ExtResource("19_v7xhk")]([ExtResource("20_wukv0"), ExtResource
 script = ExtResource("18_v7xhk")
 units_root = NodePath("../../Units")
 villager_scene = ExtResource("19_wukv0")
+builder_scene = ExtResource("21_ebcm8")
 
 [node name="TaskManager" type="Node" parent="Builder" unique_id=455829252 node_paths=PackedStringArray("resources_root")]
 script = ExtResource("18_pgw7i")
@@ -230,12 +232,73 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -63.0
+offset_left = -100.0
 offset_top = -11.5
+offset_right = -37.0
 offset_bottom = 11.5
 grow_horizontal = 0
 grow_vertical = 2
 text = "Wood: 0"
+
+[node name="WorkshopPanel" type="Panel" parent="HUD" unique_id=1775454089]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -225.0
+offset_top = -100.0
+offset_right = 225.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="TrainBuilderButton" type="Button" parent="HUD/WorkshopPanel" unique_id=1241963273]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -125.0
+offset_top = 30.0
+offset_right = -17.0
+offset_bottom = 61.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Train Builder"
+
+[node name="CloseWorkshopButton" type="Button" parent="HUD/WorkshopPanel" unique_id=414151117]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 25.0
+offset_top = 30.0
+offset_right = 75.0
+offset_bottom = 61.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Close"
+
+[node name="Label" type="Label" parent="HUD/WorkshopPanel" unique_id=388099581]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Train a Builder for 3 logs"
 
 [node name="PlacedObjects" type="Node3D" parent="." unique_id=2018501954]
 
