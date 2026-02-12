@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://ddtv17ptoucpe"]
+
+[ext_resource type="PackedScene" uid="uid://bttg3g5j1qkhg" path="res://Assets/Meshes/Structures/BlueStructures/building_home_A_blue.gltf" id="1_1umkw"]
+[ext_resource type="PackedScene" uid="uid://ch3mg7uas5hsw" path="res://Assets/Meshes/Units/NeutralUnits/shield.gltf" id="2_6poup"]
+[ext_resource type="PackedScene" uid="uid://4fr2mxo1wonl" path="res://Assets/Meshes/Units/NeutralUnits/hammer.gltf" id="3_7ekn0"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1umkw"]
+height = 0.42321777
+radius = 0.3227539
+
+[node name="obj_blue_workshop" type="Node3D" unique_id=757719170]
+
+[node name="Visual" type="Node3D" parent="." unique_id=1991582880]
+
+[node name="building_home_A_blue2" parent="Visual" unique_id=1415055237 instance=ExtResource("1_1umkw")]
+
+[node name="shield2" parent="Visual" unique_id=295264406 instance=ExtResource("2_6poup")]
+transform = Transform3D(-6.556708e-08, -1.0606602, 0.7071067, 0, 1.0606601, 0.7071068, -1.5, 4.6362928e-08, -3.0908616e-08, 0.1911518, 0.58082616, 0)
+
+[node name="hammer2" parent="Visual" unique_id=586588322 instance=ExtResource("3_7ekn0")]
+transform = Transform3D(-0.5, -0.4999999, -0.7071067, 0.49999997, 0.49999994, -0.7071067, 0.70710677, -0.7071067, -3.0908616e-08, 0.23592219, 0.56402296, 0.037253067)
+
+[node name="shield3" parent="Visual" unique_id=1041695117 instance=ExtResource("2_6poup")]
+transform = Transform3D(1.788732e-08, 1.0606601, -0.7071067, 0, 1.0606601, 0.7071067, 1.5, -1.2648244e-08, 8.4321625e-09, -0.191, 0.581, 0)
+
+[node name="hammer3" parent="Visual" unique_id=1940441001 instance=ExtResource("3_7ekn0")]
+transform = Transform3D(0.4999999, 0.4999999, 0.7071067, 0.4999999, 0.4999999, -0.7071067, -0.7071067, 0.7071067, 8.4321625e-09, -0.236, 0.564, -0.037)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1496702677]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1859784998]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21710205, 0)
+shape = SubResource("CylinderShape3D_1umkw")

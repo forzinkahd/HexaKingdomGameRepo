@@ -24,6 +24,13 @@ func can_place(building_id: StringName, v: Voxel) -> bool:
 	# Uniqueness guard:
 	if building_id == ID_TOWN_CENTER and WorldMap.has_town_center():
 		return false
+	
+	if def.unique and WorldMap.has_unique_building(def.id):
+		return false
+
+	# cost check
+	if WorldMap.wood_logs < def.cost_logs:
+		return false
 
 	return true
 
@@ -32,6 +39,10 @@ func place(building_id: StringName, v: Voxel, rotation_y: float) -> Node3D:
 		return null
 
 	var def := get_definition(building_id)
+	if def == null:
+		return null
+	
+	WorldMap.wood_logs -= def.cost_logs
 
 	var inst := def.scene.instantiate() as Node3D
 	inst.position = Vector3(v.world_position.x, _voxel_cap_y(v), v.world_position.z)

@@ -29,6 +29,7 @@ var initialized = false
 
 @onready var build_panel: Panel = $"../../HUD/BuildPanel"
 @onready var town_center_button: Button = $"../../HUD/BuildPanel/TownCenterButton"
+@onready var workshop_button: Button = $"../../HUD/BuildPanel/WorkshopButton"
 @onready var confirm_button: Button = $"../../HUD/BuildPanel/ConfirmButton"
 @onready var cancel_button: Button = $"../../HUD/BuildPanel/CancelButton"
 @onready var rotate_left_button: Button = $"../../HUD/BuildPanel/RotateLeftButton"
@@ -68,10 +69,11 @@ func init():
 	selection_indicator.texture = SELECTSPRITE
 	
 	town_center_button.pressed.connect(_on_tc_pressed)
+	workshop_button.pressed.connect(_on_workshop_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	rotate_left_button.pressed.connect(func(): _rotate_ghost(-1))
-	rotate_right_button.pressed.connect(func(): _rotate_ghost(1))
+	rotate_left_button.pressed.connect(func(): _rotate_ghost(1))
+	rotate_right_button.pressed.connect(func(): _rotate_ghost(-1))
 	
 	_set_build_panel_visible(false)
 	
@@ -249,6 +251,9 @@ func _set_build_panel_visible(on: bool) -> void:
 	confirm_button.disabled = ghost == null
 	rotate_left_button.disabled = ghost == null
 	rotate_right_button.disabled = ghost == null
+	
+	# disable workshop if logs insufficient
+	workshop_button.disabled = WorldMap.wood_logs < 5
 
 
 func _on_tc_pressed() -> void:
@@ -258,6 +263,19 @@ func _on_tc_pressed() -> void:
 
 	if not building_placer.can_place(active_building_id, selected_voxel):
 		push_warning("Can't place Town Center here (occupied, not placeable, or already exists).")
+		return
+
+	_spawn_ghost_on_voxel(selected_voxel)
+	_set_build_panel_visible(true)
+
+
+func _on_workshop_pressed() -> void:
+	active_building_id = &"builders_workshop"
+	if selected_voxel == null or building_placer == null:
+		return
+
+	if not building_placer.can_place(active_building_id, selected_voxel):
+		push_warning("Can't place Builder Workshop (need 5 logs / tile not placeable).")
 		return
 
 	_spawn_ghost_on_voxel(selected_voxel)
@@ -363,6 +381,9 @@ func _on_confirm_pressed() -> void:
 
 		popup_founded.dialog_text = "Congratulations! You founded your kingdom."
 		popup_founded.popup_centered()
+
+	if id == &"builders_workshop":
+		push_warning("builder's workshop created, unlock/implement progression")
 
 	active_building_id = &""
 

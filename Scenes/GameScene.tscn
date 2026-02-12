@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 [ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
+[ext_resource type="Resource" uid="uid://bvewfnglri4ov" path="res://Scenes/Kingdom/Buildings/blue_workshop.tres" id="18_hgvmy"]
 [ext_resource type="Script" uid="uid://c0esfdcq17by5" path="res://scripts/Managers/task_manager.gd" id="18_pgw7i"]
 [ext_resource type="Script" uid="uid://c3rn4fk4pr1lk" path="res://scripts/Managers/unit_manager.gd" id="18_v7xhk"]
 [ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="19_v7xhk"]
@@ -109,7 +110,7 @@ resource_root = NodePath("../../NatResources")
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root")]
 script = ExtResource("18_gipt1")
 placed_root = NodePath("../../PlacedObjects")
-buildings = Array[ExtResource("19_v7xhk")]([ExtResource("20_wukv0")])
+buildings = Array[ExtResource("19_v7xhk")]([ExtResource("20_wukv0"), ExtResource("18_hgvmy")])
 
 [node name="UnitManager" type="Node" parent="Builder" unique_id=1615816696 node_paths=PackedStringArray("units_root")]
 script = ExtResource("18_v7xhk")
@@ -165,48 +166,55 @@ stretch_mode = 4
 script = ExtResource("22_wukv0")
 
 [node name="BuildPanel" type="Panel" parent="HUD" unique_id=1532613484]
-visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="TownCenterButton" type="Button" parent="HUD/BuildPanel" unique_id=1202341235]
 layout_mode = 0
 offset_left = 30.0
-offset_top = 238.0
+offset_top = 200.0
 offset_right = 137.0
-offset_bottom = 269.0
+offset_bottom = 232.0
 text = "Town Center"
+
+[node name="WorkshopButton" type="Button" parent="HUD/BuildPanel" unique_id=54437274]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 240.0
+offset_right = 117.0
+offset_bottom = 272.0
+text = "Workshop"
 
 [node name="ConfirmButton" type="Button" parent="HUD/BuildPanel" unique_id=1351332747]
 layout_mode = 0
 offset_left = 30.0
-offset_top = 274.0
+offset_top = 280.0
 offset_right = 101.0
-offset_bottom = 305.0
+offset_bottom = 312.0
 text = "Confirm"
 
 [node name="CancelButton" type="Button" parent="HUD/BuildPanel" unique_id=1909977597]
 layout_mode = 0
 offset_left = 30.0
-offset_top = 310.0
+offset_top = 320.0
 offset_right = 90.0
-offset_bottom = 341.0
+offset_bottom = 352.0
 text = "Cancel"
 
 [node name="RotateLeftButton" type="Button" parent="HUD/BuildPanel" unique_id=975939322]
 layout_mode = 0
 offset_left = 30.0
-offset_top = 346.0
+offset_top = 360.0
 offset_right = 124.0
-offset_bottom = 377.0
+offset_bottom = 392.0
 text = "Rotate Left"
 
 [node name="RotateRightButton" type="Button" parent="HUD/BuildPanel" unique_id=75588407]
 layout_mode = 0
 offset_left = 30.0
-offset_top = 382.0
+offset_top = 400.0
 offset_right = 131.0
-offset_bottom = 413.0
+offset_bottom = 432.0
 text = "Rotate right"
 
 [node name="PopupFounded" type="AcceptDialog" parent="HUD" unique_id=1212512145]
