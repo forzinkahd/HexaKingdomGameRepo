@@ -90,9 +90,23 @@ func chop_and_harvest(resource_root: Node3D, spawn_y: float) -> Array[LogPickup]
 	await get_tree().create_timer(chop_time).timeout
 
 	if not is_inside_tree():
-		is_being_chopped = false
+		#is_being_chopped = false # old, not automated
+		release_claim()
 		stop_shake()
 		return []
 
 	stop_shake()
 	return harvest_spawn_logs(resource_root, spawn_y)
+
+
+func try_claim() -> bool:
+	if is_depleted or is_being_chopped:
+		return false
+	is_being_chopped = true
+	return true
+
+
+func release_claim() -> void:
+	# Call this if the villager gives up before the tree is harvested
+	if not is_depleted:
+		is_being_chopped = false

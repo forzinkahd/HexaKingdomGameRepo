@@ -7,7 +7,7 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_picay"]
 size = Vector3(0.9042969, 0.8828125, 0.9277344)
 
-[node name="obj_base_tree_medium" type="Node3D" unique_id=78286678]
+[node name="obj_base_tree_medium" type="Node3D" unique_id=78286678 groups=["harvestable_tree"]]
 script = ExtResource("1_picay")
 logs_scene = ExtResource("2_fem1v")
 logs_count = 2

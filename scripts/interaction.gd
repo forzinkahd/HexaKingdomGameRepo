@@ -394,7 +394,9 @@ func _on_confirm_pressed() -> void:
 		# spawn villager now that WorldMap.town_center_voxel is guaranteed set
 		#var um := get_node_or_null("../../Managers/UnitManager") as UnitManager
 		if unit_manager != null:
-			unit_manager.spawn_first_villager_at_town_center()
+			var v := unit_manager.spawn_first_villager_at_town_center()
+			if v != null:
+				v.start_auto_work(resource_root)
 
 		popup_founded.dialog_text = "Congratulations! You founded your kingdom."
 		popup_founded.popup_centered()
