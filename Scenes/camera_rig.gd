@@ -67,8 +67,9 @@ func _pick_pivot_under_mouse() -> Vector3:
 
 	# Fallback: intersect with y=0 plane if ray hits nothing
 	var plane := Plane(Vector3.UP, 0.0)
-	var t: Variant = plane.intersects_ray(origin, dir)
-	if t != null:
-		return origin + dir * float(t)
-
+	var p: Variant = plane.intersects_ray(origin, dir)
+	
+	if p != null:
+		return p as Vector3
+	
 	return global_transform.origin
