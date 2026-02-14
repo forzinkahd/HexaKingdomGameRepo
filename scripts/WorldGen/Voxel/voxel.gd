@@ -34,6 +34,10 @@ func has_building() -> bool:
 	return building_id != &""
 
 
+func clear_resource() -> void:
+	resource_id = &""
+
+
 func can_place_building() -> bool:
 	if not placeable:
 		push_warning("not placeable here at %s building_id=%s" % [grid_position_xz, building_id])

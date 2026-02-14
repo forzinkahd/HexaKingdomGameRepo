@@ -76,8 +76,8 @@ func harvest_spawn_logs(spawn_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 		inst.global_position = Vector3(global_position.x + off.x, spawn_y + 0.08, global_position.z + off.z)
 		out.append(inst)
 	
-	if home_voxel != null and home_voxel.resource_id == &"tree_cluster":
-		home_voxel.resource_id = &""
+	if home_voxel != null:
+		home_voxel.clear_resource()
 	
 	queue_free()
 	return out
