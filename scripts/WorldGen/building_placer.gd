@@ -15,7 +15,11 @@ func get_definition(id: StringName) -> BuildingDefinition:
 	return null
 
 func can_place(building_id: StringName, v: Voxel) -> bool:
-	if v == null or not v.can_place_building():
+	if v == null:
+		push_warning("null")
+		return false
+	
+	if not v.can_place_building():
 		return false
 
 	var def := get_definition(building_id)
@@ -31,6 +35,7 @@ func can_place(building_id: StringName, v: Voxel) -> bool:
 
 	# cost check
 	if WorldMap.wood_logs < def.cost_logs:
+		push_warning("Not enough logs")
 		return false
 
 	return true

@@ -12,6 +12,7 @@ class_name TreeCluster
 
 @onready var _squish_target: Node3D = $Visual
 
+var home_voxel: Voxel = null
 var is_depleted: bool = false
 var is_being_chopped: bool = false
 var _shake_tween: Tween
@@ -74,7 +75,10 @@ func harvest_spawn_logs(spawn_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 		var off := Vector3(randf_range(-0.25, 0.25), 0.0, randf_range(-0.25, 0.25))
 		inst.global_position = Vector3(global_position.x + off.x, spawn_y + 0.08, global_position.z + off.z)
 		out.append(inst)
-
+	
+	if home_voxel != null and home_voxel.resource_id == &"tree_cluster":
+		home_voxel.resource_id = &""
+	
 	queue_free()
 	return out
 

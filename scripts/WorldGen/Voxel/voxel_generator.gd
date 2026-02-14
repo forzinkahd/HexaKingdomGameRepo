@@ -485,6 +485,8 @@ func _spawn_mountains(chunk: Chunk) -> void:
 		chunk.add_child(m)
 		_has_mountain_by_xz[v.grid_position_xz] = true
 		
+		v.resource_id = &"mountain"
+		
 		# replace foundation of mountain tile
 		if theme.mountain_foundation_scene != null:
 			var key: Vector2i = v.grid_position_xz
@@ -554,7 +556,7 @@ func _spawn_forests(chunk: Chunk) -> void:
 		if scene == null:
 			continue
 
-		var inst := scene.instantiate() as Node3D
+		var inst := scene.instantiate() as TreeCluster		# possibly return to Node3D
 
 		# place on cap height
 		var y := float(v.height_units) * half_step_h
@@ -564,9 +566,12 @@ func _spawn_forests(chunk: Chunk) -> void:
 		inst.rotation.y = rng.randf_range(0.0, TAU)
 
 		chunk.add_child(inst)
+		
+		inst.home_voxel = v			# possibly delete
+		v.resource_id = &"tree_cluster"
 
 		# mark tile unplaceable for villages/units if you want
-		v.placeable = false
+		#v.placeable = false
 
 
 func _tile_seed(v: Voxel, salt: int) -> int:

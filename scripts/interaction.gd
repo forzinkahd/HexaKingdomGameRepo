@@ -293,7 +293,6 @@ func _on_workshop_pressed() -> void:
 		return
 
 	if not building_placer.can_place(active_building_id, selected_voxel):
-		push_warning("Can't place Builder Workshop (need 5 logs / tile not placeable).")
 		return
 
 	_spawn_ghost_on_voxel(selected_voxel)
@@ -533,17 +532,6 @@ func _run_task_chop_tree(villager: Villager) -> void:
 		task_manager.clear_task()
 		return
 
-	# IMPORTANT: since TaskManager already set tree.is_being_chopped=true,
-	# TreeCluster.chop_and_harvest() should NOT early-return because of that.
-	# So: remove the "is_being_chopped" check inside chop_and_harvest OR
-	# don't set it in TaskManager. Pick ONE owner of that flag.
-	#
-	# I recommend: TaskManager claims by setting is_being_chopped=true,
-	# and TreeCluster.chop_and_harvest() should accept that state.
-	#
-	# Quick fix: change TreeCluster.can_harvest() for external checks,
-	# and in chop_and_harvest() remove "or is_being_chopped" from the guard.
-
 	var spawn_y := _terrain_cap_y_at(tree.global_position)
 	var logs: Array[LogPickup] = await tree.chop_and_harvest(resource_root, spawn_y)
 
@@ -551,7 +539,8 @@ func _run_task_chop_tree(villager: Villager) -> void:
 	if logs.is_empty():
 		task_manager.clear_task()
 		return
-
+	
+	
 	# pickup
 	for log in logs:
 		if not is_instance_valid(log):
