@@ -3,6 +3,7 @@ class_name BuildingPlacer
 
 @export var placed_root: Node3D
 @export var buildings: Array[BuildingDefinition] = []
+@export var construction_manager: ConstructionManager
 
 
 const ID_TOWN_CENTER: StringName = &"town_center"
@@ -42,8 +43,25 @@ func place(building_id: StringName, v: Voxel, rotation_y: float) -> Node3D:
 	if def == null:
 		return null
 	
+	
 	WorldMap.wood_logs -= def.cost_logs
-
+	
+	# If building requires construction, spawn a site instead
+	if def.requires_construction and construction_manager != null:
+		var site := construction_manager.spawn_site(def, v, rotation_y)
+		if site == null:
+			push_warning("site is null")
+			return null
+		
+		# lock voxel to prohibit double placing
+		v.building_id = def.id
+		v.building_node = site
+		v.building_rotation_y = rotation_y
+		v.placeable = false
+		
+		return site
+	
+	# Instantly place certain props
 	var inst := def.scene.instantiate() as Node3D
 	inst.position = Vector3(v.world_position.x, _voxel_cap_y(v), v.world_position.z)
 	inst.rotation.y = rotation_y

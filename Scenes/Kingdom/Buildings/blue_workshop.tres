@@ -7,5 +7,6 @@
 script = ExtResource("1_q4tff")
 id = &"builders_workshop"
 scene = ExtResource("1_20o85")
+progress_stages = 2
 cost_logs = 5
 metadata/_custom_type_script = "uid://kcjwafuybtl5"
