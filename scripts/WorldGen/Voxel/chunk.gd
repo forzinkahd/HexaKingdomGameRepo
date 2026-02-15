@@ -34,42 +34,57 @@ func fill_pos_dict():
 
 
 func voxel_at_point(hd: HitData) -> Voxel:
-	# Prefer ray intersection with ground plane (y = 0) to avoid cliffs blocking selection.
-	var p: Vector3 = _ray_hit_ground_plane(hd)
-	# Small bias so exact edges don’t flicker
+	var p: Vector3 = _ray_hit_plane_at_hit_y(hd)
 	p.x += 0.0001
 	p.z += 0.0001
-
-	var key: Vector2i
+	
+	var key: Vector2i = _pick_offset_hex_xz(p) if WorldMap.is_map_staggered else _pick_axial_hex_xz(p)
+	
+	# 1) collect candidates: guessed tile + 6 neighbors
+	var candidates: Array[Voxel] = []
+	var v0: Voxel = voxels_by_xz.get(key)
+	if v0 != null:
+		candidates.append(v0)
+	
+	# choose correct neighbor dirs based on parity (matches your WorldMap logic)
+	var dirs := VoxelData.HEXAGONAL_NEIGHBOR_DIRECTIONS
 	if WorldMap.is_map_staggered:
-		key = _pick_offset_hex_xz(p)
-	else:
-		key = _pick_axial_hex_xz(p)
-
-	var v: Voxel = voxels_by_xz.get(key)
-	if v != null:
-		return v
-
+		dirs = VoxelData.NEIGHBOR_DIRECTIONS_EVEN if (key.x % 2 == 0) else VoxelData.NEIGHBOR_DIRECTIONS_ODD
+	
+	for d in dirs:
+		var nk := Vector2i(key.x + int(d.x), key.y + int(d.y))
+		var nv: Voxel = voxels_by_xz.get(nk)
+		if nv != null:
+			candidates.append(nv)
+	
+	# 2) pick the candidate whose center is closest to p.xz
+	if not candidates.is_empty():
+		var best: Voxel = candidates[0]
+		var best_d := INF
+		for c in candidates:
+			var d2 := Vector2(c.world_position.x, c.world_position.z).distance_squared_to(Vector2(p.x, p.z))
+			if d2 < best_d:
+				best_d = d2
+				best = c
+		return best
+	
+	# fallback
 	return _fallback_nearest_by_xz(p)
 
 
-func _ray_hit_ground_plane(hd: HitData) -> Vector3:
-	# Plane y=0 (world base). If your base isn’t 0, change this.
-	var plane_y: float = 0.0
+func _ray_hit_plane_at_hit_y(hd: HitData) -> Vector3:
+	# Use the height of what we actually hit (top of voxel, cliff face, etc.)
+	var plane_y := hd.point.y
 
-	var dir_y: float = hd.ray_dir.y
+	var dir_y := hd.ray_dir.y
 	if abs(dir_y) < 0.00001:
-		# Ray is almost parallel to plane; fallback to collision point
 		return hd.point
 
-	var t: float = (plane_y - hd.ray_origin.y) / dir_y
-
-	# If plane is behind the camera (t < 0), fallback to collision point
+	var t := (plane_y - hd.ray_origin.y) / dir_y
 	if t < 0.0:
 		return hd.point
 
 	return hd.ray_origin + hd.ray_dir * t
-
 
 
 func _pick_axial_hex_xz(p: Vector3) -> Vector2i:
