@@ -9,7 +9,7 @@ radius = 0.067871094
 height = 0.29248047
 
 [node name="blue_builder" type="CharacterBody3D" unique_id=1500896791]
-collision_mask = 3
+collision_layer = 2
 script = ExtResource("1_0ylji")
 unit_name = "Builder"
 

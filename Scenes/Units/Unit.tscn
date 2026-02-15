@@ -4,12 +4,24 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bgxm2"]
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7bw4q"]
+radius = 0.11279297
+height = 0.32202148
+
 [node name="Unit" type="CharacterBody3D" unique_id=420534359]
+collision_layer = 2
+collision_mask = 3
 script = ExtResource("1_su7yn")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1311962752]
 
 [node name="SelectionCollider" type="Area3D" parent="." unique_id=403816814]
+collision_layer = 2
+collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SelectionCollider" unique_id=1760627796]
 shape = SubResource("BoxShape3D_bgxm2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=960990985]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17102051, 0)
+shape = SubResource("CapsuleShape3D_7bw4q")

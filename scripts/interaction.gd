@@ -129,36 +129,44 @@ func _handle_world_click(is_right_click: bool) -> void:
 	var origin := main_camera.project_ray_origin(mouse_pos)
 	var dir := main_camera.project_ray_normal(mouse_pos)
 	var end := origin + dir * 1000.0
-	
-	var hit_data := raycast_at_mouse(origin, end)
-	if hit_data == null:
-		return
-		
+
+	# Always compute voxel hit (used for move destinations, and for normal selection)
+	var vhit := raycast_voxels(origin, end)
+	var voxel_hd: HitData = null
+	if not vhit.is_empty():
+		voxel_hd = hitdata_from_hit(vhit, origin, end)
+
 	if is_right_click:
-		_handle_right_click(hit_data)
+		_handle_right_click(voxel_hd) # may be null if you clicked sky
 		return
-		
-	if interact_mode == mode.SELECT:
-		attempt_select(hit_data)
-	elif interact_mode == mode.BUILD:
-		attempt_build(hit_data.object)
+
+	# LEFT CLICK: try unit hit first
+	var uhit := raycast_units(origin, end)
+	if not uhit.is_empty():
+		_select_unit_from_collider(uhit["collider"])
+		return
+
+	# Otherwise fall back to voxel selection
+	if voxel_hd != null:
+		if interact_mode == mode.SELECT:
+			attempt_select(voxel_hd)
+		elif interact_mode == mode.BUILD:
+			attempt_build(voxel_hd.object)
 
 
-"""func raycast_at_mouse(origin, end) -> HitData:
-		var query := PhysicsRayQueryParameters3D.create(origin, end)
-		var collision := get_world_3d().direct_space_state.intersect_ray(query)
-		if collision and collision.has("collider"):
-			var hit = collision.collider
-			var data = HitData.new()
-			data.object = collision.collider
-			data.point = collision.position
-			data.normal = collision.normal
-			data.ray_origin = origin
-			data.ray_dir = (end - origin).normalized()
-			return data
-		else:
-			deselect()
-			return null"""
+func _select_unit_from_collider(col: Object) -> void:
+	var n := col as Node
+	while n != null:
+		if n is Unit:
+			selected_unit = n as Unit
+			selected_voxel = null
+			hide_cursor(voxel_cursor)
+			unit_cursor.visible = true
+			move_cursor(unit_cursor, selected_unit.global_position)
+			animate_cursor(unit_cursor)
+			_set_build_panel_visible(false)
+			return
+		n = n.get_parent()
 
 
 func raycast_at_mouse(origin, end) -> HitData:
@@ -263,6 +271,35 @@ func highlight_unit(unit):
 	unit_cursor.visible = true
 
 
+const LAYER_VOXELS := 1 << 0
+const LAYER_UNITS  := 1 << 1
+
+func raycast_units(origin: Vector3, end: Vector3) -> Dictionary:
+	var q := PhysicsRayQueryParameters3D.create(origin, end)
+	q.collide_with_bodies = true
+	q.collide_with_areas = true
+	q.collision_mask = LAYER_UNITS # layer 2
+	return get_world_3d().direct_space_state.intersect_ray(q)
+
+
+func raycast_voxels(origin: Vector3, end: Vector3) -> Dictionary:
+	var q := PhysicsRayQueryParameters3D.create(origin, end)
+	q.collide_with_bodies = true
+	q.collide_with_areas = false
+	q.collision_mask = LAYER_VOXELS
+	return get_world_3d().direct_space_state.intersect_ray(q)
+
+
+func hitdata_from_hit(hit: Dictionary, origin: Vector3, end: Vector3) -> HitData:
+	var data := HitData.new()
+	data.object = hit["collider"]
+	data.point = hit["position"]
+	data.normal = hit["normal"]
+	data.ray_origin = origin
+	data.ray_dir = (end - origin).normalized()
+	return data
+
+
 ## move cursor with optional height difference
 func move_cursor(cursor : Node3D, pos : Vector3):
 	cursor.position = pos
@@ -311,57 +348,38 @@ func hide_cursor(cursor : Node3D):
 			cursor.scale = _cursor_base_scale[cursor]
 
 
-"""func _handle_right_click(hit: HitData) -> void:
-	# BUILD mode: cancel placement quickly
-	if interact_mode == mode.BUILD:
-		_on_cancel_pressed()
-		interact_mode = mode.SELECT
-		selection_indicator.texture = SELECTSPRITE
-		return
-	
-	# SELECT mode: context command
-	var v := _voxel_from_hit(hit)
-	
-	# If you later implement selecting units, this becomes your “command unit” path.
-	if selected_unit != null and selected_unit is Villager:
-		var villager := selected_unit as Villager
-	
-		# Right click tree = chop
-		var tree := _tree_from_hit(hit.object)
-		if tree != null:
-			_command_chop_tree(tree, hit)
-			return
-	
-		# Right click ground = move
-		if v != null:
-			var cap_y := _voxel_cap_y(v)
-			villager.move_to_world(Vector3(v.world_position.x, cap_y, v.world_position.z))
-			return
-	
-	# no unit selected: treat as “cancel UI / deselect”
-	deselect()
-	workshop_panel.visible = false
-	_open_workshop = null"""
-
-
-func _handle_right_click(hit: HitData) -> void:
-	# 1) cancel building placement if ghost exists
+func _handle_right_click(voxel_hit: HitData) -> void:
+	# cancel building placement if ghost exists
 	if ghost != null:
 		_on_cancel_pressed()
 		return
-
-	# 2) move selected unit (if it supports moving)
-	if selected_unit != null and is_instance_valid(selected_unit):
-		var v := _voxel_from_hit(hit)
-		if v != null:
-			# assuming Unit has move_to_world OR you route via Pathfinder
-			selected_unit.move_to_world(Vector3(v.world_position.x, selected_unit.global_position.y, v.world_position.z))
+	
+	# if no selected unit, just close UI
+	if selected_unit == null or not is_instance_valid(selected_unit):
+		deselect()
+		workshop_panel.visible = false
+		_open_workshop = null
 		return
-
-	# 3) otherwise just deselect / close panels
-	deselect()
-	workshop_panel.visible = false
-	_open_workshop = null
+	
+	# must have a voxel target
+	if voxel_hit == null:
+		return
+	
+	var v := _voxel_from_hit(voxel_hit)
+	if v == null:
+		return
+	
+	var cap_y := _voxel_cap_y(v)
+	var dest := Vector3(v.world_position.x, cap_y, v.world_position.z)
+	
+	# IMPORTANT: Unit base may not declare move_to_world(), so guard with has_method
+	if selected_unit.has_method("move_to_world"):
+		print("move command given")
+		selected_unit.call("move_to_world", dest)
+		move_cursor(unit_cursor, dest)
+		animate_cursor(unit_cursor)
+	else:
+		push_warning("Selected unit has no move_to_world(): %s" % [selected_unit])
 
 
 func _voxel_cap_y(v: Voxel) -> float:
