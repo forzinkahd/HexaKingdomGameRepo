@@ -28,6 +28,6 @@ class_name WorldTheme
 @export_category("Forests")
 @export var tree_cluster_scenes: Array[PackedScene] = []
 @export var forest_chance: float = 0.25
-@export var forest_min_height_units: int = 2
+@export var forest_min_height_units: int = 1
 @export var forest_max_height_units: int = 20
 @export var forest_avoid_mountains: bool = true

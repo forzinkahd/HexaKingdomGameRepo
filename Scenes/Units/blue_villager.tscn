@@ -8,7 +8,9 @@ radius = 0.07861328
 height = 0.29882813
 
 [node name="BlueVillager" type="CharacterBody3D" unique_id=1483137485]
+collision_mask = 3
 script = ExtResource("1_kko5t")
+unit_name = "Villager"
 
 [node name="unit_blue_accent2" parent="." unique_id=1017251160 instance=ExtResource("2_sh04b")]
 

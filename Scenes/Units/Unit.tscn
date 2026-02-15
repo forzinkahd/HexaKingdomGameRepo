@@ -1,15 +1,15 @@
-[gd_scene format=3 uid="uid://obg7bgin1n7a"]
+[gd_scene format=3 uid="uid://b4xwfwp01kpyt"]
 
-[ext_resource type="Script" uid="uid://j82fso57rw2q" path="res://scripts/unit.gd" id="1_su7yn"]
+[ext_resource type="Script" uid="uid://cxv5hic0ubb2o" path="res://scripts/unit.gd" id="1_su7yn"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bgxm2"]
 
-[node name="Unit" type="Node3D"]
+[node name="Unit" type="CharacterBody3D" unique_id=420534359]
 script = ExtResource("1_su7yn")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1311962752]
 
-[node name="SelectionCollider" type="Area3D" parent="."]
+[node name="SelectionCollider" type="Area3D" parent="." unique_id=403816814]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SelectionCollider"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SelectionCollider" unique_id=1760627796]
 shape = SubResource("BoxShape3D_bgxm2")

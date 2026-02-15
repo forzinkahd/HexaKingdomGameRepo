@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends Unit
 class_name Villager
 
 signal reached_target
@@ -8,7 +8,7 @@ signal reached_target
 @export var pickup_time: float = 0.45
 @export var pickup_lunge_distance: float = 0.12
 @export var height_lerp_speed: float = 14.0
-@export var ground_offset: float = 0.02
+#@export var ground_offset: float = 0.02
 @export var auto_work_enabled: bool = true
 @export var auto_retry_delay: float = 0.6
 @export var auto_after_task_delay: float = 0.2
@@ -20,7 +20,7 @@ var _auto_running: bool = false
 
 var carrying_logs: int = 0
 var is_busy: bool = false
-var occupied_voxel: Voxel
+#var occupied_voxel: Voxel
 
 var _target_pos: Vector3
 var _has_target := false
@@ -247,8 +247,8 @@ func _do_chop_and_haul(tree: TreeCluster, resource_root: Node3D) -> void:
 		carrying_logs = 0
 
 
-func _cap_y(v: Voxel) -> float:
-	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)
+"""func _cap_y(v: Voxel) -> float:
+	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)"""
 
 
 func _terrain_cap_y_at(world_pos: Vector3) -> float:

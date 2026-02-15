@@ -34,7 +34,8 @@ func fill_pos_dict():
 
 
 func voxel_at_point(hd: HitData) -> Voxel:
-	var p: Vector3 = _ray_hit_plane_at_hit_y(hd)
+	#var p: Vector3 = _ray_hit_plane_at_hit_y(hd)
+	var p: Vector3 = hd.point
 	p.x += 0.0001
 	p.z += 0.0001
 	

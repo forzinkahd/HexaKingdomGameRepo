@@ -43,6 +43,9 @@ var initialized = false
 enum build_tool { NONE, TOWN_CENTER }
 var active_tool: build_tool = build_tool.NONE
 
+var _cursor_tweens: Dictionary = {}
+var _cursor_base_scale: Dictionary = {}
+
 var ghost: Node3D = null
 var ghost_voxel: Voxel = null
 var ghost_yaw: float = 0.0
@@ -72,6 +75,11 @@ func init():
 	voxel_cursor.scale_object_local(Vector3(scalar, 1.0, scalar))
 	deselect()
 	selection_indicator.texture = SELECTSPRITE
+	voxel_cursor.scale_object_local(Vector3(scalar, 1.0, scalar))
+	
+	_cursor_base_scale[voxel_cursor] = voxel_cursor.scale
+	_cursor_base_scale[unit_cursor] = unit_cursor.scale
+
 	
 	town_center_button.pressed.connect(_on_tc_pressed)
 	workshop_button.pressed.connect(_on_workshop_pressed)
@@ -127,7 +135,7 @@ func _handle_world_click(is_right_click: bool) -> void:
 		return
 		
 	if is_right_click:
-		print("RightClick currently does nothing, check interaction.gd")
+		_handle_right_click(hit_data)
 		return
 		
 	if interact_mode == mode.SELECT:
@@ -136,7 +144,7 @@ func _handle_world_click(is_right_click: bool) -> void:
 		attempt_build(hit_data.object)
 
 
-func raycast_at_mouse(origin, end) -> HitData:
+"""func raycast_at_mouse(origin, end) -> HitData:
 		var query := PhysicsRayQueryParameters3D.create(origin, end)
 		var collision := get_world_3d().direct_space_state.intersect_ray(query)
 		if collision and collision.has("collider"):
@@ -150,7 +158,30 @@ func raycast_at_mouse(origin, end) -> HitData:
 			return data
 		else:
 			deselect()
-			return null
+			return null"""
+
+
+func raycast_at_mouse(origin, end) -> HitData:
+	var query := PhysicsRayQueryParameters3D.create(origin, end)
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+
+	# ONLY voxel layer (Layer 1)
+	query.collision_mask = 1 << 0  # layer 1
+
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit and hit.has("collider"):
+		var data := HitData.new()
+		data.object = hit["collider"]
+		data.point = hit["position"]
+		data.normal = hit["normal"]
+		data.ray_origin = origin
+		data.ray_dir = (end - origin).normalized()
+		return data
+
+	deselect()
+	return null
+
 
 
 func attempt_build(hit_object):
@@ -173,23 +204,26 @@ func deselect():
 
 
 func attempt_select(hit: HitData):
-	var ws := _workshop_from_hit(hit.object)
-	if ws != null:
-		_open_workshop = ws
-		workshop_panel.visible = true
-		train_builder_button.disabled = not ws.can_train_builder()
-		return
-	
-	# handle tree clusters
+	# 1) resolve voxel FIRST
+	var v: Voxel = _voxel_from_hit(hit)
+	if v != null and v.building_node != null and is_instance_valid(v.building_node):
+		# if the voxel has a workshop, open it
+		if v.building_node is BuilderWorkshop:
+			_open_workshop = v.building_node as BuilderWorkshop
+			workshop_panel.visible = true
+			train_builder_button.disabled = not _open_workshop.can_train_builder()
+			return
+
+	# 2) if not a building interaction, handle tree click
 	var tree := _tree_from_hit(hit.object)
 	if tree != null:
 		_command_chop_tree(tree, hit)
 		return
-	
+
+	# 3) otherwise normal voxel highlight
 	deselect()
 	if hit.object.is_in_group("voxels") or hit.object.get_parent().is_in_group("voxels"):
 		highlight_voxel(hit)
-		return
 
 
 # We have clicked somewhere on a chunk of voxels
@@ -234,20 +268,100 @@ func move_cursor(cursor : Node3D, pos : Vector3):
 	cursor.position = pos
 
 
-func animate_cursor(cursor : Node3D):
-	var tween = get_tree().create_tween()
-	var initial_scale = cursor.scale
-	var target_scale = initial_scale * 1.15
-	tween.set_trans(Tween.TRANS_SPRING)
-	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(cursor, "scale", target_scale, 0.175)
-	tween.tween_property(cursor, "scale", initial_scale, 0.2)
+func animate_cursor(cursor: Node3D) -> void:
+	if cursor == null:
+		return
+
+	# cache base scale if missing (safety)
+	if not _cursor_base_scale.has(cursor):
+		_cursor_base_scale[cursor] = cursor.scale
+
+	# kill existing tween for this cursor
+	if _cursor_tweens.has(cursor):
+		var old := _cursor_tweens[cursor] as Tween
+		if old != null and is_instance_valid(old):
+			old.kill()
+		_cursor_tweens.erase(cursor)
+
+	# hard reset to base so spam-click can’t accumulate scale
+	var base: Vector3 = _cursor_base_scale[cursor]
+	cursor.scale = base
+
+	var t := get_tree().create_tween()
+	_cursor_tweens[cursor] = t
+
+	t.set_trans(Tween.TRANS_SPRING)
+	t.set_ease(Tween.EASE_IN_OUT)
+
+	t.tween_property(cursor, "scale", base * 1.15, 0.175)
+	t.tween_property(cursor, "scale", base, 0.2)
+
+	# cleanup when finished
+	t.finished.connect(func():
+		if _cursor_tweens.get(cursor) == t:
+			_cursor_tweens.erase(cursor)
+	)
 
 
 func hide_cursor(cursor : Node3D):
 	if cursor:
 		move_cursor(cursor, Vector3.ZERO)
 		cursor.visible = false
+		if _cursor_base_scale.has(cursor):
+			cursor.scale = _cursor_base_scale[cursor]
+
+
+"""func _handle_right_click(hit: HitData) -> void:
+	# BUILD mode: cancel placement quickly
+	if interact_mode == mode.BUILD:
+		_on_cancel_pressed()
+		interact_mode = mode.SELECT
+		selection_indicator.texture = SELECTSPRITE
+		return
+	
+	# SELECT mode: context command
+	var v := _voxel_from_hit(hit)
+	
+	# If you later implement selecting units, this becomes your “command unit” path.
+	if selected_unit != null and selected_unit is Villager:
+		var villager := selected_unit as Villager
+	
+		# Right click tree = chop
+		var tree := _tree_from_hit(hit.object)
+		if tree != null:
+			_command_chop_tree(tree, hit)
+			return
+	
+		# Right click ground = move
+		if v != null:
+			var cap_y := _voxel_cap_y(v)
+			villager.move_to_world(Vector3(v.world_position.x, cap_y, v.world_position.z))
+			return
+	
+	# no unit selected: treat as “cancel UI / deselect”
+	deselect()
+	workshop_panel.visible = false
+	_open_workshop = null"""
+
+
+func _handle_right_click(hit: HitData) -> void:
+	# 1) cancel building placement if ghost exists
+	if ghost != null:
+		_on_cancel_pressed()
+		return
+
+	# 2) move selected unit (if it supports moving)
+	if selected_unit != null and is_instance_valid(selected_unit):
+		var v := _voxel_from_hit(hit)
+		if v != null:
+			# assuming Unit has move_to_world OR you route via Pathfinder
+			selected_unit.move_to_world(Vector3(v.world_position.x, selected_unit.global_position.y, v.world_position.z))
+		return
+
+	# 3) otherwise just deselect / close panels
+	deselect()
+	workshop_panel.visible = false
+	_open_workshop = null
 
 
 func _voxel_cap_y(v: Voxel) -> float:
@@ -497,6 +611,8 @@ func _workshop_from_hit(n: Node) -> BuilderWorkshop:
 	while current != null:
 		if current is BuilderWorkshop:
 			return current as BuilderWorkshop
+		if current.has_method("can_train_builder") and current.has_method("train_builder"):
+			return current
 		current = current.get_parent()
 	return null
 
@@ -572,6 +688,15 @@ func _run_task_chop_tree(villager: Villager) -> void:
 		#print("Delivered logs to Town Center! Total: ", WorldMap.wood_logs)
 
 	task_manager.clear_task()
+
+
+func _voxel_from_hit(hit: HitData) -> Voxel:
+	if hit == null:
+		return null
+	var hit_chunk := _chunk_from_hit(hit.object)
+	if hit_chunk == null:
+		return null
+	return hit_chunk.voxel_at_point(hit)
 
 
 func _terrain_cap_y_at(world_xz: Vector3) -> float:
