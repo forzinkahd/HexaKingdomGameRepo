@@ -8,6 +8,8 @@ class_name Unit
 
 @onready var selection_ring: Node3D = get_node_or_null("SelectionRing") as Node3D
 
+signal reached_target
+
 var current_health: int = 10
 var occupied_voxel: Voxel = null
 

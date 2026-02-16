@@ -159,7 +159,18 @@ func _select_unit_from_collider(col: Object) -> void:
 	var n := col as Node
 	while n != null:
 		if n is Unit:
-			selected_unit = n as Unit
+			_bind_selected_unit(n as Unit)
+			selected_voxel = null
+			hide_cursor(voxel_cursor)
+			unit_cursor.visible = true
+			move_cursor(unit_cursor, selected_unit.global_position)
+			animate_cursor(unit_cursor)
+			
+			_set_build_panel_visible(false)
+			return
+		n = n.get_parent()
+		
+		"""selected_unit = n as Unit
 			selected_voxel = null
 			hide_cursor(voxel_cursor)
 			unit_cursor.visible = true
@@ -167,7 +178,7 @@ func _select_unit_from_collider(col: Object) -> void:
 			animate_cursor(unit_cursor)
 			_set_build_panel_visible(false)
 			return
-		n = n.get_parent()
+		n = n.get_parent()"""
 
 
 func raycast_at_mouse(origin, end) -> HitData:
@@ -208,7 +219,10 @@ func deselect():
 	hide_cursor(voxel_cursor)
 	hide_cursor(unit_cursor)
 	unit_moves.clear()
-	selected_unit = null
+	
+	_unbind_selected_unit()
+	#selected_unit = null
+	
 	p_finder.clear_highlight()
 
 
@@ -385,6 +399,38 @@ func _handle_right_click(voxel_hit: HitData) -> void:
 		move_cursor(unit_cursor, dest)
 	else:
 		push_warning("Selected unit has no move_to_world(): %s" % [selected_unit])
+
+
+func _bind_selected_unit(u: Unit) -> void:
+	_unbind_selected_unit()
+
+	selected_unit = u
+	if selected_unit == null:
+		return
+
+	# selection ring etc. if you have it
+	if selected_unit.has_method("toggle_selected"):
+		selected_unit.call("toggle_selected", true)
+
+	# connect once (avoid duplicates)
+	if not selected_unit.reached_target.is_connected(_on_selected_unit_reached_target):
+		selected_unit.reached_target.connect(_on_selected_unit_reached_target)
+
+
+func _unbind_selected_unit() -> void:
+	if selected_unit != null and is_instance_valid(selected_unit):
+		if selected_unit.has_method("toggle_selected"):
+			selected_unit.call("toggle_selected", false)
+
+		if selected_unit.reached_target.is_connected(_on_selected_unit_reached_target):
+			selected_unit.reached_target.disconnect(_on_selected_unit_reached_target)
+
+	selected_unit = null
+
+
+func _on_selected_unit_reached_target() -> void:
+	# Only hide if we still have a selected unit (and it didn't get replaced)
+	hide_cursor(unit_cursor)
 
 
 func _voxel_cap_y(v: Voxel) -> float:
