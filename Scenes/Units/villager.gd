@@ -22,10 +22,211 @@ var carrying_logs: int = 0
 var is_busy: bool = false
 #var occupied_voxel: Voxel
 
+# Pathing
+var _path: Array[Voxel] = []
+var _path_i: int = 0
 var _target_pos: Vector3
 var _has_target := false
 var _moving := false
 
+###################################################
+func _ready() -> void:
+	super._ready()
+	# Optional: when switched to MANUAL, pause auto-work
+	control_mode_changed.connect(func(m: int):
+		if m == ControlMode.MANUAL:
+			_auto_running = false
+	)
+
+
+func can_receive_move_commands() -> bool:
+	return true
+
+
+func command_move_to_voxel(v: Voxel) -> void:
+	if v == null:
+		return
+
+	# Any manual order switches out of AUTO
+	set_control_mode(ControlMode.MANUAL)
+
+	# Build BFS path on surface
+	var start_key := _key_from_world(global_position)
+	var goal_key := _key_from_voxel(v)
+
+	var new_path := _bfs_path(start_key, goal_key)
+	if new_path.is_empty():
+		# fallback: direct move if pathing fails
+		_set_direct_target(_world_point_on_voxel(v))
+		return
+
+	_path = new_path
+	_path_i = 0
+	_has_target = true
+	_target_pos = _world_point_on_voxel(_path[_path_i])
+
+
+func command_stop() -> void:
+	_path.clear()
+	_path_i = 0
+	_has_target = false
+	velocity = Vector3.ZERO
+	move_and_slide()
+
+
+func _set_direct_target(p: Vector3) -> void:
+	_path.clear()
+	_path_i = 0
+	_has_target = true
+	_target_pos = p
+
+
+func _physics_process(delta: float) -> void:
+	# Keep body on top of terrain
+	var desired_y := _terrain_cap_y_at(global_position) + ground_offset
+	global_position.y = lerp(global_position.y, desired_y, clamp(delta * height_lerp_speed, 0.0, 1.0))
+
+	rotation.x = 0.0
+	rotation.z = 0.0
+
+	if not _has_target:
+		velocity = Vector3.ZERO
+		move_and_slide()
+		return
+
+	var to := _target_pos - global_position
+	to.y = 0.0
+	var dist := to.length()
+
+	if dist <= arrive_distance:
+		# Advance along path if we have one
+		if not _path.is_empty():
+			_path_i += 1
+			if _path_i < _path.size():
+				_target_pos = _world_point_on_voxel(_path[_path_i])
+				return
+			else:
+				# finished path
+				_path.clear()
+				_path_i = 0
+
+		_has_target = false
+		velocity = Vector3.ZERO
+		move_and_slide()
+		reached_target.emit()
+		return
+
+	var dir: Vector3 = to / max(dist, 0.0001)
+	velocity = dir * move_speed
+	move_and_slide()
+
+
+# ----------------------------
+# BFS PATHFINDING ON SURFACE
+# ----------------------------
+
+func _key_from_voxel(v: Voxel) -> Vector2i:
+	# Assumes your surface_layer is keyed by axial (q,r) or offset (col,row)
+	# If your Voxel already stores its key, use that instead.
+	# Fallback: derive key from its world position.
+	return _key_from_world(Vector3(v.world_position.x, 0, v.world_position.z))
+
+
+func _key_from_world(p: Vector3) -> Vector2i:
+	# reuse your existing pick functions (you already have these in your villager.gd)
+	if WorldMap.is_map_staggered:
+		return _pick_offset_hex_xz(p)
+	return _pick_axial_hex_xz(p)
+
+
+func _world_point_on_voxel(v: Voxel) -> Vector3:
+	var cap_y := float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)
+	return Vector3(v.world_position.x, cap_y, v.world_position.z)
+
+
+func _bfs_path(start: Vector2i, goal: Vector2i) -> Array[Voxel]:
+	if start == goal:
+		var vv: Variant = WorldMap.surface_layer.get(goal)
+		return vv == [] if null else [vv]
+
+	var frontier: Array[Vector2i] = [start]
+	var came_from := {} # Dictionary<Vector2i, Vector2i>
+	came_from[start] = start
+
+	while not frontier.is_empty():
+		var cur: Vector2i = frontier.pop_front()
+		if cur == goal:
+			break
+
+		for nb in _neighbors(cur):
+			if came_from.has(nb):
+				continue
+
+			var nv: Voxel = WorldMap.surface_layer.get(nb)
+			if nv == null:
+				continue
+
+			# Optional block checks (uncomment if your Voxel has these properties)
+			# if nv.occupier != null: continue
+			# if nv.building_node != null: continue
+
+			came_from[nb] = cur
+			frontier.append(nb)
+
+	if not came_from.has(goal):
+		return []
+
+	# reconstruct
+	var out: Array[Voxel] = []
+	var step: Vector2i = goal
+	while step != start:
+		var vx: Voxel = WorldMap.surface_layer.get(step)
+		if vx != null:
+			out.push_front(vx)
+		step = came_from[step]
+	# include start? usually not needed
+	return out
+
+
+func _neighbors(k: Vector2i) -> Array[Vector2i]:
+	# If staggered, surface_layer key is offset (col,row) in odd-q layout (matches your _pick_offset_hex_xz)
+	if WorldMap.is_map_staggered:
+		var col := k.x
+		var row := k.y
+		var odd := (col & 1)
+
+		# convert offset -> axial
+		var q := col
+		var r := row - int((col - odd) / 2)
+
+		var axial := _axial_neighbors(Vector2i(q, r))
+
+		# axial -> offset
+		var out: Array[Vector2i] = []
+		for a in axial:
+			var cq := a.x
+			var cr := a.y
+			var codd := (cq & 1)
+			var orow := cr + int((cq - codd) / 2)
+			out.append(Vector2i(cq, orow))
+		return out
+
+	# axial keys
+	return _axial_neighbors(k)
+
+
+func _axial_neighbors(a: Vector2i) -> Array[Vector2i]:
+	var q := a.x
+	var r := a.y
+	return [
+		Vector2i(q + 1, r),
+		Vector2i(q - 1, r),
+		Vector2i(q, r + 1),
+		Vector2i(q, r - 1),
+		Vector2i(q + 1, r - 1),
+		Vector2i(q - 1, r + 1),
+	]
+###################################################
 
 func place_on_voxel(v: Voxel) -> void:
 	occupied_voxel = v
@@ -110,7 +311,7 @@ func pickup_log_with_animation(log: LogPickup) -> bool:
 	return true
 
 
-func _physics_process(delta: float) -> void:
+"""func _physics_process(delta: float) -> void:
 	# Keep body on top of terrain
 	var desired_y := _terrain_cap_y_at(global_position) + ground_offset
 	global_position.y = lerp(global_position.y, desired_y, clamp(delta * height_lerp_speed, 0.0, 1.0))
@@ -138,7 +339,7 @@ func _physics_process(delta: float) -> void:
 	
 	var dir: Vector3 = to / max(dist, 0.0001)
 	velocity = dir * move_speed
-	move_and_slide()
+	move_and_slide()"""
 
 
 # auto working
@@ -156,6 +357,10 @@ func stop_auto_work() -> void:
 
 func _auto_work_loop(resource_root: Node3D) -> void:
 	while _auto_running and is_inside_tree():
+		if control_mode != ControlMode.AUTO:
+			await get_tree().process_frame
+			continue
+
 		if not auto_work_enabled:
 			await get_tree().create_timer(0.3).timeout
 			continue
@@ -223,15 +428,15 @@ func _do_chop_and_haul(tree: TreeCluster, resource_root: Node3D) -> void:
 		return
 	
 	# Pick up all logs (your animation already handles reserve + collect)
-	for log in logs:
-		if not is_instance_valid(log):
+	for log_thingy in logs:
+		if not is_instance_valid(log_thingy):
 			continue
 		
 		# optional: walk to it before pickup
-		move_to_world(log.global_position)
+		move_to_world(log_thingy.global_position)
 		await await_reach_target()
 		
-		await pickup_log_with_animation(log)
+		await pickup_log_with_animation(log_thingy)
 
 	# Deliver to Town Center
 	if WorldMap.town_center_voxel != null:
@@ -245,15 +450,6 @@ func _do_chop_and_haul(tree: TreeCluster, resource_root: Node3D) -> void:
 		
 		WorldMap.wood_logs += carrying_logs
 		carrying_logs = 0
-
-
-func can_receive_move_commands() -> bool:
-	return true
-
-
-func command_move(dest: Vector3) -> void:
-	move_to_world(dest)
-
 
 
 func _terrain_cap_y_at(world_pos: Vector3) -> float:
