@@ -59,7 +59,6 @@ const ROT_STEP := deg_to_rad(30.0)
 var active_building_id: StringName = &""			# replacing hardcoded scenes
 
 var _task_running: bool = false
-var _reached_conn_unit: Unit = null
 
 var _open_workshop: BuilderWorkshop = null
 
@@ -182,11 +181,6 @@ func _select_unit_from_collider(col: Object) -> void:
 		n = n.get_parent()"""
 
 
-func _on_selected_unit_reached_target() -> void:
-	# Only hide the movement cursor (keep selection ring on unit)
-	hide_cursor(unit_cursor)
-
-
 func raycast_at_mouse(origin, end) -> HitData:
 	var query := PhysicsRayQueryParameters3D.create(origin, end)
 	query.collide_with_bodies = true
@@ -225,14 +219,6 @@ func deselect():
 	hide_cursor(voxel_cursor)
 	hide_cursor(unit_cursor)
 	unit_moves.clear()
-	
-	if _reached_conn_unit != null and is_instance_valid(_reached_conn_unit):
-		if _reached_conn_unit.has_signal("reached_target"):
-			var cb := Callable(self, "_on_selected_unit_reached_target")
-			if _reached_conn_unit.is_connected("reached_target", cb):
-				_reached_conn_unit.disconnect("reached_target", cb)
-	_reached_conn_unit = null
-
 	
 	_unbind_selected_unit()
 	#selected_unit = null
@@ -390,21 +376,29 @@ func _handle_right_click(voxel_hit: HitData) -> void:
 		_open_workshop = null
 		return
 	
-	if selected_unit != null and is_instance_valid(selected_unit):
-		if voxel_hit == null:
-			return
-		var v := _voxel_from_hit(voxel_hit)
-		if v == null:
-			return
-		
-		if selected_unit.can_receive_move_commands():
-			selected_unit.command_move_to_voxel(v)
-			
-			# show cursor at destination now (it will hide when reached_target fires)
-			var cap_y := _voxel_cap_y(v)
-			move_cursor(unit_cursor, Vector3(v.world_position.x, cap_y, v.world_position.z))
-			unit_cursor.visible = true
-			animate_cursor(unit_cursor)
+	# must have a voxel target
+	if voxel_hit == null:
+		return
+	
+	var v := _voxel_from_hit(voxel_hit)
+	if v == null:
+		return
+	
+	var cap_y := _voxel_cap_y(v)
+	var dest := Vector3(v.world_position.x, cap_y, v.world_position.z)
+	
+	# IMPORTANT: Unit base may not declare move_to_world(), so guard with has_method
+	"""if selected_unit.has_method("move_to_world"):
+		print("move command given")
+		selected_unit.call("move_to_world", dest)
+		move_cursor(unit_cursor, dest)
+		animate_cursor(unit_cursor)"""
+	if selected_unit.can_receive_move_commands():
+		selected_unit.command_move(dest)
+		animate_cursor(unit_cursor)
+		move_cursor(unit_cursor, dest)
+	else:
+		push_warning("Selected unit has no move_to_world(): %s" % [selected_unit])
 
 
 func _bind_selected_unit(u: Unit) -> void:
@@ -432,6 +426,11 @@ func _unbind_selected_unit() -> void:
 			selected_unit.reached_target.disconnect(_on_selected_unit_reached_target)
 
 	selected_unit = null
+
+
+func _on_selected_unit_reached_target() -> void:
+	# Only hide if we still have a selected unit (and it didn't get replaced)
+	hide_cursor(unit_cursor)
 
 
 func _voxel_cap_y(v: Voxel) -> float:
