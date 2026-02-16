@@ -45,6 +45,7 @@ var active_tool: build_tool = build_tool.NONE
 
 var _cursor_tweens: Dictionary = {}
 var _cursor_base_scale: Dictionary = {}
+var selected_units: Array[Unit] = []
 
 var ghost: Node3D = null
 var ghost_voxel: Voxel = null
@@ -373,11 +374,15 @@ func _handle_right_click(voxel_hit: HitData) -> void:
 	var dest := Vector3(v.world_position.x, cap_y, v.world_position.z)
 	
 	# IMPORTANT: Unit base may not declare move_to_world(), so guard with has_method
-	if selected_unit.has_method("move_to_world"):
+	"""if selected_unit.has_method("move_to_world"):
 		print("move command given")
 		selected_unit.call("move_to_world", dest)
 		move_cursor(unit_cursor, dest)
+		animate_cursor(unit_cursor)"""
+	if selected_unit.can_receive_move_commands():
+		selected_unit.command_move(dest)
 		animate_cursor(unit_cursor)
+		move_cursor(unit_cursor, dest)
 	else:
 		push_warning("Selected unit has no move_to_world(): %s" % [selected_unit])
 

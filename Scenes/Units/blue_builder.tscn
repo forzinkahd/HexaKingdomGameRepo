@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dfycpudt7m77k" path="res://Scenes/Units/blue_builder.gd" id="1_0ylji"]
 [ext_resource type="PackedScene" uid="uid://41qrh6gcveqa" path="res://Assets/Meshes/Units/BlueUnits/unit_blue_accent.gltf" id="2_fnqfa"]
 [ext_resource type="PackedScene" uid="uid://4fr2mxo1wonl" path="res://Assets/Meshes/Units/NeutralUnits/hammer.gltf" id="3_ihjkx"]
+[ext_resource type="PackedScene" uid="uid://8irxkykbxe13" path="res://Assets/voxel_cursor.glb" id="4_ihjkx"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fnqfa"]
 radius = 0.067871094
@@ -23,3 +24,7 @@ transform = Transform3D(-3.090862e-08, 3.090862e-08, 1, 0.70710677, 0.70710677, 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=743740710]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16821289, 0)
 shape = SubResource("CapsuleShape3D_fnqfa")
+
+[node name="voxel_cursor" parent="." unique_id=405807831 instance=ExtResource("4_ihjkx")]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+visible = false

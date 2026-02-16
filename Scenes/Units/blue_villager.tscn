@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ckdpxga5dy0dw" path="res://Scenes/Units/villager.gd" id="1_kko5t"]
 [ext_resource type="PackedScene" uid="uid://41qrh6gcveqa" path="res://Assets/Meshes/Units/BlueUnits/unit_blue_accent.gltf" id="2_sh04b"]
+[ext_resource type="PackedScene" uid="uid://8irxkykbxe13" path="res://Assets/voxel_cursor.glb" id="3_urku7"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_urku7"]
 radius = 0.07861328
@@ -20,3 +21,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15673828, 0)
 shape = SubResource("CapsuleShape3D_urku7")
 
 [node name="Visual" type="Node3D" parent="." unique_id=1408642472]
+
+[node name="SelectionRing" parent="." unique_id=405807831 instance=ExtResource("3_urku7")]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+visible = false

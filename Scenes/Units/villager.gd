@@ -247,8 +247,13 @@ func _do_chop_and_haul(tree: TreeCluster, resource_root: Node3D) -> void:
 		carrying_logs = 0
 
 
-"""func _cap_y(v: Voxel) -> float:
-	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)"""
+func can_receive_move_commands() -> bool:
+	return true
+
+
+func command_move(dest: Vector3) -> void:
+	move_to_world(dest)
+
 
 
 func _terrain_cap_y_at(world_pos: Vector3) -> float:
