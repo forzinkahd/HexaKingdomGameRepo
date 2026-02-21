@@ -447,6 +447,10 @@ func _spawn_padding(chunk: Chunk) -> void:
 				chunk.add_child(pad)
 
 
+func refresh_overlay_at(chunk: Chunk, v: Voxel) -> void:
+	_update_overlay_for_voxel(chunk, v)
+
+
 func _update_overlay_for_voxel(chunk: Chunk, v: Voxel) -> void:
 	var key := v.grid_position_xz
 
