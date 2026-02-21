@@ -84,11 +84,12 @@ stretch_mode = 4
 
 [node name="Builder" type="Node" parent="." unique_id=1283482510]
 
-[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer")]
+[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer", "overlay_visuals")]
 script = ExtResource("3_davhy")
 settings = ExtResource("4_58wc8")
 object_placer = NodePath("../ObjectPlacer")
 world_theme = ExtResource("5_7rq2r")
+overlay_visuals = NodePath("../OverlayVisuals")
 
 [node name="ObjectPlacer" type="Node" parent="Builder" unique_id=1196252014]
 script = ExtResource("9_p13dw")
@@ -135,8 +136,10 @@ placed_root = NodePath("../../PlacedObjects")
 construction_site_scene = ExtResource("24_leul7")
 building_placer = NodePath("../BuildingPlacer")
 
-[node name="OverlayVisuals" type="Node" parent="Builder" unique_id=1887200495]
+[node name="OverlayVisuals" type="Node" parent="Builder" unique_id=1887200495 node_paths=PackedStringArray("overlay_root")]
 script = ExtResource("25_wp4mh")
+theme = ExtResource("5_7rq2r")
+overlay_root = NodePath("../../PlacedObjects")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

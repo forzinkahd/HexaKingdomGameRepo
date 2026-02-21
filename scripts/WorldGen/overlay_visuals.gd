@@ -8,6 +8,7 @@ var _road_nodes: Dictionary = {}  # Vector2i -> Node3D
 var _river_nodes: Dictionary = {} # Vector2i -> Node3D
 
 func refresh_voxel(v: Voxel) -> void:
+	#print("refresh_voxel overlay=", v.overlay, " road_mask=", v.road_mask, " river_mask=", v.river_mask)
 	if v == null:
 		return
 	if theme == null:
@@ -88,7 +89,7 @@ func _update_overlay_transform(node: Node3D, v: Voxel, is_road: bool) -> void:
 	var y := float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5) + 0.02
 	node.position = Vector3(v.world_position.x, y, v.world_position.z)
 
-	var mask := 0 #v.road_mask if is_road else v.river_mask
+	var mask := v.road_mask if is_road else v.river_mask
 	node.rotation.y = _overlay_yaw_from_mask(mask)
 
 
@@ -113,3 +114,21 @@ func _remove(store: Dictionary, key: Vector2i) -> void:
 		if n != null and is_instance_valid(n):
 			n.queue_free()
 		store.erase(key)
+
+# Debug
+func debug_spawn_one(road_scene: PackedScene, river_scene: PackedScene, pos: Vector3) -> void:
+	if overlay_root == null:
+		push_warning("OverlayVisuals.overlay_root not assigned")
+		return
+
+	if road_scene != null:
+		var r := road_scene.instantiate() as Node3D
+		r.position = pos + Vector3(-2, 0.1, 0)
+		overlay_root.add_child(r)
+		print("Spawned debug road at ", r.global_position)
+
+	if river_scene != null:
+		var w := river_scene.instantiate() as Node3D
+		w.position = pos + Vector3(2, 0.1, 0)
+		overlay_root.add_child(w)
+		print("Spawned debug river at ", w.global_position)

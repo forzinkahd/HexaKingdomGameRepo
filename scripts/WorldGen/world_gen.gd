@@ -7,10 +7,13 @@ extends Node
 @onready var interaction_tracker: Node3D = $"../Interaction_tracker"
 @onready var chunks: Node3D = $"../../Chunks"
 @export var world_theme: WorldTheme
-
+@export var overlay_visuals: OverlayVisuals		# mainly debug
 #UI
 @onready var label: RichTextLabel = $"../../Control/VBoxContainer/RichTextLabel"
 
+
+var _vg: VoxelGenerator
+var _chunk: Chunk
 
 ## Starting point: Generate a random seed, create the tiles, place POI's
 func _ready() -> void:
@@ -41,22 +44,133 @@ func generate_world():
 	var voxels = mapper.calculate_map_positions()
 	interval["Calculate Map Positions -- "] = Time.get_ticks_msec()
 
-	var vg = VoxelGenerator.new()
-	vg.theme = world_theme				# 1.2.2026
-	var new_chunk = vg.generate_chunk(voxels, interval)
-	chunks.add_child(new_chunk)
-	new_chunk.init_chunk()
+	_vg = VoxelGenerator.new()
+	_vg.theme = world_theme
+	_chunk = _vg.generate_chunk(voxels, interval)
+	chunks.add_child(_chunk)
+	_chunk.init_chunk()
 	interval["Create Voxel Mesh -- "] = Time.get_ticks_msec()
 	#print("World theme is: ", world_theme)
 	
 	print_generation_results(starttime, interval)
 	interaction_tracker.init()
 	
-	_debug_spawn_overlay_examples(new_chunk)		# debug
+	#_debug_spawn_overlay_examples(new_chunk)		# debug
 	#Debugger.draw_voxel_dictionary(WorldMap.surface_layer)
 
+### Begin Debug ###
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("debug_spawn_overlays"):
+		_debug_spawn_road_and_river()
 
-func _debug_spawn_overlay_examples(chunk: Chunk) -> void:
+func _debug_spawn_road_and_river() -> void:
+	if overlay_visuals == null:
+		push_warning("overlay_visuals not assigned")
+		return
+
+	var road_start := _find_any_surface_voxel(func(v: Voxel) -> bool:
+		return v != null and v.can_place_road()
+	)
+	if road_start == null:
+		push_warning("No road_start found")
+		return
+	
+	var y := float(road_start.height_units) * (settings.voxel_height * 0.5) + 0.02
+	overlay_visuals.debug_spawn_one(
+		world_theme.road_variants[0],   # pick any index you KNOW is populated
+		world_theme.river_variants[0],
+		Vector3(road_start.world_position.x, y, road_start.world_position.z)
+	)
+
+
+	# pick a river tile far enough away
+	var river_start := _find_any_surface_voxel(func(v: Voxel) -> bool:
+		return v != null and v.can_place_river() and v.grid_position_xz.distance_to(road_start.grid_position_xz) > 6
+	)
+	if river_start == null:
+		push_warning("No river_start found")
+		return
+
+	_place_overlay_line(road_start, Voxel.Overlay.ROAD, 3)
+	_place_overlay_line(river_start, Voxel.Overlay.RIVER, 3)
+
+
+func _find_any_surface_voxel(pred: Callable) -> Voxel:
+	for key in WorldMap.surface_layer.keys():
+		var v: Voxel = WorldMap.surface_layer[key]
+		if pred.call(v):
+			return v
+	return null
+
+
+func _place_overlay_line(start: Voxel, overlay: int, length: int) -> void:
+	var cur := start
+	for i in range(length):
+		if cur == null:
+			break
+		
+		if overlay == Voxel.Overlay.ROAD and not cur.can_place_road():
+			break
+		if overlay == Voxel.Overlay.RIVER and not cur.can_place_river():
+			break
+		
+		cur.overlay = overlay
+		# recompute masks for cur + neighbors
+		_recalc_overlay_masks_around(cur, overlay)
+		
+		# refresh tile CAP replacements (roads/rivers are full caps)
+		_vg.refresh_overlay_at(_chunk, cur)
+		for n in WorldMap.get_tile_neighbors_surface(cur):
+			_vg.refresh_overlay_at(_chunk, n)
+		
+		# step to neighbor direction 1 (east-ish)
+		cur = _neighbor_surface(cur, 1)
+
+
+func _neighbor_surface(v: Voxel, dir_index: int) -> Voxel:
+	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+	var nk := v.grid_position_xz + dirs[dir_index]
+	return WorldMap.surface_layer.get(nk)
+
+
+func _recalc_overlay_masks_around(center: Voxel, overlay: int) -> void:
+	_recalc_overlay_mask(center, overlay)
+
+	var dirs := VoxelData.neighbor_dirs_for_col(center.grid_position_xz.x)
+	for i in range(6):
+		var nk := center.grid_position_xz + dirs[i]
+		var n: Voxel = WorldMap.surface_layer.get(nk)
+		if n != null:
+			_recalc_overlay_mask(n, overlay)
+
+
+func _recalc_overlay_mask(v: Voxel, overlay: int) -> void:
+	var mask := 0
+	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+
+	for i in range(6):
+		var nk := v.grid_position_xz + dirs[i]
+		var n: Voxel = WorldMap.surface_layer.get(nk)
+		if n == null:
+			continue
+
+		if overlay == Voxel.Overlay.ROAD:
+			if v.overlay == Voxel.Overlay.ROAD and n.overlay == Voxel.Overlay.ROAD:
+				mask |= (1 << i)
+		elif overlay == Voxel.Overlay.RIVER:
+			if v.overlay == Voxel.Overlay.RIVER and n.overlay == Voxel.Overlay.RIVER:
+				mask |= (1 << i)
+
+	if overlay == Voxel.Overlay.ROAD:
+		v.road_mask = mask
+	else:
+		v.river_mask = mask
+
+
+### End Debug ###
+
+
+"""func _debug_spawn_overlay_examples(chunk: Chunk) -> void:
 	var vg: VoxelGenerator = chunk.get_meta("voxel_generator")
 	if vg == null:
 		push_warning("No voxel_generator meta on chunk.")
@@ -85,6 +199,8 @@ func _debug_spawn_overlay_examples(chunk: Chunk) -> void:
 
 	# RIVER: make a 3-tile line
 	_place_overlay_line(chunk, vg, river_start, Voxel.Overlay.RIVER, 3)
+
+
 
 
 func _find_any_surface_voxel(pred: Callable) -> Voxel:
@@ -172,7 +288,7 @@ func _recalc_overlay_mask(v: Voxel, overlay: int) -> void:
 	if overlay == Voxel.Overlay.ROAD:
 		v.road_mask = mask
 	elif overlay == Voxel.Overlay.RIVER:
-		v.river_mask = mask
+		v.river_mask = mask"""
 
 
 

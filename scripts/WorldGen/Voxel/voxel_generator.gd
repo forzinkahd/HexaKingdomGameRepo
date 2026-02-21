@@ -361,6 +361,39 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		chunk.add_child(cap)
 		_cap_by_xz[v.grid_position_xz] = cap
 
+# Replace caps with the roads or rivers
+func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
+	var key: Vector2i = v.grid_position_xz
+	var old_cap: Node3D = _cap_by_xz.get(key)
+
+	# remove old cap
+	if old_cap != null and is_instance_valid(old_cap):
+		var pos := old_cap.position
+		var rot := old_cap.rotation
+		old_cap.queue_free()
+
+		if new_scene == null:
+			_cap_by_xz.erase(key)
+			return
+
+		# spawn new cap (replacement)
+		var inst := new_scene.instantiate() as Node3D
+		inst.position = pos
+		inst.rotation = rot
+		chunk.add_child(inst)
+		_cap_by_xz[key] = inst
+		return
+
+	# if no old cap existed, just spawn at computed tile cap position
+	if new_scene == null:
+		return
+
+	var half_step_h := settings.voxel_height * 0.5
+	var cap_y := float(v.height_units) * half_step_h
+	var inst2 := new_scene.instantiate() as Node3D
+	inst2.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+	chunk.add_child(inst2)
+	_cap_by_xz[key] = inst2
 
 
 func _spawn_columns(chunk: Chunk) -> void:
@@ -448,7 +481,40 @@ func _spawn_padding(chunk: Chunk) -> void:
 
 
 func refresh_overlay_at(chunk: Chunk, v: Voxel) -> void:
-	_update_overlay_for_voxel(chunk, v)
+	_apply_cap_variant_for_overlay(chunk, v)
+
+
+func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
+	if theme == null:
+		return
+
+	# no overlay -> restore normal terrain cap
+	if v.overlay == Voxel.Overlay.NONE:
+		_replace_cap_at(chunk, v, _top_scene_for_voxel_type(v.type))
+		return
+
+	var is_road := v.overlay == Voxel.Overlay.ROAD
+	var mask := v.road_mask if is_road else v.river_mask
+
+	var letter := VoxelData.variant_letter_from_mask(mask)
+	var idx: int = (
+		VoxelData.ROAD_LETTER_TO_INDEX[letter]
+		if is_road
+		else VoxelData.RIVER_LETTER_TO_INDEX[letter]
+	)
+
+	var variants: Array[PackedScene] = theme.road_variants if is_road else theme.river_variants
+	if idx < 0 or idx >= variants.size():
+		push_warning("Overlay cap idx out of range letter=%s idx=%s size=%s" % [letter, idx, variants.size()])
+		return
+
+	var scene: PackedScene = variants[idx]
+	_replace_cap_at(chunk, v, scene)
+
+	# rotate the replacement cap
+	var cap: Node3D = _cap_by_xz.get(v.grid_position_xz)
+	if cap != null and is_instance_valid(cap):
+		cap.rotation.y = _overlay_yaw_from_mask(mask)
 
 
 func _update_overlay_for_voxel(chunk: Chunk, v: Voxel) -> void:
