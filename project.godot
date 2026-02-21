@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 VoxelData="*uid://duchb7ruk2kp0"
 WorldMap="*uid://b8pokn1c3247p"
 Debugger="*uid://b1i7ck5sadr06"
+OverlaySys="*uid://cg6wcnqemlktg"
 
 [display]
 

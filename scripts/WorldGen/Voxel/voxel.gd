@@ -1,5 +1,8 @@
 class_name Voxel
 
+enum Overlay { NONE, ROAD, RIVER }
+var overlay: Overlay = Overlay.NONE
+
 var grid_position_xyz : Vector3i
 var grid_position_xz : Vector2i
 var world_position : Vector3
@@ -25,6 +28,16 @@ var building_rotation_y: float = 0.0
 
 # future proof NatResources slot
 var resource_id: StringName = &""
+
+# connectivity bitmasks, 6 bits (one per side)
+# bit i == 1 means "connected on side i"
+var road_mask: int = 0
+var river_mask: int = 0
+
+# movement / placement flags
+var walkable: bool = true
+var move_cost: float = 1.0  # later: road cheaper, mud higher, etc.
+
 
 func has_resource() -> bool:
 	return resource_id != &""
@@ -53,4 +66,27 @@ func can_place_building() -> bool:
 		return false
 	#if water:
 	#	return false
+	return true
+
+
+func has_road() -> bool:
+	return overlay == Overlay.ROAD
+
+
+func has_river() -> bool:
+	return overlay == Overlay.RIVER
+
+
+func can_place_road() -> bool:
+	if buffer: return false
+	if has_building(): return false
+	if has_resource(): return false
+	if water: return false
+	if overlay == Overlay.RIVER: return false
+	return true
+
+
+func can_place_river() -> bool:
+	if has_building(): return false
+	if overlay == Overlay.ROAD: return false
 	return true

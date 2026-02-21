@@ -25,6 +25,12 @@ func place_on_voxel(v: Voxel) -> void:
 		global_position = Vector3(v.world_position.x, _cap_y(v) + ground_offset, v.world_position.z)
 
 
+func command_move_to_voxel(v: Voxel) -> void:
+	if v == null: return
+	var dest := Vector3(v.world_position.x, _cap_y(v) + ground_offset, v.world_position.z)
+	command_move(dest)
+
+
 func leave_tile() -> void:
 	if occupied_voxel != null:
 		occupied_voxel.occupier = null

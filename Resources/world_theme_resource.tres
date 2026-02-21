@@ -9,9 +9,37 @@
 [ext_resource type="PackedScene" uid="uid://rt1qpmhcyumk" path="res://Scenes/TerrainVoxels/tile_base_mountain_foundation_bottom.tscn" id="4_dmiqk"]
 [ext_resource type="PackedScene" uid="uid://byphhysv82hgg" path="res://Scenes/TerrainVoxels/tile_base_mountain_b.tscn" id="5_ckmn6"]
 [ext_resource type="PackedScene" uid="uid://byhc0yq1qpn5n" path="res://Scenes/TerrainVoxels/tile_base_mountain_c.tscn" id="6_dmiqk"]
+[ext_resource type="PackedScene" uid="uid://c5lcx0gbg0nx7" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_a.tscn" id="9_hic5v"]
+[ext_resource type="PackedScene" uid="uid://cgueanc0upb5b" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_a.tscn" id="9_nfbn7"]
 [ext_resource type="PackedScene" uid="uid://co5lj142ldel1" path="res://Scenes/NatureResources/obj_base_tree_small.tscn" id="10_0ye04"]
+[ext_resource type="PackedScene" uid="uid://bbr8mgh2fr1af" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_b.tscn" id="10_g0hk2"]
+[ext_resource type="PackedScene" uid="uid://c5hcoig6qpj14" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_b.tscn" id="10_ygtr0"]
+[ext_resource type="PackedScene" uid="uid://cf0hyf8cjvpxb" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_c.tscn" id="11_1svpa"]
+[ext_resource type="PackedScene" uid="uid://cwrg5x7tvae8u" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_c.tscn" id="11_57cfd"]
 [ext_resource type="PackedScene" uid="uid://chdi3bv783s30" path="res://Scenes/NatureResources/obj_base_tree_medium.tscn" id="11_ef15h"]
+[ext_resource type="PackedScene" uid="uid://p34xm6i5najt" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_d.tscn" id="12_5ccbd"]
 [ext_resource type="PackedScene" uid="uid://3dr0erw1lk5u" path="res://Scenes/NatureResources/obj_base_tree_large.tscn" id="12_61onh"]
+[ext_resource type="PackedScene" uid="uid://c1olmq2yp8bfw" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_d.tscn" id="12_sma3h"]
+[ext_resource type="PackedScene" uid="uid://birmyfq37gih4" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_e.tscn" id="13_7jrbf"]
+[ext_resource type="PackedScene" uid="uid://x80gh0iniotx" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_e.tscn" id="13_e5sdi"]
+[ext_resource type="PackedScene" uid="uid://2506yl1hg01i" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_f.tscn" id="14_bapqs"]
+[ext_resource type="PackedScene" uid="uid://bym2uh7duk4c0" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_f.tscn" id="14_ttff6"]
+[ext_resource type="PackedScene" uid="uid://byh3td86jrqor" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_g.tscn" id="15_7g8g1"]
+[ext_resource type="PackedScene" uid="uid://clte08jibl22m" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_g.tscn" id="15_ho3vv"]
+[ext_resource type="PackedScene" uid="uid://vp00oyqar3hr" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_h.tscn" id="16_j3e3m"]
+[ext_resource type="PackedScene" uid="uid://c52cmxsmd6wo3" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_h.tscn" id="16_xyrth"]
+[ext_resource type="PackedScene" uid="uid://cgxhhyc6mdook" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_i.tscn" id="17_lbpeh"]
+[ext_resource type="PackedScene" uid="uid://cvv7r20ad4lrs" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_i.tscn" id="17_t13c0"]
+[ext_resource type="PackedScene" uid="uid://cmskvex2r2rxf" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_j.tscn" id="18_647gl"]
+[ext_resource type="PackedScene" uid="uid://dm5126jwh6equ" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_j.tscn" id="18_740v2"]
+[ext_resource type="PackedScene" uid="uid://djfjonxu21w1y" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_k.tscn" id="19_4p7u4"]
+[ext_resource type="PackedScene" uid="uid://7adsf74hs8mp" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_k.tscn" id="19_5xrpn"]
+[ext_resource type="PackedScene" uid="uid://cev43v23iev5e" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_l.tscn" id="20_ngx7d"]
+[ext_resource type="PackedScene" uid="uid://b2dfy0yi5cbdu" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_l.tscn" id="20_rdt4p"]
+[ext_resource type="PackedScene" uid="uid://dqgs2edsqegea" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_m.tscn" id="21_evukd"]
+[ext_resource type="PackedScene" uid="uid://cgbxys2neq374" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_curvy.tscn" id="21_nkx4u"]
+[ext_resource type="PackedScene" uid="uid://bl3thhwqrv74t" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_crossing_a.tscn" id="22_7v408"]
+[ext_resource type="PackedScene" uid="uid://dxjgc68upvuc1" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_crossing_b.tscn" id="23_kvgjy"]
 
 [resource]
 script = ExtResource("1_n8hqk")
@@ -26,4 +54,6 @@ mountain_scenes = Array[PackedScene]([ExtResource("4_87rje"), ExtResource("5_ckm
 mountain_foundation_scene = ExtResource("4_ckmn6")
 mountain_foundation_bottom_scene = ExtResource("4_dmiqk")
 tree_cluster_scenes = Array[PackedScene]([ExtResource("10_0ye04"), ExtResource("11_ef15h"), ExtResource("12_61onh")])
+road_variants = Array[PackedScene]([ExtResource("9_hic5v"), ExtResource("10_g0hk2"), ExtResource("11_1svpa"), ExtResource("12_sma3h"), ExtResource("13_7jrbf"), ExtResource("14_bapqs"), ExtResource("15_7g8g1"), ExtResource("16_xyrth"), ExtResource("17_lbpeh"), ExtResource("18_740v2"), ExtResource("19_5xrpn"), ExtResource("20_rdt4p"), ExtResource("21_evukd")])
+river_variants = Array[PackedScene]([ExtResource("9_nfbn7"), ExtResource("10_ygtr0"), ExtResource("11_57cfd"), ExtResource("12_5ccbd"), ExtResource("13_e5sdi"), ExtResource("14_ttff6"), ExtResource("15_ho3vv"), ExtResource("16_j3e3m"), ExtResource("17_t13c0"), ExtResource("18_647gl"), ExtResource("19_4p7u4"), ExtResource("20_ngx7d"), ExtResource("21_nkx4u"), ExtResource("22_7v408"), ExtResource("23_kvgjy")])
 metadata/_custom_type_script = "uid://bfdmepmayfg4u"

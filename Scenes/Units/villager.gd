@@ -1,7 +1,7 @@
 extends Unit
 class_name Villager
 
-#signal reached_target
+#signal reached_target		# inherited from Unit class
 
 @export var move_speed: float = 2.5
 @export var arrive_distance: float = 0.25

@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://dal880y43rf11" path="res://scripts/WorldGen/object_placer.gd" id="9_p13dw"]
 [ext_resource type="Script" uid="uid://dxy4k3g3kax0c" path="res://scripts/pathfinder.gd" id="10_0b4my"]
 [ext_resource type="PackedScene" path="res://scenes/Cursors/hexagon_cursor.tscn" id="10_6pl24"]
-[ext_resource type="PackedScene" path="res://scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
+[ext_resource type="PackedScene" uid="uid://ckoa1wdbhfgii" path="res://Scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
@@ -26,6 +26,7 @@
 [ext_resource type="Script" uid="uid://x168kplgypou" path="res://scripts/hud.gd" id="22_wukv0"]
 [ext_resource type="Script" uid="uid://cfcvw2va2hsk6" path="res://scripts/Managers/construction_manager.gd" id="23_4v654"]
 [ext_resource type="PackedScene" uid="uid://cna658c6oodob" path="res://Scenes/Kingdom/Buildings/construction_site.tscn" id="24_leul7"]
+[ext_resource type="Script" uid="uid://l61lh7mn7ain" path="res://scripts/WorldGen/overlay_visuals.gd" id="25_wp4mh"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -133,6 +134,9 @@ script = ExtResource("23_4v654")
 placed_root = NodePath("../../PlacedObjects")
 construction_site_scene = ExtResource("24_leul7")
 building_placer = NodePath("../BuildingPlacer")
+
+[node name="OverlayVisuals" type="Node" parent="Builder" unique_id=1887200495]
+script = ExtResource("25_wp4mh")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

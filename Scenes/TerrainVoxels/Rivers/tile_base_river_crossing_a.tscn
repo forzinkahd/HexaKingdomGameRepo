@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bl3thhwqrv74t"]
+
+[ext_resource type="PackedScene" uid="uid://bmwk3s3j3c3rc" path="res://Assets/Meshes/Terrain/rivers/hex_river_crossing_A.gltf" id="1_b5cef"]
+
+[node name="Tile_BaseRiverCrossing_A" type="Node3D" unique_id=307470964]
+
+[node name="hex_river_crossing_A2" parent="." unique_id=263531704 instance=ExtResource("1_b5cef")]

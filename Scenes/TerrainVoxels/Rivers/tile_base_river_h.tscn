@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://vp00oyqar3hr"]
+
+[ext_resource type="PackedScene" uid="uid://dao4rdq5ns0pg" path="res://Assets/Meshes/Terrain/rivers/hex_river_H.gltf" id="1_hsxuo"]
+
+[node name="Tile_BaseRiver_H" type="Node3D" unique_id=829630882]
+
+[node name="hex_river_H2" parent="." unique_id=851830992 instance=ExtResource("1_hsxuo")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 0, 0)

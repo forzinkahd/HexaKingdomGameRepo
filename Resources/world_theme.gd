@@ -31,3 +31,21 @@ class_name WorldTheme
 @export var forest_min_height_units: int = 1
 @export var forest_max_height_units: int = 20
 @export var forest_avoid_mountains: bool = true
+
+@export_category("Overlays")
+@export var road_variants: Array[PackedScene] = []
+@export var river_variants: Array[PackedScene] = []
+
+
+func road_scene(letter: String) -> PackedScene:
+	var idx: int = VoxelData.ROAD_LETTER_TO_INDEX.get(letter, -1)
+	if idx < 0 or idx >= road_variants.size():
+		return null
+	return road_variants[idx]
+
+
+func river_scene(letter: String) -> PackedScene:
+	var idx: int = VoxelData.RIVER_LETTER_TO_INDEX.get(letter, -1)
+	if idx < 0 or idx >= river_variants.size():
+		return null
+	return river_variants[idx]

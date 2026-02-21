@@ -7,6 +7,10 @@ var settings : GenerationSettings
 var surface_voxels : Array[Voxel]
 var theme: WorldTheme					# 1.2.2026
 
+var _road_by_xz: Dictionary = {}
+var _river_by_xz: Dictionary = {}
+var _has_mountain_by_xz: Dictionary = {}
+
 const ATLAS_RES   = Vector2i(512, 512)	# full atlas resolution in pixels
 const TILE_SIZE   = Vector2i(16, 16)	# usable area of one tile
 const TILE_STRIDE = Vector2i(18, 18)	# includes padding
@@ -75,6 +79,8 @@ func prepared_chunk(surface) -> Chunk:
 	chunk.mesh = surface.commit()
 	chunk.voxels = map
 	chunk.material_override = settings.material
+	
+	chunk.set_meta("voxel_generator", self)		# debug
 	
 	var surface_tiles: Array[Voxel] = _build_surface_from_map()
 	surface_voxels = surface_tiles
@@ -441,7 +447,91 @@ func _spawn_padding(chunk: Chunk) -> void:
 				chunk.add_child(pad)
 
 
-var _has_mountain_by_xz: Dictionary = {}
+func _update_overlay_for_voxel(chunk: Chunk, v: Voxel) -> void:
+	var key := v.grid_position_xz
+
+	# remove existing overlay nodes if overlay type changed
+	if v.overlay != Voxel.Overlay.ROAD and _road_by_xz.has(key):
+		var n: Node = _road_by_xz[key]
+		if n != null: n.queue_free()
+		_road_by_xz.erase(key)
+
+	if v.overlay != Voxel.Overlay.RIVER and _river_by_xz.has(key):
+		var n2: Node = _river_by_xz[key]
+		if n2 != null: n2.queue_free()
+		_river_by_xz.erase(key)
+
+	var half_step_h := settings.voxel_height * 0.5
+	var y := float(v.height_units) * half_step_h + 0.02
+
+	if v.overlay == Voxel.Overlay.ROAD:
+		_apply_overlay_variant(chunk, v, true, Vector3(v.world_position.x, y, v.world_position.z))
+
+	if v.overlay == Voxel.Overlay.RIVER:
+		_apply_overlay_variant(chunk, v, false, Vector3(v.world_position.x, y, v.world_position.z))
+
+
+func _apply_overlay_variant(chunk: Chunk, v: Voxel, is_road: bool, pos: Vector3) -> void:
+	if theme == null:
+		return
+
+	var key := v.grid_position_xz
+	var mask := v.road_mask if is_road else v.river_mask
+
+	# pick variant index by mask
+	var letter := VoxelData.variant_letter_from_mask(mask)
+	var idx: int = (VoxelData.ROAD_LETTER_TO_INDEX[letter] if is_road else VoxelData.RIVER_LETTER_TO_INDEX[letter])
+
+	var variants := theme.road_variants if is_road else theme.river_variants
+	if idx < 0 or idx >= variants.size():
+		push_warning("Overlay variant idx out of range (%s) idx=%s size=%s" % [letter, idx, variants.size()])
+		return
+
+	var dict := _road_by_xz if is_road else _river_by_xz
+	var existing: Node3D = dict.get(key)
+
+	# if exists but wrong variant, replace
+	var desired_scene: PackedScene = variants[idx]
+	var desired_path := desired_scene.resource_path
+
+	if existing != null and is_instance_valid(existing):
+		# if you want strict match by scene path, store it in metadata
+		var existing_path := str(existing.get_meta("variant_path", ""))
+		if existing_path != desired_path:
+			existing.queue_free()
+			dict.erase(key)
+			existing = null
+
+	# spawn if missing
+	if existing == null:
+		var inst := desired_scene.instantiate() as Node3D
+		inst.position = pos
+		inst.set_meta("variant_path", desired_path)
+		chunk.add_child(inst)
+		dict[key] = inst
+		existing = inst
+
+	# rotation so the same A/B/C... can align with which edges are connected
+	existing.rotation.y = _overlay_yaw_from_mask(mask)
+
+
+func _overlay_yaw_from_mask(mask: int) -> float:
+	# Find the first set bit (0..5) and rotate so that bit aligns with your base mesh direction.
+	# Assumption: your meshes are authored with "connection on edge 0" as their default orientation.
+	# If not, add an offset (see below).
+	var first := -1
+	for i in range(6):
+		if (mask & (1 << i)) != 0:
+			first = i
+			break
+
+	if first == -1:
+		return 0.0
+
+	var step := TAU / 6.0
+	var offset_steps := 0 # change this if your asset's "edge 0" isn't Godot's edge 0
+	return float(first + offset_steps) * step
+
 
 func _spawn_mountains(chunk: Chunk) -> void:
 	if theme == null:

@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c1olmq2yp8bfw"]
+
+[ext_resource type="PackedScene" uid="uid://c6bm1yupt1rpg" path="res://Assets/Meshes/Terrain/roads/hex_road_D.gltf" id="1_4kmk1"]
+
+[node name="Tile_BaseRoad_D" type="Node3D" unique_id=298674280]
+
+[node name="hex_road_D2" parent="." unique_id=2113652415 instance=ExtResource("1_4kmk1")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 0, 0)

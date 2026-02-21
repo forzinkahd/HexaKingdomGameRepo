@@ -1,7 +1,7 @@
 extends Node3D
 
-enum mode {SELECT, BUILD}
-var interact_mode : mode = mode.SELECT
+
+
 @export var voxel_cursor_scene : PackedScene
 @export var unit_cursor_scene : PackedScene
 @export var main_camera : Camera3D
@@ -39,9 +39,12 @@ var initialized = false
 @onready var train_builder_button: Button = $"../../HUD/WorkshopPanel/TrainBuilderButton"
 @onready var close_workshop_button: Button = $"../../HUD/WorkshopPanel/CloseWorkshopButton"
 
-
-enum build_tool { NONE, TOWN_CENTER }
+enum mode {SELECT, BUILD}
+var interact_mode : mode = mode.SELECT
+enum build_tool { NONE, TOWN_CENTER, ROAD, RIVER }
 var active_tool: build_tool = build_tool.NONE
+enum ControlMode { WORLD, UNIT_COMMAND, BUILD }
+var control_mode := ControlMode.WORLD
 
 var _cursor_tweens: Dictionary = {}
 var _cursor_base_scale: Dictionary = {}
@@ -387,13 +390,9 @@ func _handle_right_click(voxel_hit: HitData) -> void:
 	var cap_y := _voxel_cap_y(v)
 	var dest := Vector3(v.world_position.x, cap_y, v.world_position.z)
 	
-	# IMPORTANT: Unit base may not declare move_to_world(), so guard with has_method
-	"""if selected_unit.has_method("move_to_world"):
-		print("move command given")
-		selected_unit.call("move_to_world", dest)
-		move_cursor(unit_cursor, dest)
-		animate_cursor(unit_cursor)"""
 	if selected_unit.can_receive_move_commands():
+		push_warning("old command_move used here, change commented")
+		#selected_unit.command_move_to_voxel(v)
 		selected_unit.command_move(dest)
 		animate_cursor(unit_cursor)
 		move_cursor(unit_cursor, dest)

@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://cgbxys2neq374"]
+
+[ext_resource type="PackedScene" uid="uid://ccm3spvq3qx7t" path="res://Assets/Meshes/Terrain/rivers/hex_river_A_curvy.gltf" id="1_das3h"]
+
+[node name="Tile_BaseRiverCurvy" type="Node3D" unique_id=1550095197]
+
+[node name="hex_river_A_curvy2" parent="." unique_id=72700535 instance=ExtResource("1_das3h")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 0, 0)
