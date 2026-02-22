@@ -144,11 +144,10 @@ script = ExtResource("25_wp4mh")
 theme = ExtResource("5_7rq2r")
 overlay_root = NodePath("../../PlacedObjects")
 
-[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera", "ghost_parent")]
+[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera")]
 script = ExtResource("26_y0yaw")
 camera = NodePath("../../CameraParent/Camera3D")
 world_theme = ExtResource("5_7rq2r")
-ghost_parent = NodePath("../../PlacedObjects")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

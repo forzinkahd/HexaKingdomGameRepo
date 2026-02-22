@@ -384,38 +384,42 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 	var old_cap: Node3D = _cap_by_xz.get(key)
 
 	# remove old cap
-	if old_cap != null and is_instance_valid(old_cap):
-		var pos := old_cap.position
-		var rot := old_cap.rotation
+	var pos: Vector3
+	var rot: Vector3
+	var have_old := old_cap != null and is_instance_valid(old_cap)
+
+	if have_old:
+		pos = old_cap.position
+		rot = old_cap.rotation
 		old_cap.queue_free()
+	else:
+		var half_step_h := settings.voxel_height * 0.5
+		var cap_y := float(v.height_units) * half_step_h
+		pos = Vector3(v.world_position.x, cap_y, v.world_position.z)
+		rot = Vector3.ZERO
 
-		if new_scene == null:
-			_cap_by_xz.erase(key)
-			return
-
-		# spawn new cap (replacement)
-		var inst := new_scene.instantiate() as Node3D
-		inst.position = pos
-		inst.rotation = rot
-		_tag_tile_nodes(inst, v.grid_position_xz)
-		chunk.add_child(inst)
-		_cap_by_xz[key] = inst
-		return
-
-	# if no old cap existed, just spawn at computed tile cap position
+	# clear record if no replacement requested
 	if new_scene == null:
+		_cap_by_xz.erase(key)
+		# if we're restoring later, this will be set in _spawn_surface_tiles or _apply_cap_variant_for_overlay
+		v.is_base_grass_cap = false
 		return
 
-	var half_step_h := settings.voxel_height * 0.5
-	var cap_y := float(v.height_units) * half_step_h
-	
-	v.is_base_grass_cap = false
-	
-	var inst2 := new_scene.instantiate() as Node3D
-	inst2.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
-	_tag_tile_nodes(inst2, v.grid_position_xz)
-	chunk.add_child(inst2)
-	_cap_by_xz[key] = inst2
+	# spawn replacement cap
+	var inst := new_scene.instantiate() as Node3D
+	if inst == null:
+		_cap_by_xz.erase(key)
+		v.is_base_grass_cap = false
+		return
+
+	inst.position = pos
+	inst.rotation = rot
+	_tag_tile_nodes(inst, v.grid_position_xz)
+	chunk.add_child(inst)
+	_cap_by_xz[key] = inst
+
+	# update "is base grass cap" flag deterministically
+	v.is_base_grass_cap = (new_scene == theme.grass_top_scene)
 
 
 func _spawn_columns(chunk: Chunk) -> void:
@@ -756,6 +760,39 @@ func _spawn_forests(chunk: Chunk) -> void:
 
 		# mark tile unplaceable for villages/units if you want
 		#v.placeable = false
+
+
+# -------------------------------------------------------------------
+# PREVIEW CAP API (used by RoadTool to show a "real tile" preview)
+# -------------------------------------------------------------------
+
+var _preview_keys: Dictionary = {} # Vector2i -> bool
+
+func preview_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
+	if v == null:
+		return
+	_preview_keys[v.grid_position_xz] = true
+	_replace_cap_at(chunk, v, new_scene)
+
+
+func preview_cap_rotate(key: Vector2i, yaw: float) -> void:
+	var cap: Node3D = _cap_by_xz.get(key)
+	if cap != null and is_instance_valid(cap):
+		cap.rotation.y = yaw
+
+
+func clear_preview_cap(chunk: Chunk, v: Voxel) -> void:
+	if v == null:
+		return
+
+	var key := v.grid_position_xz
+	if not _preview_keys.has(key):
+		return
+	_preview_keys.erase(key)
+
+	# restore to normal terrain cap (based on voxel.type)
+	var scene := _top_scene_for_voxel_type(v.type)
+	_replace_cap_at(chunk, v, scene)
 
 
 func _tile_seed(v: Voxel, salt: int) -> int:
