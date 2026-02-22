@@ -26,6 +26,7 @@ var initialized = false
 @export var unit_manager: UnitManager
 @export var task_manager: TaskManager
 @export var resource_root: Node3D
+@export var road_tool: RoadTool
 
 @onready var build_panel: Panel = $"../../HUD/BuildPanel"
 @onready var town_center_button: Button = $"../../HUD/BuildPanel/TownCenterButton"
@@ -98,8 +99,8 @@ func init():
 		workshop_panel.visible = false
 	)
 	workshop_panel.visible = false
-	
 	_set_build_panel_visible(false)
+	place_road_button.pressed.connect(_on_place_road_pressed)
 	
 	initialized = true
 
@@ -553,6 +554,14 @@ func _on_cancel_pressed() -> void:
 	_cancel_ghost()
 	active_tool = build_tool.NONE
 	_set_build_panel_visible(false)
+
+
+func _on_place_road_pressed() -> void:
+	if road_tool == null:
+		return
+	if selected_voxel == null:
+		return
+	road_tool.begin_from_voxel(selected_voxel)
 
 
 func _on_confirm_pressed() -> void:

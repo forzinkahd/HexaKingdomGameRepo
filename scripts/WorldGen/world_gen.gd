@@ -56,17 +56,26 @@ func generate_world():
 	print_generation_results(starttime, interval)
 	interaction_tracker.init()
 	
+	# Configure road tool runtime references
+	if road_tool != null:
+		road_tool.world_theme = world_theme
+		road_tool.configure_runtime(_vg, _chunk)
+	else:
+		push_warning("world_gen: road_tool not assigned")
 	#_debug_spawn_overlay_examples(new_chunk)		# debug
 	#Debugger.draw_voxel_dictionary(WorldMap.surface_layer)
 
 ### Begin Debug ###
 func _unhandled_input(event: InputEvent) -> void:
+	# Optional convenience hotkey: start road tool from any valid grass tile
 	if event.is_action_pressed("toggle_road_tool"):
-		if road_tool != null:
-			road_tool.set_active(true)
-	
-	if event.is_action_pressed("debug_spawn_overlays"):
-		_debug_spawn_road_and_river()
+		if road_tool == null:
+			return
+		var v := _find_any_surface_voxel(func(x: Voxel) -> bool:
+			return x != null and x.type == VoxelData.voxel_type.GRASS and x.can_place_road()
+		)
+		if v != null:
+			road_tool.begin_from_voxel(v)
 
 func _debug_spawn_road_and_river() -> void:
 	if overlay_visuals == null:

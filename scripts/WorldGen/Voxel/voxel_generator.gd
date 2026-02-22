@@ -354,7 +354,9 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var scene := _top_scene_for_voxel_type(v.type)
 		if scene == null:
 			continue
-
+		
+		v.is_base_grass_cap = (scene == theme.grass_top_scene)
+		
 		var cap := scene.instantiate() as Node3D
 		var cap_y := float(v.height_units) * half_step_h
 		cap.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
@@ -366,17 +368,15 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 func _tag_tile_nodes(root: Node, xz: Vector2i) -> void:
 	if root == null:
 		return
-
-	# Tag root too (nice for debugging)
-	if root is Node:
-		root.set_meta("xz", xz)
-
+	
+	root.set_meta("xz", xz)
+	
 	# Tag any collision objects so raycasts can read it
 	for n in root.get_children():
 		_tag_tile_nodes(n, xz)
-
+	
 	if root is CollisionObject3D:
-		root.set_meta("xz", xz)
+		(root as CollisionObject3D).set_meta("xz", xz)
 
 # Replace caps with the roads or rivers
 func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
@@ -408,6 +408,9 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 
 	var half_step_h := settings.voxel_height * 0.5
 	var cap_y := float(v.height_units) * half_step_h
+	
+	v.is_base_grass_cap = false
+	
 	var inst2 := new_scene.instantiate() as Node3D
 	inst2.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
 	_tag_tile_nodes(inst2, v.grid_position_xz)
@@ -509,7 +512,9 @@ func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
 
 	# no overlay -> restore normal terrain cap
 	if v.overlay == Voxel.Overlay.NONE:
+		var scene := _top_scene_for_voxel_type(v.type)
 		_replace_cap_at(chunk, v, _top_scene_for_voxel_type(v.type))
+		v.is_base_grass_cap = (scene == theme.grass_top_scene)
 		return
 
 	var is_road := v.overlay == Voxel.Overlay.ROAD

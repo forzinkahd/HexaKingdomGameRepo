@@ -13,6 +13,7 @@ var buffer : bool = false
 var water : bool = false
 var air_probability : float = 0
 var surface_voxel := false
+var is_base_grass_cap: bool = false
 
 var neighbors = []
 var placeable = true			# see voxel_generator.gd

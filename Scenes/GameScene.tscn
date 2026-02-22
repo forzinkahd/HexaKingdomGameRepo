@@ -100,7 +100,7 @@ script = ExtResource("9_p13dw")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root", "road_tool")]
 script = ExtResource("12_tt8b8")
 voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
@@ -113,6 +113,7 @@ building_placer = NodePath("../BuildingPlacer")
 unit_manager = NodePath("../UnitManager")
 task_manager = NodePath("../TaskManager")
 resource_root = NodePath("../../NatResources")
+road_tool = NodePath("../RoadTool")
 
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root", "construction_manager")]
 script = ExtResource("18_gipt1")
@@ -143,11 +144,11 @@ script = ExtResource("25_wp4mh")
 theme = ExtResource("5_7rq2r")
 overlay_root = NodePath("../../PlacedObjects")
 
-[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera", "overlay_visuals", "overlay_root")]
+[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera", "ghost_parent")]
 script = ExtResource("26_y0yaw")
 camera = NodePath("../../CameraParent/Camera3D")
-overlay_visuals = NodePath("../OverlayVisuals")
-overlay_root = NodePath("../../PlacedObjects")
+world_theme = ExtResource("5_7rq2r")
+ghost_parent = NodePath("../../PlacedObjects")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
