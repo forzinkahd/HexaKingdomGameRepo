@@ -38,6 +38,7 @@ var initialized = false
 @onready var workshop_panel: Panel = $"../../HUD/WorkshopPanel"
 @onready var train_builder_button: Button = $"../../HUD/WorkshopPanel/TrainBuilderButton"
 @onready var close_workshop_button: Button = $"../../HUD/WorkshopPanel/CloseWorkshopButton"
+@onready var place_road_button: Button = $"../../HUD/BuildPanel/PlaceRoadButton"
 
 enum mode {SELECT, BUILD}
 var interact_mode : mode = mode.SELECT

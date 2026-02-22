@@ -8,6 +8,7 @@ extends Node
 @onready var chunks: Node3D = $"../../Chunks"
 @export var world_theme: WorldTheme
 @export var overlay_visuals: OverlayVisuals		# mainly debug
+@export var road_tool: RoadTool
 #UI
 @onready var label: RichTextLabel = $"../../Control/VBoxContainer/RichTextLabel"
 
@@ -60,6 +61,10 @@ func generate_world():
 
 ### Begin Debug ###
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_road_tool"):
+		if road_tool != null:
+			road_tool.set_active(true)
+	
 	if event.is_action_pressed("debug_spawn_overlays"):
 		_debug_spawn_road_and_river()
 
@@ -76,11 +81,11 @@ func _debug_spawn_road_and_river() -> void:
 		return
 	
 	var y := float(road_start.height_units) * (settings.voxel_height * 0.5) + 0.02
-	overlay_visuals.debug_spawn_one(
+	"""overlay_visuals.debug_spawn_one(
 		world_theme.road_variants[0],   # pick any index you KNOW is populated
 		world_theme.river_variants[0],
 		Vector3(road_start.world_position.x, y, road_start.world_position.z)
-	)
+	)"""
 
 
 	# pick a river tile far enough away

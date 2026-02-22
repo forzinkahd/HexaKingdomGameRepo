@@ -27,6 +27,7 @@
 [ext_resource type="Script" uid="uid://cfcvw2va2hsk6" path="res://scripts/Managers/construction_manager.gd" id="23_4v654"]
 [ext_resource type="PackedScene" uid="uid://cna658c6oodob" path="res://Scenes/Kingdom/Buildings/construction_site.tscn" id="24_leul7"]
 [ext_resource type="Script" uid="uid://l61lh7mn7ain" path="res://scripts/WorldGen/overlay_visuals.gd" id="25_wp4mh"]
+[ext_resource type="Script" uid="uid://b20mtxxmymy3g" path="res://scripts/Tools/road_tool.gd" id="26_y0yaw"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -84,12 +85,13 @@ stretch_mode = 4
 
 [node name="Builder" type="Node" parent="." unique_id=1283482510]
 
-[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer", "overlay_visuals")]
+[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer", "overlay_visuals", "road_tool")]
 script = ExtResource("3_davhy")
 settings = ExtResource("4_58wc8")
 object_placer = NodePath("../ObjectPlacer")
 world_theme = ExtResource("5_7rq2r")
 overlay_visuals = NodePath("../OverlayVisuals")
+road_tool = NodePath("../RoadTool")
 
 [node name="ObjectPlacer" type="Node" parent="Builder" unique_id=1196252014]
 script = ExtResource("9_p13dw")
@@ -139,6 +141,12 @@ building_placer = NodePath("../BuildingPlacer")
 [node name="OverlayVisuals" type="Node" parent="Builder" unique_id=1887200495 node_paths=PackedStringArray("overlay_root")]
 script = ExtResource("25_wp4mh")
 theme = ExtResource("5_7rq2r")
+overlay_root = NodePath("../../PlacedObjects")
+
+[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera", "overlay_visuals", "overlay_root")]
+script = ExtResource("26_y0yaw")
+camera = NodePath("../../CameraParent/Camera3D")
+overlay_visuals = NodePath("../OverlayVisuals")
 overlay_root = NodePath("../../PlacedObjects")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
@@ -234,6 +242,14 @@ offset_top = 400.0
 offset_right = 131.0
 offset_bottom = 432.0
 text = "Rotate right"
+
+[node name="PlaceRoadButton" type="Button" parent="HUD/BuildPanel" unique_id=74775609]
+layout_mode = 0
+offset_left = 156.0
+offset_top = 200.0
+offset_right = 263.0
+offset_bottom = 232.0
+text = "Place Road"
 
 [node name="PopupFounded" type="AcceptDialog" parent="HUD" unique_id=1212512145]
 oversampling_override = 1.0

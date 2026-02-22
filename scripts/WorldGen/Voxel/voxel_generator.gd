@@ -358,8 +358,25 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var cap := scene.instantiate() as Node3D
 		var cap_y := float(v.height_units) * half_step_h
 		cap.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+		_tag_tile_nodes(cap, v.grid_position_xz)
 		chunk.add_child(cap)
 		_cap_by_xz[v.grid_position_xz] = cap
+
+
+func _tag_tile_nodes(root: Node, xz: Vector2i) -> void:
+	if root == null:
+		return
+
+	# Tag root too (nice for debugging)
+	if root is Node:
+		root.set_meta("xz", xz)
+
+	# Tag any collision objects so raycasts can read it
+	for n in root.get_children():
+		_tag_tile_nodes(n, xz)
+
+	if root is CollisionObject3D:
+		root.set_meta("xz", xz)
 
 # Replace caps with the roads or rivers
 func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
@@ -380,6 +397,7 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 		var inst := new_scene.instantiate() as Node3D
 		inst.position = pos
 		inst.rotation = rot
+		_tag_tile_nodes(inst, v.grid_position_xz)
 		chunk.add_child(inst)
 		_cap_by_xz[key] = inst
 		return
@@ -392,6 +410,7 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 	var cap_y := float(v.height_units) * half_step_h
 	var inst2 := new_scene.instantiate() as Node3D
 	inst2.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+	_tag_tile_nodes(inst2, v.grid_position_xz)
 	chunk.add_child(inst2)
 	_cap_by_xz[key] = inst2
 
@@ -599,8 +618,8 @@ func _overlay_yaw_from_mask(mask: int) -> float:
 		return 0.0
 
 	var step := TAU / 6.0
-	var offset_steps := 0 # change this if your asset's "edge 0" isn't Godot's edge 0
-	return float(first + offset_steps) * step
+	const EDGE_OFFSET_STEPS := 1 # change this if your asset's "edge 0" isn't Godot's edge 0
+	return float(first + EDGE_OFFSET_STEPS) * step
 
 
 func _spawn_mountains(chunk: Chunk) -> void:
