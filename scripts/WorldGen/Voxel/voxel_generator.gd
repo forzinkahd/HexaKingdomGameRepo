@@ -417,6 +417,7 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 	_tag_tile_nodes(inst, v.grid_position_xz)
 	chunk.add_child(inst)
 	_cap_by_xz[key] = inst
+	_play_place_bounce(inst, chunk)
 
 	# update "is base grass cap" flag deterministically
 	v.is_base_grass_cap = (new_scene == theme.grass_top_scene)
@@ -629,6 +630,28 @@ func _overlay_yaw_from_mask(mask: int) -> float:
 	var step := TAU / 6.0
 	const EDGE_OFFSET_STEPS := 1 # change this if your asset's "edge 0" isn't Godot's edge 0
 	return float(first + EDGE_OFFSET_STEPS) * step
+
+
+func _play_place_bounce(node: Node3D, chunk: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		return
+	if chunk == null or not is_instance_valid(chunk):
+		return
+	
+	node.scale = Vector3.ONE
+	
+	var tween: Tween = chunk.create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	
+	# Step 1: squish + dip (parallel)
+	tween.tween_property(node, "scale", Vector3(1.1, 0.6, 1.1), 0.16)
+	
+	# Step 2: bounce + rise (parallel)
+	tween.tween_property(node, "scale", Vector3(0.95, 1.15, 0.95), 0.20)
+	
+	# Step 3: settle (parallel)
+	tween.tween_property(node, "scale", Vector3.ONE, 0.14)
 
 
 func _spawn_mountains(chunk: Chunk) -> void:

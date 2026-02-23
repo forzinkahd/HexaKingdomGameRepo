@@ -561,6 +561,7 @@ func _on_place_road_pressed() -> void:
 		return
 	if selected_voxel == null:
 		return
+	hide_cursor(voxel_cursor)
 	road_tool.begin_from_voxel(selected_voxel)
 
 

@@ -18,7 +18,7 @@ var active: bool = false
 var anchor: Voxel = null          # current "front" tile
 var ghost_dir: int = 0            # 0..5 (we keep name for rotation)
 
-const PREVIEW_INDEX: int = 12     # "M" dead-end in road_variants
+const PREVIEW_INDEX: int = 3     # "M" dead-end in road_variants
 
 func configure_runtime(_vg: VoxelGenerator, _chunk: Chunk) -> void:
 	vg = _vg
@@ -81,11 +81,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_active(false)
 		return
 
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	"""if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var v := _pick_surface_voxel()
 		if v == null:
 			return
-		try_place_at(v)
+		try_place_at(v)"""
 
 func rotate_left() -> void:
 	ghost_dir = (ghost_dir + 5) % 6
@@ -134,7 +134,7 @@ func try_place_at(v: Voxel) -> void:
 
 # --- Picking ---
 
-func _pick_surface_voxel() -> Voxel:
+"""func _pick_surface_voxel() -> Voxel:
 	if camera == null:
 		return null
 
@@ -163,7 +163,7 @@ func _pick_surface_voxel() -> Voxel:
 	if typeof(key) != TYPE_VECTOR2I:
 		return null
 
-	return WorldMap.surface_layer.get(key)
+	return WorldMap.surface_layer.get(key)"""
 
 # --- Neighbor / mask updates ---
 
