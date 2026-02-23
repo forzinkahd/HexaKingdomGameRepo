@@ -251,6 +251,14 @@ offset_right = 263.0
 offset_bottom = 232.0
 text = "Place Road"
 
+[node name="EditRoadButton" type="Button" parent="HUD/BuildPanel" unique_id=1417050880]
+layout_mode = 0
+offset_left = 156.0
+offset_top = 240.0
+offset_right = 263.0
+offset_bottom = 272.0
+text = "Edit Road"
+
 [node name="PopupFounded" type="AcceptDialog" parent="HUD" unique_id=1212512145]
 oversampling_override = 1.0
 title = "Achievement"

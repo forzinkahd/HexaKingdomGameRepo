@@ -40,6 +40,7 @@ var initialized = false
 @onready var train_builder_button: Button = $"../../HUD/WorkshopPanel/TrainBuilderButton"
 @onready var close_workshop_button: Button = $"../../HUD/WorkshopPanel/CloseWorkshopButton"
 @onready var place_road_button: Button = $"../../HUD/BuildPanel/PlaceRoadButton"
+@onready var edit_road_button: Button = $"../../HUD/BuildPanel/EditRoadButton"
 
 enum mode {SELECT, BUILD}
 var interact_mode : mode = mode.SELECT
@@ -101,6 +102,7 @@ func init():
 	workshop_panel.visible = false
 	_set_build_panel_visible(false)
 	place_road_button.pressed.connect(_on_place_road_pressed)
+	edit_road_button.pressed.connect(_on_edit_road_pressed)
 	
 	initialized = true
 
@@ -268,6 +270,34 @@ func highlight_voxel(hit: HitData):
 		print("Hit voxel is null!")
 		return
 
+	# IMPORTANT: always use canonical surface voxel (overlay lives here)
+	selected_voxel = _surface_voxel(hit_voxel)
+
+	var cap_y := _voxel_cap_y(selected_voxel)
+	var cursor_pos := Vector3(selected_voxel.world_position.x, cap_y, selected_voxel.world_position.z)
+
+	move_cursor(voxel_cursor, cursor_pos)
+	voxel_cursor.visible = true
+	animate_cursor(voxel_cursor)
+
+	if active_tool == build_tool.TOWN_CENTER and selected_voxel != null:
+		_spawn_ghost_on_voxel(selected_voxel)
+
+	if active_tool == build_tool.NONE:
+		_set_build_panel_visible(true)
+"""func highlight_voxel(hit: HitData):
+	selected_unit = null
+	hide_cursor(unit_cursor)
+
+	var hit_chunk: Chunk = _chunk_from_hit(hit.object)
+	if hit_chunk == null:
+		return
+
+	var hit_voxel: Voxel = hit_chunk.voxel_at_point(hit)
+	if hit_voxel == null:
+		print("Hit voxel is null!")
+		return
+
 	selected_voxel = hit_voxel
 
 	var cap_y := _voxel_cap_y(hit_voxel)
@@ -283,7 +313,7 @@ func highlight_voxel(hit: HitData):
 	
 	# If a build tool is not active, just show the build panel for this selected tile
 	if active_tool == build_tool.NONE:
-		_set_build_panel_visible(true)
+		_set_build_panel_visible(true)"""
 
 
 func highlight_unit(unit):
@@ -565,6 +595,22 @@ func _on_place_road_pressed() -> void:
 	road_tool.begin_from_voxel(selected_voxel)
 
 
+func _on_edit_road_pressed() -> void:
+	if road_tool == null:
+		return
+	if selected_voxel == null:
+		push_warning("no road on this tile")
+		return
+	
+	selected_voxel = _surface_voxel(selected_voxel)
+	
+	if selected_voxel.overlay != Voxel.Overlay.ROAD:
+		push_warning("not in overlay")
+		return
+	
+	push_warning("this is a road tile")
+
+
 func _on_confirm_pressed() -> void:
 	if ghost == null or ghost_voxel == null:
 		return
@@ -775,7 +821,15 @@ func _voxel_from_hit(hit: HitData) -> Voxel:
 	var hit_chunk := _chunk_from_hit(hit.object)
 	if hit_chunk == null:
 		return null
-	return hit_chunk.voxel_at_point(hit)
+	return _surface_voxel(hit_chunk.voxel_at_point(hit))
+	"""return hit_chunk.voxel_at_point(hit)"""
+
+
+func _surface_voxel(v: Voxel) -> Voxel:
+	if v == null:
+		return null
+	var sv: Voxel = WorldMap.surface_layer.get(v.grid_position_xz)
+	return sv if sv != null else v
 
 
 func _terrain_cap_y_at(world_xz: Vector3) -> float:

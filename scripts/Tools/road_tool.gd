@@ -18,7 +18,7 @@ var active: bool = false
 var anchor: Voxel = null          # current "front" tile
 var ghost_dir: int = 0            # 0..5 (we keep name for rotation)
 
-const PREVIEW_INDEX: int = 3     # "M" dead-end in road_variants
+const PREVIEW_INDEX: int = 2     # "M" dead-end in road_variants
 
 func configure_runtime(_vg: VoxelGenerator, _chunk: Chunk) -> void:
 	vg = _vg
