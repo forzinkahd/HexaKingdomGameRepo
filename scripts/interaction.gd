@@ -272,7 +272,10 @@ func highlight_voxel(hit: HitData):
 
 	# IMPORTANT: always use canonical surface voxel (overlay lives here)
 	selected_voxel = _surface_voxel(hit_voxel)
-
+	print("xz=", selected_voxel.grid_position_xz,
+	" overlay=", int(selected_voxel.overlay),
+	" road_preview=", selected_voxel.road_preview)
+	
 	var cap_y := _voxel_cap_y(selected_voxel)
 	var cursor_pos := Vector3(selected_voxel.world_position.x, cap_y, selected_voxel.world_position.z)
 
@@ -603,10 +606,12 @@ func _on_edit_road_pressed() -> void:
 		return
 	
 	selected_voxel = _surface_voxel(selected_voxel)
-	
-	if selected_voxel.overlay != Voxel.Overlay.ROAD:
-		push_warning("not in overlay")
+	if not selected_voxel.has_road_or_preview():
+		push_warning("no road on this tile (and no preview)")
 		return
+	#if selected_voxel.overlay != Voxel.Overlay.ROAD:
+		#push_warning("not in overlay")
+		#return
 	
 	push_warning("this is a road tile")
 

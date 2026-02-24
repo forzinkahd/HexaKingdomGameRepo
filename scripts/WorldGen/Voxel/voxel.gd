@@ -70,6 +70,12 @@ func can_place_building() -> bool:
 	return true
 
 
+var road_preview: bool = false
+
+func has_road_or_preview() -> bool:
+	return overlay == Overlay.ROAD or road_preview
+
+
 func has_road() -> bool:
 	return overlay == Overlay.ROAD
 
