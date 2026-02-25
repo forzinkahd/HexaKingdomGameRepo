@@ -4,7 +4,6 @@ class_name TreeCluster
 @export var logs_scene: PackedScene
 @export var logs_count: int = 3
 @export var chop_time: float = 1.5
-
 @export var squish_y: float = 0.82                  # smaller = more squish
 @export var squish_xz: float = 1.10                 # bigger = more bulge
 @export var squish_in_time: float = 0.08
@@ -18,12 +17,15 @@ var is_being_chopped: bool = false
 var _shake_tween: Tween
 var _base_scale: Vector3 = Vector3.ONE
 
+
 func _ready() -> void:
 	if _squish_target != null:
 		_base_scale = _squish_target.scale
 
-func can_harvest() -> bool:
-	return not is_depleted and not is_being_chopped
+
+# ----------------------------------------------
+# ANIMATION
+# ----------------------------------------------
 
 func start_shake() -> void:
 	if _squish_target == null:
@@ -47,6 +49,7 @@ func start_shake() -> void:
 	_shake_tween.tween_property(_squish_target, "scale", _base_scale * 1.03, 0.06)
 	_shake_tween.tween_property(_squish_target, "scale", _base_scale, squish_out_time)
 
+
 func stop_shake() -> void:
 	# don’t early-return if freed; just guard properly
 	if _shake_tween != null and is_instance_valid(_shake_tween):
@@ -55,6 +58,15 @@ func stop_shake() -> void:
 
 	if _squish_target != null and is_instance_valid(_squish_target):
 		_squish_target.scale = _base_scale
+
+
+# ----------------------------------------------
+# HARVESTING
+# ----------------------------------------------
+
+func can_harvest() -> bool:
+	return not is_depleted and not is_being_chopped
+
 
 func harvest_spawn_logs(spawn_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 	if is_depleted:
@@ -81,6 +93,7 @@ func harvest_spawn_logs(spawn_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 	
 	queue_free()
 	return out
+
 
 func chop_and_harvest(resource_root: Node3D, spawn_y: float) -> Array[LogPickup]:
 	if is_depleted:

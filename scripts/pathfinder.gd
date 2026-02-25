@@ -4,6 +4,10 @@ class_name Pathfinder
 @export var highlight_marker : PackedScene
 var markers = []
 
+# =======================================
+# WILL BE REWORKED ONCE ROADS ARE FINISHED 25.02.26
+# =======================================
+
 
 func find_reachable_voxels(start: Voxel, unit: Unit) -> Array[Voxel]:
 	var queue = []

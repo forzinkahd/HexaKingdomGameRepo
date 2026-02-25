@@ -6,32 +6,29 @@ var world_settings : GenerationSettings
 var noise_range : Vector2
 var surface_layer: Dictionary[Vector2i, Voxel] = {}		# Overworking half steps
 
-# protect unique buildings
+
+# -------------------------------------------------------
+# UNIQUE BUILDINGS
+# -------------------------------------------------------
 var town_center_voxel: Voxel = null
 var town_center_node: Node3D = null
-
 var unique_buildings: Dictionary = {} # StringName -> Voxel
 
-# Resource inventory
+
+# -------------------------------------------------------
+# RESOURCE INVENTORY
+# -------------------------------------------------------
 signal wood_changed(new_amount: int)
+
 var wood_logs: int = 0:
 	set(value):
 		wood_logs = value
 		wood_changed.emit(wood_logs)
 
-func has_town_center() -> bool:
-	return town_center_voxel != null and is_instance_valid(town_center_node)
 
-
-func has_unique_building(id: StringName) -> bool:
-	return unique_buildings.has(id)
-
-
-func register_unique_building(id: StringName, v: Voxel) -> void:
-	unique_buildings[id] = v
-
-
-## Construct a dictionary for our 2d top layer of voxels
+# -------------------------------------------------------
+# WORLD MAP
+# -------------------------------------------------------
 func set_map(all_voxels, top_voxels):
 	map_as_dict.clear()
 	surface_layer.clear()
@@ -46,7 +43,9 @@ func clear_map():
 	map_as_dict.clear()
 
 
-## Handy function for finding all neigbors of a voxel
+# ------------------------------------------------------------
+# CHECK TILES
+# ------------------------------------------------------------
 func get_tile_neighbors_planar(voxel : Voxel) -> Array[Voxel]:
 	var neighbors : Array[Voxel] = []
 	var neighbor_positions = VoxelData.HEXAGONAL_NEIGHBOR_DIRECTIONS
@@ -85,3 +84,15 @@ func get_tile_neighbors_surface(voxel: Voxel) -> Array[Voxel]:
 			neighbors.append(surface_layer[nxz])
 
 	return neighbors
+
+
+func has_town_center() -> bool:
+	return town_center_voxel != null and is_instance_valid(town_center_node)
+
+
+func has_unique_building(id: StringName) -> bool:
+	return unique_buildings.has(id)
+
+
+func register_unique_building(id: StringName, v: Voxel) -> void:
+	unique_buildings[id] = v

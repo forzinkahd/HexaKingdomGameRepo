@@ -19,12 +19,12 @@ func get_task_type() -> StringName:
 	return active_task.get("type", &"") as StringName
 
 
+# ----------------------------------------------
+# GET NATRESOURCE
+# ----------------------------------------------
+
 func get_treecluster() -> TreeCluster:
 	return active_task.get("tree") as TreeCluster
-
-
-func get_target_voxel() -> Voxel:
-	return active_task.get("voxel") as Voxel
 
 
 func create_chop_task(tree: TreeCluster, target_voxel: Voxel) -> bool:
@@ -46,3 +46,11 @@ func create_chop_task(tree: TreeCluster, target_voxel: Voxel) -> bool:
 		"voxel": target_voxel
 	}
 	return true
+
+
+# ----------------------------------------------
+# GET WORLD POSITION
+# ----------------------------------------------
+
+func get_target_voxel() -> Voxel:
+	return active_task.get("voxel") as Voxel

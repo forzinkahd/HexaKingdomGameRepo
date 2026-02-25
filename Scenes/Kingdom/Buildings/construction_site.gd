@@ -71,8 +71,3 @@ func add_progress(seconds: float) -> void:
 	
 	if progress > float(_stage) / float(build_stages) and _is_building:
 		_stage += 1
-
-
-"""func _apply_visual_feedback() -> void:
-	var t := progress
-	scale = Vector3.ONE * lerp(0.8, 1.0, t)"""

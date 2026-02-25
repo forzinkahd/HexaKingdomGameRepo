@@ -1,36 +1,31 @@
 extends Unit
 class_name Villager
 
-#signal reached_target		# inherited from Unit class
 
 @export var move_speed: float = 2.5
 @export var arrive_distance: float = 0.25
 @export var pickup_time: float = 0.45
 @export var pickup_lunge_distance: float = 0.12
 @export var height_lerp_speed: float = 14.0
-#@export var ground_offset: float = 0.02
 @export var auto_work_enabled: bool = true
 @export var auto_retry_delay: float = 0.6
 @export var auto_after_task_delay: float = 0.2
 
-var _auto_running: bool = false
 
 @onready var visual: Node3D = $Visual
 
 
 var carrying_logs: int = 0
 var is_busy: bool = false
-#var occupied_voxel: Voxel
-
 var _target_pos: Vector3
 var _has_target := false
 var _moving := false
+var _auto_running: bool = false
 
 
-func place_on_voxel(v: Voxel) -> void:
-	occupied_voxel = v
-	global_position = Vector3(v.world_position.x, _cap_y(v), v.world_position.z)
-
+# -----------------------------------------------------
+# MOVEMENT
+# -----------------------------------------------------
 
 func move_to_world(pos: Vector3) -> void:
 	_target_pos = pos
@@ -42,11 +37,6 @@ func await_reach_target() -> void:
 	if not _moving:
 		return
 	await reached_target
-
-
-func can_carry_more() -> bool:
-	# keep your capacity logic if you have it
-	return true
 
 
 func face_point_yaw(p: Vector3) -> void:
@@ -64,7 +54,55 @@ func face_point_yaw(p: Vector3) -> void:
 	rotation.z = 0.0
 
 
-# works nicely
+func _physics_process(delta: float) -> void:
+	# Keep body on top of terrain
+	var desired_y := _terrain_cap_y_at(global_position) + ground_offset
+	global_position.y = lerp(global_position.y, desired_y, clamp(delta * height_lerp_speed, 0.0, 1.0))
+	
+	# Also hard-lock pitch/roll each frame (prevents any drift from other calls)
+	rotation.x = 0.0
+	rotation.z = 0.0
+	
+	if not _has_target:
+		velocity = Vector3.ZERO
+		move_and_slide()
+		return
+	
+	var to := _target_pos - global_position
+	to.y = 0.0
+	var dist := to.length()
+	
+	if dist <= arrive_distance:
+		_has_target = false
+		_moving = false
+		velocity = Vector3.ZERO
+		move_and_slide()
+		reached_target.emit()
+		return
+	
+	var dir: Vector3 = to / max(dist, 0.0001)
+	velocity = dir * move_speed
+	move_and_slide()
+
+
+func can_receive_move_commands() -> bool:
+	return true
+
+
+func command_move(dest: Vector3) -> void:
+	move_to_world(dest)
+
+
+# ----------------------------------------------------
+# FORAGING
+# ----------------------------------------------------
+
+# NOT IMPLEMENTED YET
+func can_carry_more() -> bool:
+	# keep your capacity logic if you have it
+	return true
+
+
 func pickup_log_with_animation(log: LogPickup) -> bool:
 	if log == null or not is_instance_valid(log):
 		return false
@@ -110,38 +148,6 @@ func pickup_log_with_animation(log: LogPickup) -> bool:
 	return true
 
 
-func _physics_process(delta: float) -> void:
-	# Keep body on top of terrain
-	var desired_y := _terrain_cap_y_at(global_position) + ground_offset
-	global_position.y = lerp(global_position.y, desired_y, clamp(delta * height_lerp_speed, 0.0, 1.0))
-	
-	# Also hard-lock pitch/roll each frame (prevents any drift from other calls)
-	rotation.x = 0.0
-	rotation.z = 0.0
-	
-	if not _has_target:
-		velocity = Vector3.ZERO
-		move_and_slide()
-		return
-	
-	var to := _target_pos - global_position
-	to.y = 0.0
-	var dist := to.length()
-	
-	if dist <= arrive_distance:
-		_has_target = false
-		_moving = false
-		velocity = Vector3.ZERO
-		move_and_slide()
-		reached_target.emit()
-		return
-	
-	var dir: Vector3 = to / max(dist, 0.0001)
-	velocity = dir * move_speed
-	move_and_slide()
-
-
-# auto working
 func start_auto_work(resource_root: Node3D) -> void:
 	if _auto_running:
 		return
@@ -247,13 +253,13 @@ func _do_chop_and_haul(tree: TreeCluster, resource_root: Node3D) -> void:
 		carrying_logs = 0
 
 
-func can_receive_move_commands() -> bool:
-	return true
+# --------------------------------------------------------
+# POSITIONING
+# --------------------------------------------------------
 
-
-func command_move(dest: Vector3) -> void:
-	move_to_world(dest)
-
+func place_on_voxel(v: Voxel) -> void:
+	occupied_voxel = v
+	global_position = Vector3(v.world_position.x, _cap_y(v), v.world_position.z)
 
 
 func _terrain_cap_y_at(world_pos: Vector3) -> float:

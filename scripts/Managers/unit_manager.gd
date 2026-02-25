@@ -5,6 +5,16 @@ class_name UnitManager
 @export var villager_scene: PackedScene
 @export var builder_scene: PackedScene
 
+
+func get_first_villager() -> Villager:
+	if units_root == null:
+		return null
+	for c in units_root.get_children():
+		if c is Villager:
+			return c as Villager
+	return null
+
+
 func spawn_first_villager_at_town_center() -> Villager:
 	if villager_scene == null or units_root == null:
 		return null
@@ -16,15 +26,6 @@ func spawn_first_villager_at_town_center() -> Villager:
 	units_root.add_child(v)
 	v.place_on_voxel(WorldMap.town_center_voxel)
 	return v
-
-
-func get_first_villager() -> Villager:
-	if units_root == null:
-		return null
-	for c in units_root.get_children():
-		if c is Villager:
-			return c as Villager
-	return null
 
 
 func spawn_builder_at_world_pos(pos: Vector3) -> Builder:

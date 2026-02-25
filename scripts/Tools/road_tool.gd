@@ -171,41 +171,7 @@ func try_place_at(v: Voxel) -> void:
 	ghost_dir = 0
 	_apply_preview_cap(anchor)
 
-# --- Picking ---
-
-"""func _pick_surface_voxel() -> Voxel:
-	if camera == null:
-		return null
-
-	var mouse := get_viewport().get_mouse_position()
-	var from := camera.project_ray_origin(mouse)
-	var dir := camera.project_ray_normal(mouse)
-	var to := from + dir * 5000.0
-
-	var params := PhysicsRayQueryParameters3D.create(from, to)
-	params.collide_with_areas = false
-	params.collide_with_bodies = true
-
-	var hit := camera.get_world_3d().direct_space_state.intersect_ray(params)
-	if hit.is_empty():
-		return null
-
-	var col: Object = hit.get("collider")
-	if col == null:
-		return null
-
-	# relies on VoxelGenerator tagging caps/colliders with meta "xz"
-	if not col.has_meta("xz"):
-		return null
-
-	var key: Variant = col.get_meta("xz")
-	if typeof(key) != TYPE_VECTOR2I:
-		return null
-
-	return WorldMap.surface_layer.get(key)"""
-
 # --- Neighbor / mask updates ---
-
 func _is_neighbor(a: Voxel, b: Voxel) -> bool:
 	if a == null or b == null:
 		return false

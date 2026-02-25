@@ -3,7 +3,9 @@ class_name ObjectPlacer
 
 # from Prototype, either rework for props or delete at some point 10.02.2026
 
-
+# ====================================
+# IS THIS STILL IN USE????
+# ====================================
 
 
 # Spawn an object on a tile

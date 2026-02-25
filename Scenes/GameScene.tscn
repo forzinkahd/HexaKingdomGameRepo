@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Cursors/path_overlay.tscn" id="9_6pl24"]
 [ext_resource type="Script" uid="uid://dal880y43rf11" path="res://scripts/WorldGen/object_placer.gd" id="9_p13dw"]
 [ext_resource type="Script" uid="uid://dxy4k3g3kax0c" path="res://scripts/pathfinder.gd" id="10_0b4my"]
-[ext_resource type="PackedScene" uid="uid://cchityj1npp8j" path="res://scenes/Cursors/hexagon_cursor.tscn" id="10_6pl24"]
+[ext_resource type="PackedScene" uid="uid://cchityj1npp8j" path="res://Scenes/Cursors/hexagon_cursor.tscn" id="10_6pl24"]
 [ext_resource type="PackedScene" uid="uid://ckoa1wdbhfgii" path="res://Scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]

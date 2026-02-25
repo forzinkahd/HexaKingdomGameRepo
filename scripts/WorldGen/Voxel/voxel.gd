@@ -2,6 +2,8 @@ class_name Voxel
 
 enum Overlay { NONE, ROAD, RIVER }
 var overlay: Overlay = Overlay.NONE
+var overlay_mask: int = 0
+var overlay_variant_override: int = -1
 
 var grid_position_xyz : Vector3i
 var grid_position_xz : Vector2i
@@ -29,6 +31,9 @@ var building_rotation_y: float = 0.0
 
 # future proof NatResources slot
 var resource_id: StringName = &""
+
+# future proof decoration
+var decoration_id: StringName = &""
 
 # connectivity bitmasks, 6 bits (one per side)
 # bit i == 1 means "connected on side i"

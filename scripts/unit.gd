@@ -40,7 +40,7 @@ func leave_tile() -> void:
 func _cap_y(v: Voxel) -> float:
 	return float(v.height_units) * (WorldMap.world_settings.voxel_height * 0.5)
 
-
+# Overwrite the following in subclasses
 func can_receive_move_commands() -> bool:
 	return false
 

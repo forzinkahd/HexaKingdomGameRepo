@@ -37,6 +37,10 @@ class_name WorldTheme
 @export var river_variants: Array[PackedScene] = []
 
 
+# ----------------------------------------------------------------
+# RETURN FUNCs FOR VARIANT SCENES
+# ----------------------------------------------------------------
+
 func road_scene(letter: String) -> PackedScene:
 	var idx: int = VoxelData.ROAD_LETTER_TO_INDEX.get(letter, -1)
 	if idx < 0 or idx >= road_variants.size():

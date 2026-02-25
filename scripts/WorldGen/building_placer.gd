@@ -6,6 +6,10 @@ class_name BuildingPlacer
 @export var construction_manager: ConstructionManager
 
 
+# =========================================
+# IS THIS STILL IN USE??? can_place() needs rework
+# =========================================
+
 const ID_TOWN_CENTER: StringName = &"town_center"
 
 func get_definition(id: StringName) -> BuildingDefinition:
