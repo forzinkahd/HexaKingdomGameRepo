@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cchityj1npp8j"]
 
-[ext_resource type="PackedScene" uid="uid://bgtl12qswunfg" path="res://assets/Meshes/hexagon_cursor.glb" id="1_upos7"]
-[ext_resource type="Material" uid="uid://x4wrl2po7jer" path="res://assets/Materials/hex_cursor_mat.tres" id="2_x157u"]
+[ext_resource type="PackedScene" uid="uid://bgtl12qswunfg" path="res://Assets/Meshes/hexagon_cursor.glb" id="1_upos7"]
+[ext_resource type="Material" uid="uid://x4wrl2po7jer" path="res://Assets/Materials/hex_cursor_mat.tres" id="2_x157u"]
 [ext_resource type="PackedScene" path="res://assets/voxel_cursor.tscn" id="3_nt0i0"]
 
 [sub_resource type="Animation" id="Animation_iupn8"]

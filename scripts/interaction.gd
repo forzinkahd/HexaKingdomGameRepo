@@ -41,6 +41,9 @@ var initialized = false
 @onready var close_workshop_button: Button = $"../../HUD/WorkshopPanel/CloseWorkshopButton"
 @onready var place_road_button: Button = $"../../HUD/BuildPanel/PlaceRoadButton"
 @onready var edit_road_button: Button = $"../../HUD/BuildPanel/EditRoadButton"
+@onready var rotate_road_right_button: Button = $"../../HUD/BuildPanel/RotateRoadRightButton"
+@onready var rotate_road_left_button: Button = $"../../HUD/BuildPanel/RotateRoadLeftButton"
+
 
 enum mode {SELECT, BUILD}
 var interact_mode : mode = mode.SELECT
@@ -103,6 +106,8 @@ func init():
 	_set_build_panel_visible(false)
 	place_road_button.pressed.connect(_on_place_road_pressed)
 	edit_road_button.pressed.connect(_on_edit_road_pressed)
+	rotate_road_left_button.pressed.connect(func(): _rotate_road(1))
+	rotate_road_right_button.pressed.connect(func(): _rotate_road(-1))
 	
 	initialized = true
 
@@ -482,12 +487,16 @@ func _chunk_from_hit(node: Node) -> Chunk:
 
 func _set_build_panel_visible(on: bool) -> void:
 	build_panel.visible = on
-	# Only enable confirm/rotate when ghost exists
-	confirm_button.disabled = ghost == null
-	rotate_left_button.disabled = ghost == null
-	rotate_right_button.disabled = ghost == null
-	
-	# disable workshop if logs insufficient
+
+	var road_active := (road_tool != null and road_tool.active)
+
+	# confirm/rotate for building ghost OR road tool
+	confirm_button.disabled = (ghost == null and not road_active)
+
+	# keep your existing building rotate buttons tied to building ghost
+	rotate_left_button.disabled = (ghost == null)
+	rotate_right_button.disabled = (ghost == null)
+
 	workshop_button.disabled = WorldMap.wood_logs < 5
 
 
@@ -560,6 +569,17 @@ func _rotate_ghost(dir: int) -> void:
 		return
 	ghost_yaw = wrapf(ghost_yaw + float(dir) * ROT_STEP, -PI, PI)
 	ghost.rotation.y = ghost_yaw
+
+
+func _rotate_road(dir: int) -> void:
+	selected_voxel = _surface_voxel(selected_voxel)
+	if not selected_voxel.has_road_or_preview():
+		push_warning("no road on this tile (and no preview)")
+		return
+	if dir > 0:
+		road_tool.rotate_right()
+	else:
+		road_tool.rotate_left()
 
 
 func _make_node_transparent(n: Node) -> void:
@@ -649,6 +669,10 @@ func _on_confirm_pressed() -> void:
 		push_warning("builder's workshop created, unlock/implement progression")
 
 	active_building_id = &""
+	
+	if road_tool != null and road_tool.active:
+		road_tool.commit_current()
+		return
 
 
 func _cancel_ghost() -> void:

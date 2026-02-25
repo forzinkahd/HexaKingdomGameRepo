@@ -51,6 +51,45 @@ func begin_from_voxel(v: Voxel) -> void:
 	# Show preview using REAL road tile (index 12) without changing overlay state yet
 	_apply_preview_cap(anchor)
 
+
+func commit_current() -> void:
+	# Commit the currently previewed tile as an actual road.
+	if not active:
+		return
+	if vg == null or chunk == null:
+		push_warning("RoadTool: commit_current -> vg/chunk not configured")
+		return
+	if anchor == null:
+		return
+
+	# Always resolve canonical surface voxel
+	var sv: Voxel = WorldMap.surface_layer.get(anchor.grid_position_xz)
+	if sv != null:
+		anchor = sv
+
+	# If it's already a road, nothing to do (but we should clear preview)
+	if anchor.overlay == Voxel.Overlay.ROAD:
+		_clear_preview()
+		return
+
+	# Enforce placement rules (optional but recommended)
+	if not _can_place_on(anchor):
+		return
+
+	# Remove preview (this restores base cap, but we immediately replace it via refresh_overlay_at)
+	_clear_preview()
+
+	# Commit overlay state
+	anchor.overlay = Voxel.Overlay.ROAD
+
+	# Update connectivity + visuals
+	_recalc_road_masks_around(anchor)
+	_refresh_neighborhood(anchor)
+
+	# Optionally end placement mode after confirm
+	set_active(false)
+
+
 func _can_place_on(v: Voxel, is_start: bool = false) -> bool:
 	if v == null:
 		return false
