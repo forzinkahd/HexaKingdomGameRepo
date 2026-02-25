@@ -795,7 +795,6 @@ func preview_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 	if v == null:
 		return
 	_preview_keys[v.grid_position_xz] = true
-	v.road_preview = true
 	_replace_cap_at(chunk, v, new_scene)
 
 
@@ -814,7 +813,6 @@ func clear_preview_cap(chunk: Chunk, v: Voxel) -> void:
 		return
 
 	_preview_keys.erase(key)
-	v.road_preview = false
 
 	# restore to normal terrain cap (based on voxel.type)
 	var scene := _top_scene_for_voxel_type(v.type)

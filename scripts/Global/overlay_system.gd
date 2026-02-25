@@ -1,6 +1,10 @@
 extends Node
 class_name OverlaySystem
 
+# =================================================
+# MIGHT BE REDUNDANT AFTER REFACTOR 25.02.26
+# =================================================
+
 func set_road(v: Voxel, on: bool) -> void:
 	if v == null:
 		return

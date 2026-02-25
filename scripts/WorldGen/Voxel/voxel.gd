@@ -90,6 +90,7 @@ func has_river() -> bool:
 
 
 func can_place_road() -> bool:
+	push_warning("see placement_rules.gd")
 	if buffer: return false
 	if has_building(): return false
 	if has_resource(): return false
@@ -99,6 +100,7 @@ func can_place_road() -> bool:
 
 
 func can_place_river() -> bool:
+	push_warning("see placement_rules.gd")
 	if has_building(): return false
 	if overlay == Overlay.ROAD: return false
 	return true

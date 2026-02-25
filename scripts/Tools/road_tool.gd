@@ -3,6 +3,8 @@ class_name RoadTool
 
 @export_category("Dependencies")
 @export var camera: Camera3D
+@export var placement: PlacementSystem
+@export var preview: PreviewSystem
 @export var world_theme: WorldTheme
 
 # Assign these from world_gen.gd after generation
@@ -17,20 +19,85 @@ var chunk: Chunk = null
 var active: bool = false
 var anchor: Voxel = null          # current "front" tile
 var ghost_dir: int = 0            # 0..5 (we keep name for rotation)
+var preview_variant_index: int = 2     # "M" dead-end in road_variants
 
-const PREVIEW_INDEX: int = 2     # "M" dead-end in road_variants
 
 func configure_runtime(_vg: VoxelGenerator, _chunk: Chunk) -> void:
 	vg = _vg
 	chunk = _chunk
 
-func set_active(on: bool) -> void:
+
+func begin_from_voxel(v: Voxel) -> void:
+	var sv: Variant = WorldMap.surface_layer.get(v.grid_position_xz)
+	if sv == null: return
+	anchor = sv
+	active = true
+	ghost_dir = 0
+	_update_preview()
+
+
+func rotate_right() -> void:
+	ghost_dir = (ghost_dir + 1) % 6
+	_update_preview()
+
+
+func cycle_variant(delta: int) -> void:
+	var n := world_theme.road_variants.size()
+	if n <= 0: return
+	preview_variant_index = (preview_variant_index + delta) % n
+	if preview_variant_index < 0: preview_variant_index += n
+	_update_preview()
+
+
+func commit_current() -> void:
+	if not active or anchor == null: return
+	_clear_preview()
+	if placement != null:
+		placement.set_road(anchor, true, preview_variant_index)
+	active = false
+	anchor = null
+
+
+func cancel() -> void:
+	_clear_preview()
+	active = false
+	anchor = null
+
+
+func _update_preview() -> void:
+	if anchor == null or vg == null or chunk == null: return
+	var step := TAU / 6.0
+	var yaw := float(ghost_dir + 1) * step
+	
+	# visual preview uses generator for now
+	var scene := world_theme.road_variants[preview_variant_index]
+	vg.preview_cap_at(chunk, anchor, scene)
+	vg.preview_cap_rotate(anchor.grid_position_xz, yaw)
+	
+	# store preview state (optional)
+	if preview != null:
+		preview.set_road_preview(anchor.grid_position_xz, preview_variant_index, yaw)
+
+
+func _clear_preview() -> void:
+	if anchor == null or vg == null or chunk == null: return
+	vg.clear_preview_cap(chunk, anchor)
+	if preview != null:
+		preview.clear_preview(anchor.grid_position_xz)
+
+
+
+
+
+# Old stuff before refactor
+
+"""func set_active(on: bool) -> void:
 	active = on
 	if not active:
 		_clear_preview()
-		anchor = null
+		anchor = null"""
 
-func begin_from_voxel(v: Voxel) -> void:
+"""func begin_from_voxel(v: Voxel) -> void:
 	if v == null:
 		return
 
@@ -49,10 +116,10 @@ func begin_from_voxel(v: Voxel) -> void:
 	ghost_dir = 0
 
 	# Show preview using REAL road tile (index 12) without changing overlay state yet
-	_apply_preview_cap(anchor)
+	_apply_preview_cap(anchor)"""
 
 
-func commit_current() -> void:
+"""func commit_current() -> void:
 	# Commit the currently previewed tile as an actual road.
 	if not active:
 		return
@@ -87,10 +154,10 @@ func commit_current() -> void:
 	_refresh_neighborhood(anchor)
 
 	# Optionally end placement mode after confirm
-	set_active(false)
+	set_active(false)"""
 
 
-func _can_place_on(v: Voxel, is_start: bool = false) -> bool:
+"""func _can_place_on(v: Voxel, is_start: bool = false) -> bool:
 	if v == null:
 		return false
 
@@ -104,9 +171,9 @@ func _can_place_on(v: Voxel, is_start: bool = false) -> bool:
 		push_warning("RoadTool: not GRASS-cap at %s (require_grass=true)" % [v.grid_position_xz])
 		return false
 
-	return true
+	return true"""
 
-func _unhandled_input(event: InputEvent) -> void:
+"""func _unhandled_input(event: InputEvent) -> void:
 	if not active:
 		return
 
@@ -118,15 +185,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("ui_cancel"):
 		set_active(false)
-		return
+		return"""
 
-	"""if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var v := _pick_surface_voxel()
-		if v == null:
-			return
-		try_place_at(v)"""
 
-func rotate_left() -> void:
+"""func rotate_left() -> void:
 	ghost_dir = (ghost_dir + 5) % 6
 	# rotate preview cap if we have one
 	_apply_preview_rotation()
@@ -194,7 +256,7 @@ func _recalc_road_mask(v: Voxel) -> void:
 	if v.overlay != Voxel.Overlay.ROAD:
 		v.road_mask = 0
 		return
-
+	
 	var mask := 0
 	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
 	for i in range(6):
@@ -243,4 +305,4 @@ func _clear_preview() -> void:
 	if vg == null or chunk == null or anchor == null:
 		return
 	# restore the normal terrain cap
-	vg.clear_preview_cap(chunk, anchor)
+	vg.clear_preview_cap(chunk, anchor)"""

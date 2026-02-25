@@ -277,9 +277,7 @@ func highlight_voxel(hit: HitData):
 
 	# IMPORTANT: always use canonical surface voxel (overlay lives here)
 	selected_voxel = _surface_voxel(hit_voxel)
-	print("xz=", selected_voxel.grid_position_xz,
-	" overlay=", int(selected_voxel.overlay),
-	" road_preview=", selected_voxel.road_preview)
+	#print("xz=", selected_voxel.grid_position_xz, " overlay=", int(selected_voxel.overlay), " road_preview=", selected_voxel.road_preview)
 	
 	var cap_y := _voxel_cap_y(selected_voxel)
 	var cursor_pos := Vector3(selected_voxel.world_position.x, cap_y, selected_voxel.world_position.z)
@@ -564,7 +562,7 @@ func _spawn_ghost_on_voxel(v: Voxel) -> void:
 	rotate_right_button.disabled = false
 
 
-func _rotate_ghost(dir: int) -> void:
+"""func _rotate_ghost(dir: int) -> void:
 	if ghost == null:
 		return
 	ghost_yaw = wrapf(ghost_yaw + float(dir) * ROT_STEP, -PI, PI)
@@ -579,7 +577,7 @@ func _rotate_road(dir: int) -> void:
 	if dir > 0:
 		road_tool.rotate_right()
 	else:
-		road_tool.rotate_left()
+		road_tool.rotate_left()"""
 
 
 func _make_node_transparent(n: Node) -> void:
@@ -605,7 +603,7 @@ func _make_node_transparent(n: Node) -> void:
 
 func _on_cancel_pressed() -> void:
 	_cancel_ghost()
-	active_tool = build_tool.NONE
+	tool_controller.cancel()
 	_set_build_panel_visible(false)
 
 
@@ -618,7 +616,7 @@ func _on_place_road_pressed() -> void:
 	road_tool.begin_from_voxel(selected_voxel)
 
 
-func _on_edit_road_pressed() -> void:
+"""func _on_edit_road_pressed() -> void:
 	if road_tool == null:
 		return
 	if selected_voxel == null:
@@ -633,10 +631,17 @@ func _on_edit_road_pressed() -> void:
 		#push_warning("not in overlay")
 		#return
 	
-	push_warning("this is a road tile")
+	push_warning("this is a road tile")"""
 
 
 func _on_confirm_pressed() -> void:
+	
+	if ghost != null:
+		_commit_building()
+		return
+	tool_controller.commit()
+	
+	# OLD STUFF
 	if ghost == null or ghost_voxel == null:
 		return
 	if building_placer == null:
