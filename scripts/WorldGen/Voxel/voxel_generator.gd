@@ -531,6 +531,11 @@ func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
 		if is_road
 		else VoxelData.RIVER_LETTER_TO_INDEX[letter]
 	)
+	
+	if is_road and v.road_variant_override < 0:
+		push_warning("road_variant_override problem")
+	if is_road and v.road_variant_override >= 0:
+		idx = clampi(v.road_variant_override, 0, (theme.road_variants.size() -1))
 
 	var variants: Array[PackedScene] = theme.road_variants if is_road else theme.river_variants
 	if idx < 0 or idx >= variants.size():

@@ -27,6 +27,7 @@ var initialized = false
 @export var task_manager: TaskManager
 @export var resource_root: Node3D
 @export var road_tool: RoadTool
+@export var tool_controller: ToolController
 
 @onready var build_panel: Panel = $"../../HUD/BuildPanel"
 @onready var town_center_button: Button = $"../../HUD/BuildPanel/TownCenterButton"
@@ -95,8 +96,8 @@ func init():
 	workshop_button.pressed.connect(_on_workshop_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	rotate_left_button.pressed.connect(func(): _rotate_ghost(1))
-	rotate_right_button.pressed.connect(func(): _rotate_ghost(-1))
+	#rotate_left_button.pressed.connect(func(): _rotate_ghost(1))
+	#rotate_right_button.pressed.connect(func(): _rotate_ghost(-1))
 	train_builder_button.pressed.connect(_on_train_builder_pressed)
 	close_workshop_button.pressed.connect(func():
 		_open_workshop = null
@@ -105,9 +106,16 @@ func init():
 	workshop_panel.visible = false
 	_set_build_panel_visible(false)
 	place_road_button.pressed.connect(_on_place_road_pressed)
-	edit_road_button.pressed.connect(_on_edit_road_pressed)
-	rotate_road_left_button.pressed.connect(func(): _rotate_road(1))
-	rotate_road_right_button.pressed.connect(func(): _rotate_road(-1))
+	#edit_road_button.pressed.connect(_on_edit_road_pressed)
+	rotate_road_left_button.pressed.connect(func():
+		if tool_controller != null:
+			tool_controller.rotate(-1)
+	)
+	
+	rotate_road_right_button.pressed.connect(func():
+		if tool_controller != null:
+			tool_controller.rotate(1)
+	)
 	
 	initialized = true
 
@@ -485,16 +493,14 @@ func _chunk_from_hit(node: Node) -> Chunk:
 
 func _set_build_panel_visible(on: bool) -> void:
 	build_panel.visible = on
-
-	var road_active := (road_tool != null and road_tool.active)
-
-	# confirm/rotate for building ghost OR road tool
+	
+	var road_active := (tool_controller != null and tool_controller.active_tool == road_tool)
 	confirm_button.disabled = (ghost == null and not road_active)
-
+	
 	# keep your existing building rotate buttons tied to building ghost
 	rotate_left_button.disabled = (ghost == null)
 	rotate_right_button.disabled = (ghost == null)
-
+	
 	workshop_button.disabled = WorldMap.wood_logs < 5
 
 
@@ -562,14 +568,14 @@ func _spawn_ghost_on_voxel(v: Voxel) -> void:
 	rotate_right_button.disabled = false
 
 
-"""func _rotate_ghost(dir: int) -> void:
+func _rotate_ghost(dir: int) -> void:
 	if ghost == null:
 		return
 	ghost_yaw = wrapf(ghost_yaw + float(dir) * ROT_STEP, -PI, PI)
 	ghost.rotation.y = ghost_yaw
 
 
-func _rotate_road(dir: int) -> void:
+"""func _rotate_road(dir: int) -> void:
 	selected_voxel = _surface_voxel(selected_voxel)
 	if not selected_voxel.has_road_or_preview():
 		push_warning("no road on this tile (and no preview)")
@@ -608,12 +614,16 @@ func _on_cancel_pressed() -> void:
 
 
 func _on_place_road_pressed() -> void:
-	if road_tool == null:
+	if road_tool == null or selected_voxel == null:
 		return
-	if selected_voxel == null:
-		return
+	
 	hide_cursor(voxel_cursor)
+	
+	if tool_controller != null:
+		tool_controller.set_tool(road_tool)
+	
 	road_tool.begin_from_voxel(selected_voxel)
+	_set_build_panel_visible(true)
 
 
 """func _on_edit_road_pressed() -> void:
@@ -642,7 +652,7 @@ func _on_confirm_pressed() -> void:
 	tool_controller.commit()
 	
 	# OLD STUFF
-	if ghost == null or ghost_voxel == null:
+	"""if ghost == null or ghost_voxel == null:
 		return
 	if building_placer == null:
 		return
@@ -677,7 +687,40 @@ func _on_confirm_pressed() -> void:
 	
 	if road_tool != null and road_tool.active:
 		road_tool.commit_current()
+		return"""
+
+
+func _commit_building() -> void:
+	if ghost == null or ghost_voxel == null:
 		return
+	if building_placer == null:
+		return
+	if active_building_id == &"":
+		return
+
+	var id := active_building_id
+
+	var placed := building_placer.place(id, ghost_voxel, ghost_yaw)
+	if placed == null:
+		push_warning("Cannot place building.")
+		return
+
+	_cancel_ghost()
+	_set_build_panel_visible(false)
+
+	if id == &"town_center":
+		if unit_manager != null:
+			var v := unit_manager.spawn_first_villager_at_town_center()
+			if v != null:
+				v.start_auto_work(resource_root)
+
+		popup_founded.dialog_text = "Congratulations! You founded your kingdom."
+		popup_founded.popup_centered()
+
+	if id == &"builders_workshop":
+		push_warning("builder's workshop created, unlock/implement progression")
+
+	active_building_id = &""
 
 
 func _cancel_ghost() -> void:

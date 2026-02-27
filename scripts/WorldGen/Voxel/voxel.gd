@@ -2,8 +2,9 @@ class_name Voxel
 
 enum Overlay { NONE, ROAD, RIVER }
 var overlay: Overlay = Overlay.NONE
-var overlay_mask: int = 0
-var overlay_variant_override: int = -1
+#var overlay_mask: int = 0
+var road_variant_override: int = -1
+var river_variant_override: int = -1
 
 var grid_position_xyz : Vector3i
 var grid_position_xz : Vector2i

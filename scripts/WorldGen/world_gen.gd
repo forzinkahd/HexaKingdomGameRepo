@@ -9,6 +9,7 @@ extends Node
 @export var world_theme: WorldTheme
 @export var overlay_visuals: OverlayVisuals		# mainly debug
 @export var road_tool: RoadTool
+@export var placement_system: PlacementSystem
 #UI
 @onready var label: RichTextLabel = $"../../Control/VBoxContainer/RichTextLabel"
 
@@ -60,7 +61,9 @@ func generate_world():
 	#print("World theme is: ", world_theme)
 	
 	print_generation_results(starttime, interval)
+	placement_system.configure_runtime(_vg, _chunk)
 	interaction_tracker.init()
+	
 	
 	# Configure road tool runtime references
 	if road_tool != null:

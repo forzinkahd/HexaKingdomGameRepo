@@ -28,6 +28,11 @@
 [ext_resource type="PackedScene" uid="uid://cna658c6oodob" path="res://Scenes/Kingdom/Buildings/construction_site.tscn" id="24_leul7"]
 [ext_resource type="Script" uid="uid://l61lh7mn7ain" path="res://scripts/WorldGen/overlay_visuals.gd" id="25_wp4mh"]
 [ext_resource type="Script" uid="uid://b20mtxxmymy3g" path="res://scripts/Tools/road_tool.gd" id="26_y0yaw"]
+[ext_resource type="Script" uid="uid://dxp3x81i37bow" path="res://scripts/Tools/tool_controller.gd" id="27_p4lnl"]
+[ext_resource type="Script" uid="uid://cnlfgqywnvq0s" path="res://scripts/Tools/placement_rules.gd" id="28_6gwdq"]
+[ext_resource type="Script" uid="uid://cmw8k2ilo5cyt" path="res://scripts/Tools/placement_system.gd" id="29_rsfko"]
+[ext_resource type="Script" uid="uid://dfbskwr3bfovn" path="res://scripts/Tools/overlay_connectivity.gd" id="30_82uqo"]
+[ext_resource type="Script" uid="uid://bjcnmr44ogc3g" path="res://scripts/Tools/preview_system.gd" id="31_bl770"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -85,13 +90,14 @@ stretch_mode = 4
 
 [node name="Builder" type="Node" parent="." unique_id=1283482510]
 
-[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer", "overlay_visuals", "road_tool")]
+[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer", "overlay_visuals", "road_tool", "placement_system")]
 script = ExtResource("3_davhy")
 settings = ExtResource("4_58wc8")
 object_placer = NodePath("../ObjectPlacer")
 world_theme = ExtResource("5_7rq2r")
 overlay_visuals = NodePath("../OverlayVisuals")
 road_tool = NodePath("../RoadTool")
+placement_system = NodePath("../PlacementSystem")
 
 [node name="ObjectPlacer" type="Node" parent="Builder" unique_id=1196252014]
 script = ExtResource("9_p13dw")
@@ -144,10 +150,32 @@ script = ExtResource("25_wp4mh")
 theme = ExtResource("5_7rq2r")
 overlay_root = NodePath("../../PlacedObjects")
 
-[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera")]
+[node name="RoadTool" type="Node" parent="Builder" unique_id=1978317240 node_paths=PackedStringArray("camera", "placement", "preview")]
 script = ExtResource("26_y0yaw")
 camera = NodePath("../../CameraParent/Camera3D")
+placement = NodePath("../PlacementSystem")
+preview = NodePath("../PreviewSystem")
 world_theme = ExtResource("5_7rq2r")
+
+[node name="ToolController" type="Node" parent="Builder" unique_id=684612397]
+script = ExtResource("27_p4lnl")
+
+[node name="PlacementRules" type="Node" parent="Builder" unique_id=1553486053]
+script = ExtResource("28_6gwdq")
+
+[node name="PlacementSystem" type="Node" parent="Builder" unique_id=936205965 node_paths=PackedStringArray("rules", "connectivity")]
+script = ExtResource("29_rsfko")
+rules = NodePath("../PlacementRules")
+connectivity = NodePath("../OverlayConnectivity")
+metadata/_custom_type_script = "uid://cmw8k2ilo5cyt"
+
+[node name="OverlayConnectivity" type="Node" parent="Builder" unique_id=1523029249]
+script = ExtResource("30_82uqo")
+metadata/_custom_type_script = "uid://dfbskwr3bfovn"
+
+[node name="PreviewSystem" type="Node" parent="Builder" unique_id=125467180]
+script = ExtResource("31_bl770")
+metadata/_custom_type_script = "uid://bjcnmr44ogc3g"
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
