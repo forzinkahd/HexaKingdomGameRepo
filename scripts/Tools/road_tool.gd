@@ -19,7 +19,7 @@ var chunk: Chunk = null
 var active := false
 var anchor: Voxel = null
 var ghost_dir := 0
-var preview_variant_index := 2
+var preview_variant_index := 12
 var preview_voxel: Voxel = null
 
 var _place_anchor_first := false # NEW

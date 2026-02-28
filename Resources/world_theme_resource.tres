@@ -54,6 +54,6 @@ mountain_scenes = Array[PackedScene]([ExtResource("4_87rje"), ExtResource("5_ckm
 mountain_foundation_scene = ExtResource("4_ckmn6")
 mountain_foundation_bottom_scene = ExtResource("4_dmiqk")
 tree_cluster_scenes = Array[PackedScene]([ExtResource("10_0ye04"), ExtResource("11_ef15h"), ExtResource("12_61onh")])
-road_variants = Array[PackedScene]([ExtResource("9_hic5v"), ExtResource("10_g0hk2"), ExtResource("21_evukd"), ExtResource("12_sma3h"), ExtResource("13_7jrbf"), ExtResource("14_bapqs"), ExtResource("15_7g8g1"), ExtResource("16_xyrth"), ExtResource("17_lbpeh"), ExtResource("18_740v2"), ExtResource("19_5xrpn"), ExtResource("20_rdt4p"), ExtResource("11_1svpa")])
+road_variants = Array[PackedScene]([ExtResource("9_hic5v"), ExtResource("10_g0hk2"), ExtResource("11_1svpa"), ExtResource("12_sma3h"), ExtResource("13_7jrbf"), ExtResource("14_bapqs"), ExtResource("15_7g8g1"), ExtResource("16_xyrth"), ExtResource("17_lbpeh"), ExtResource("18_740v2"), ExtResource("19_5xrpn"), ExtResource("20_rdt4p"), ExtResource("21_evukd")])
 river_variants = Array[PackedScene]([ExtResource("9_nfbn7"), ExtResource("10_ygtr0"), ExtResource("11_57cfd"), ExtResource("12_5ccbd"), ExtResource("13_e5sdi"), ExtResource("14_ttff6"), ExtResource("15_ho3vv"), ExtResource("16_j3e3m"), ExtResource("17_t13c0"), ExtResource("18_647gl"), ExtResource("19_4p7u4"), ExtResource("20_ngx7d"), ExtResource("21_nkx4u"), ExtResource("22_7v408"), ExtResource("23_kvgjy")])
 metadata/_custom_type_script = "uid://bfdmepmayfg4u"
