@@ -44,6 +44,8 @@ var initialized = false
 @onready var edit_road_button: Button = $"../../HUD/BuildPanel/EditRoadButton"
 @onready var rotate_road_right_button: Button = $"../../HUD/BuildPanel/RotateRoadRightButton"
 @onready var rotate_road_left_button: Button = $"../../HUD/BuildPanel/RotateRoadLeftButton"
+@onready var cycle_forward_button: Button = $"../../HUD/BuildPanel/CycleForwardButton"
+@onready var cycle_backward_button: Button = $"../../HUD/BuildPanel/CycleBackwardButton"
 
 
 enum mode {SELECT, BUILD}
@@ -96,8 +98,8 @@ func init():
 	workshop_button.pressed.connect(_on_workshop_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	#rotate_left_button.pressed.connect(func(): _rotate_ghost(1))
-	#rotate_right_button.pressed.connect(func(): _rotate_ghost(-1))
+	rotate_left_button.pressed.connect(func(): _rotate_ghost(1))
+	rotate_right_button.pressed.connect(func(): _rotate_ghost(-1))
 	train_builder_button.pressed.connect(_on_train_builder_pressed)
 	close_workshop_button.pressed.connect(func():
 		_open_workshop = null
@@ -111,10 +113,17 @@ func init():
 		if tool_controller != null:
 			tool_controller.rotate(-1)
 	)
-	
 	rotate_road_right_button.pressed.connect(func():
 		if tool_controller != null:
 			tool_controller.rotate(1)
+	)
+	cycle_forward_button.pressed.connect(func():
+		if tool_controller != null:
+			tool_controller.cycle(1)
+	)
+	cycle_backward_button.pressed.connect(func():
+		if tool_controller != null:
+			tool_controller.cycle(-1)
 	)
 	
 	initialized = true
@@ -189,16 +198,6 @@ func _select_unit_from_collider(col: Object) -> void:
 			_set_build_panel_visible(false)
 			return
 		n = n.get_parent()
-		
-		"""selected_unit = n as Unit
-			selected_voxel = null
-			hide_cursor(voxel_cursor)
-			unit_cursor.visible = true
-			move_cursor(unit_cursor, selected_unit.global_position)
-			animate_cursor(unit_cursor)
-			_set_build_panel_visible(false)
-			return
-		n = n.get_parent()"""
 
 
 func raycast_at_mouse(origin, end) -> HitData:
@@ -299,35 +298,6 @@ func highlight_voxel(hit: HitData):
 
 	if active_tool == build_tool.NONE:
 		_set_build_panel_visible(true)
-"""func highlight_voxel(hit: HitData):
-	selected_unit = null
-	hide_cursor(unit_cursor)
-
-	var hit_chunk: Chunk = _chunk_from_hit(hit.object)
-	if hit_chunk == null:
-		return
-
-	var hit_voxel: Voxel = hit_chunk.voxel_at_point(hit)
-	if hit_voxel == null:
-		print("Hit voxel is null!")
-		return
-
-	selected_voxel = hit_voxel
-
-	var cap_y := _voxel_cap_y(hit_voxel)
-	var cursor_pos := Vector3(hit_voxel.world_position.x, cap_y, hit_voxel.world_position.z)
-
-	move_cursor(voxel_cursor, cursor_pos) # no "+1" anymore
-	voxel_cursor.visible = true
-	animate_cursor(voxel_cursor)
-	
-	# Place town center on newly selected tile
-	if active_tool == build_tool.TOWN_CENTER and selected_voxel != null:
-		_spawn_ghost_on_voxel(selected_voxel)
-	
-	# If a build tool is not active, just show the build panel for this selected tile
-	if active_tool == build_tool.NONE:
-		_set_build_panel_visible(true)"""
 
 
 func highlight_unit(unit):
@@ -512,7 +482,7 @@ func _on_tc_pressed() -> void:
 	if not building_placer.can_place(active_building_id, selected_voxel):
 		push_warning("Can't place Town Center here (occupied, not placeable, or already exists).")
 		return
-
+	
 	_spawn_ghost_on_voxel(selected_voxel)
 	_set_build_panel_visible(true)
 
@@ -609,7 +579,8 @@ func _make_node_transparent(n: Node) -> void:
 
 func _on_cancel_pressed() -> void:
 	_cancel_ghost()
-	tool_controller.cancel()
+	if tool_controller != null and tool_controller.active_tool == road_tool:
+		tool_controller.cancel()
 	_set_build_panel_visible(false)
 
 

@@ -26,7 +26,9 @@ func cancel() -> void:
 
 
 func rotate(delta: int) -> void:
-	if active_tool == null: return
+	if active_tool == null:
+		push_warning("active tool is null")
+		return
 	if delta > 0 and active_tool.has_method("rotate_right"):
 		active_tool.rotate_right()
 	elif delta < 0 and active_tool.has_method("rotate_left"):

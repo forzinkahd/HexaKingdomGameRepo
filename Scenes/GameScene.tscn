@@ -106,7 +106,7 @@ script = ExtResource("9_p13dw")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root", "road_tool")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root", "road_tool", "tool_controller")]
 script = ExtResource("12_tt8b8")
 voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
@@ -120,6 +120,7 @@ unit_manager = NodePath("../UnitManager")
 task_manager = NodePath("../TaskManager")
 resource_root = NodePath("../../NatResources")
 road_tool = NodePath("../RoadTool")
+tool_controller = NodePath("../ToolController")
 
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root", "construction_manager")]
 script = ExtResource("18_gipt1")
@@ -303,6 +304,22 @@ offset_right = 287.0
 offset_bottom = 349.0
 text = "Rotate road left
 "
+
+[node name="CycleForwardButton" type="Button" parent="HUD/BuildPanel" unique_id=538743787]
+layout_mode = 0
+offset_left = 159.0
+offset_top = 359.0
+offset_right = 276.0
+offset_bottom = 390.0
+text = "Cycle Forward"
+
+[node name="CycleBackwardButton" type="Button" parent="HUD/BuildPanel" unique_id=1916187829]
+layout_mode = 0
+offset_left = 161.0
+offset_top = 400.0
+offset_right = 290.0
+offset_bottom = 431.0
+text = "Cycle Backward"
 
 [node name="PopupFounded" type="AcceptDialog" parent="HUD" unique_id=1212512145]
 oversampling_override = 1.0

@@ -819,9 +819,12 @@ func clear_preview_cap(chunk: Chunk, v: Voxel) -> void:
 
 	_preview_keys.erase(key)
 
-	# restore to normal terrain cap (based on voxel.type)
-	var scene := _top_scene_for_voxel_type(v.type)
-	_replace_cap_at(chunk, v, scene)
+	# IMPORTANT: restore to overlay cap if overlay exists, otherwise terrain
+	if v.overlay != Voxel.Overlay.NONE:
+		_apply_cap_variant_for_overlay(chunk, v)
+	else:
+		var scene := _top_scene_for_voxel_type(v.type)
+		_replace_cap_at(chunk, v, scene)
 
 
 func _tile_seed(v: Voxel, salt: int) -> int:

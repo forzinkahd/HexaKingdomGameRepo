@@ -44,6 +44,11 @@ func can_place(building_id: StringName, v: Voxel) -> bool:
 
 	return true
 
+
+func cancel() -> void:
+	push_warning("cancel in building_placer not implemented")
+
+
 func place(building_id: StringName, v: Voxel, rotation_y: float) -> Node3D:
 	if not can_place(building_id, v):
 		return null
