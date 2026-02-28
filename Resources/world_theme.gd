@@ -35,6 +35,7 @@ class_name WorldTheme
 @export_category("Overlays")
 @export var road_variants: Array[PackedScene] = []
 @export var river_variants: Array[PackedScene] = []
+@export var coast_variants: Array[PackedScene] = []
 
 
 # ----------------------------------------------------------------
@@ -53,3 +54,10 @@ func river_scene(letter: String) -> PackedScene:
 	if idx < 0 or idx >= river_variants.size():
 		return null
 	return river_variants[idx]
+
+
+func coast_scene(letter: String) -> PackedScene:
+	var idx: int = VoxelData.COAST_LETTER_TO_INDEX.get(letter, -1)
+	if idx < 0 or idx >= coast_variants.size():
+		return null
+	return coast_variants[idx]

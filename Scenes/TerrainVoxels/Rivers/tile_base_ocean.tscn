@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://doj28nqi1a1sy"]
+
+[ext_resource type="PackedScene" uid="uid://dk5loqiaar8hw" path="res://Assets/Meshes/Terrain/base/hex_water.gltf" id="1_mvkgn"]
+
+[node name="Tile_BaseOcean" type="Node3D" unique_id=794848245]
+
+[node name="hex_water2" parent="." unique_id=1550329365 instance=ExtResource("1_mvkgn")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 0, 0)

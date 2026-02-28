@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://beqda7q1i5qev"]
+
+[ext_resource type="PackedScene" uid="uid://b6i0stcr0jk02" path="res://Assets/Meshes/Terrain/coast/hex_coast_B.gltf" id="1_12j8i"]
+
+[node name="Tile_BaseCoast_B" type="Node3D" unique_id=1749128193]
+
+[node name="hex_coast_B2" parent="." unique_id=1710418232 instance=ExtResource("1_12j8i")]
+transform = Transform3D(0.749978, 0, 0.433, 0, 1, 0, -0.433, 0, 0.749978, 0, 0, 0)
