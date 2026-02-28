@@ -514,17 +514,17 @@ func refresh_overlay_at(chunk: Chunk, v: Voxel) -> void:
 func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
 	if theme == null:
 		return
-
+	
 	# no overlay -> restore normal terrain cap
 	if v.overlay == Voxel.Overlay.NONE:
 		var scene := _top_scene_for_voxel_type(v.type)
 		_replace_cap_at(chunk, v, _top_scene_for_voxel_type(v.type))
 		v.is_base_grass_cap = (scene == theme.grass_top_scene)
 		return
-
+	
 	var is_road := v.overlay == Voxel.Overlay.ROAD
 	var mask := v.road_mask if is_road else v.river_mask
-
+	
 	var letter := VoxelData.variant_letter_from_mask(mask)
 	var idx: int = (
 		VoxelData.ROAD_LETTER_TO_INDEX[letter]
@@ -535,7 +535,7 @@ func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
 	if is_road and v.road_variant_override < 0:
 		push_warning("road_variant_override problem")
 	if is_road and v.road_variant_override >= 0:
-		idx = clampi(v.road_variant_override, 0, (theme.road_variants.size() -1))
+		idx = clampi(v.road_variant_override, 0, (theme.road_variants.size() - 1))
 
 	var variants: Array[PackedScene] = theme.road_variants if is_road else theme.river_variants
 	if idx < 0 or idx >= variants.size():
@@ -548,7 +548,10 @@ func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
 	# rotate the replacement cap
 	var cap: Node3D = _cap_by_xz.get(v.grid_position_xz)
 	if cap != null and is_instance_valid(cap):
-		cap.rotation.y = _overlay_yaw_from_mask(mask)
+		if is_road and v.has_road_yaw_override:
+			cap.rotation.y = v.road_yaw_override
+		else:
+			cap.rotation.y = _overlay_yaw_from_mask(mask)
 
 
 func _update_overlay_for_voxel(chunk: Chunk, v: Voxel) -> void:

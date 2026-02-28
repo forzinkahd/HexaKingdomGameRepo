@@ -3,8 +3,7 @@ class_name Voxel
 enum Overlay { NONE, ROAD, RIVER }
 var overlay: Overlay = Overlay.NONE
 #var overlay_mask: int = 0
-var road_variant_override: int = -1
-var river_variant_override: int = -1
+
 
 var grid_position_xyz : Vector3i
 var grid_position_xz : Vector2i
@@ -40,6 +39,11 @@ var decoration_id: StringName = &""
 # bit i == 1 means "connected on side i"
 var road_mask: int = 0
 var river_mask: int = 0
+
+var road_variant_override: int = -1
+var river_variant_override: int = -1
+var road_yaw_override: float = 0.0
+var has_road_yaw_override: bool = false
 
 # movement / placement flags
 var walkable: bool = true

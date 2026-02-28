@@ -108,7 +108,7 @@ func init():
 	workshop_panel.visible = false
 	_set_build_panel_visible(false)
 	place_road_button.pressed.connect(_on_place_road_pressed)
-	#edit_road_button.pressed.connect(_on_edit_road_pressed)
+	edit_road_button.pressed.connect(_on_edit_road_pressed)
 	rotate_road_left_button.pressed.connect(func():
 		if tool_controller != null:
 			tool_controller.rotate(-1)
@@ -597,68 +597,20 @@ func _on_place_road_pressed() -> void:
 	_set_build_panel_visible(true)
 
 
-"""func _on_edit_road_pressed() -> void:
-	if road_tool == null:
-		return
-	if selected_voxel == null:
-		push_warning("no road on this tile")
+func _on_edit_road_pressed() -> void:
+	if tool_controller == null or road_tool == null or selected_voxel == null:
+		push_warning("tool_controller or road_tool problem")
 		return
 	
-	selected_voxel = _surface_voxel(selected_voxel)
-	if not selected_voxel.has_road_or_preview():
-		push_warning("no road on this tile (and no preview)")
-		return
-	#if selected_voxel.overlay != Voxel.Overlay.ROAD:
-		#push_warning("not in overlay")
-		#return
-	
-	push_warning("this is a road tile")"""
+	#tool_controller.set_tool(road_tool)
+	push_warning("edit road active")
 
 
 func _on_confirm_pressed() -> void:
-	
 	if ghost != null:
 		_commit_building()
 		return
 	tool_controller.commit()
-	
-	# OLD STUFF
-	"""if ghost == null or ghost_voxel == null:
-		return
-	if building_placer == null:
-		return
-	if active_building_id == &"":
-		return
-
-	var id := active_building_id # capture it BEFORE you clear/reset anything
-
-	var placed := building_placer.place(id, ghost_voxel, ghost_yaw)
-	if placed == null:
-		push_warning("Cannot place building.")
-		return
-
-	_cancel_ghost()
-	_set_build_panel_visible(false)
-
-	if id == &"town_center":
-		# spawn villager now that WorldMap.town_center_voxel is guaranteed set
-		#var um := get_node_or_null("../../Managers/UnitManager") as UnitManager
-		if unit_manager != null:
-			var v := unit_manager.spawn_first_villager_at_town_center()
-			if v != null:
-				v.start_auto_work(resource_root)
-
-		popup_founded.dialog_text = "Congratulations! You founded your kingdom."
-		popup_founded.popup_centered()
-
-	if id == &"builders_workshop":
-		push_warning("builder's workshop created, unlock/implement progression")
-
-	active_building_id = &""
-	
-	if road_tool != null and road_tool.active:
-		road_tool.commit_current()
-		return"""
 
 
 func _commit_building() -> void:

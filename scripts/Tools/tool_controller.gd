@@ -17,6 +17,7 @@ func set_tool(t: Node) -> void:
 func commit() -> void:
 	if active_tool != null and active_tool.has_method("commit_current"):
 		active_tool.commit_current()
+	cancel()
 
 
 func cancel() -> void:

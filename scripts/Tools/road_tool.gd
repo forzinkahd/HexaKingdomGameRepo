@@ -57,21 +57,20 @@ func rotate_left() -> void:
 
 
 func commit_current() -> void:
-	if not active or anchor == null:
+	if not active or anchor == null or preview_voxel == null:
 		return
-	if preview_voxel == null:
-		return
-
-	_clear_preview()
-
+	
+	var v := preview_voxel # capture the target BEFORE clearing anything
+	
+	var step := TAU / 6.0
+	var yaw := float(ghost_dir + edge_offset_steps) * step
+	
+	# 1) Commit the overlay state first
 	if placement != null:
-		placement.set_road(preview_voxel, true, preview_variant_index)
-
-	# after committing the first segment, we start extending outward
-	anchor = preview_voxel
-	_place_anchor_first = false
-	preview_voxel = null
-	_update_preview()
+		placement.set_road(v, true, preview_variant_index, yaw, true)
+	
+	# 2) Now clear preview bookkeeping (this will restore to overlay, not terrain)
+	_clear_preview()
 
 
 func cancel() -> void:
@@ -83,7 +82,13 @@ func cancel() -> void:
 
 
 func cycle_variant(delta: int) -> void:
-	print("cycle: ", delta)
+	var n := world_theme.road_variants.size()
+	if n <= 0:
+		return
+	preview_variant_index = (preview_variant_index + delta) % n
+	if preview_variant_index < 0:
+		preview_variant_index += n
+	_update_preview()
 
 
 func _update_preview() -> void:
