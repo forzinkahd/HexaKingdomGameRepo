@@ -50,6 +50,10 @@ var walkable: bool = true
 var move_cost: float = 1.0  # later: road cheaper, mud higher, etc.
 
 
+# coastal surface
+var is_sea: bool = false
+var coast_mask: int = 0
+
 func has_resource() -> bool:
 	return resource_id != &""
 

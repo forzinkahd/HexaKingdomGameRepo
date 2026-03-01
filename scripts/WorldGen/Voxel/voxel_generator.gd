@@ -87,6 +87,9 @@ func prepared_chunk(surface) -> Chunk:
 	WorldMap.set_map(map, surface_voxels)
 	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
 	
+	# surface_layer is populated, calculate sea/coast state
+	_compute_sea_and_coast(surface_voxels)
+	
 	# Spawn custom visuals
 	_spawn_columns(chunk)		# bottom geometry
 	_spawn_surface_tiles(chunk)	# top caps
@@ -351,7 +354,7 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 	var half_step_h := settings.voxel_height * 0.5
 
 	for v: Voxel in map:
-		var scene := _top_scene_for_voxel_type(v.type)
+		var scene := _top_scene_for_voxel(v)
 		if scene == null:
 			continue
 		
@@ -360,6 +363,9 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var cap := scene.instantiate() as Node3D
 		var cap_y := float(v.height_units) * half_step_h
 		cap.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
+		if v.coast_mask != 0 and not v.is_sea:
+			push_warning("might need offset here")
+			cap.rotation.y = VoxelData.yaw_from_mask(v.coast_mask, 1) # use your edge_offset_steps if needed
 		_tag_tile_nodes(cap, v.grid_position_xz)
 		chunk.add_child(cap)
 		_cap_by_xz[v.grid_position_xz] = cap
@@ -507,6 +513,29 @@ func _spawn_padding(chunk: Chunk) -> void:
 				chunk.add_child(pad)
 
 
+func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
+	# 1) mark sea
+	for v in surface_tiles:
+		var sea := (v.height_units <= settings.sea_level_units)
+		v.is_sea = sea
+		v.water = sea  # keep compatibility with existing code paths if needed
+	
+	# 2) compute coast masks for NON-sea tiles
+	for v in surface_tiles:
+		if v.is_sea:
+			v.coast_mask = 0
+			continue
+		
+		var mask := 0
+		var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+		for i in range(6):
+			var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
+			if n != null and n.is_sea:
+				mask |= (1 << i)
+		
+		v.coast_mask = mask
+
+
 func refresh_overlay_at(chunk: Chunk, v: Voxel) -> void:
 	_apply_cap_variant_for_overlay(chunk, v)
 
@@ -517,8 +546,8 @@ func _apply_cap_variant_for_overlay(chunk: Chunk, v: Voxel) -> void:
 	
 	# no overlay -> restore normal terrain cap
 	if v.overlay == Voxel.Overlay.NONE:
-		var scene := _top_scene_for_voxel_type(v.type)
-		_replace_cap_at(chunk, v, _top_scene_for_voxel_type(v.type))
+		var scene := _top_scene_for_voxel(v)
+		_replace_cap_at(chunk, v, _top_scene_for_voxel(v))
 		v.is_base_grass_cap = (scene == theme.grass_top_scene)
 		return
 	
@@ -826,7 +855,7 @@ func clear_preview_cap(chunk: Chunk, v: Voxel) -> void:
 	if v.overlay != Voxel.Overlay.NONE:
 		_apply_cap_variant_for_overlay(chunk, v)
 	else:
-		var scene := _top_scene_for_voxel_type(v.type)
+		var scene := _top_scene_for_voxel(v)
 		_replace_cap_at(chunk, v, scene)
 
 
@@ -846,6 +875,23 @@ func _build_xz_lookup() -> void:
 	_map_xz.clear()
 	for v: Voxel in map:
 		_map_xz[v.grid_position_xz] = v
+
+
+func _top_scene_for_voxel(v: Voxel) -> PackedScene:
+	if v == null or theme == null:
+		return null
+	
+	# sea wins over base terrain
+	if v.is_sea:
+		return theme.sea_top_scene
+	
+	# coast (non-sea tile with water neighbors)
+	if v.coast_mask != 0:
+		var letter := VoxelData.coast_letter_from_mask(v.coast_mask)
+		return theme.coast_scene(letter)
+	
+	# normal terrain
+	return _top_scene_for_voxel_type(v.type)
 
 
 func _top_scene_for_voxel_type(t) -> PackedScene:

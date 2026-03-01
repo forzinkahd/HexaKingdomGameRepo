@@ -5,7 +5,7 @@ class_name OverlaySystem
 # MIGHT BE REDUNDANT AFTER REFACTOR 25.02.26
 # =================================================
 
-func set_road(v: Voxel, on: bool) -> void:
+"""func set_road(v: Voxel, on: bool) -> void:
 	if v == null:
 		return
 	
@@ -71,4 +71,4 @@ func _calc_mask(v: Voxel, which: int) -> int:
 		var n: Voxel = WorldMap.surface_layer.get(nk)
 		if n != null and n.overlay == which:
 			mask |= (1 << i)
-	return mask
+	return mask"""

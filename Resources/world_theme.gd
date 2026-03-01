@@ -8,6 +8,7 @@ class_name WorldTheme
 @export var grass_top_scene: PackedScene
 @export var stone_top_scene: PackedScene
 @export var dirt_top_scene: PackedScene
+@export var sea_top_scene: PackedScene
 
 @export_category("Bottom tiles")
 @export var grass_bottom_scene: PackedScene

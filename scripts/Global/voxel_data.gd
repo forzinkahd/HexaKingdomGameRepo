@@ -125,3 +125,28 @@ static func variant_letter_from_mask(mask: int) -> String:
 			return "I"
 		_:
 			return "M"
+
+
+static func coast_letter_from_mask(mask: int) -> String:
+	var n := mask_bit_count(mask)
+	if n <= 0:
+		push_warning("coast is weird")
+		return "A"	# shouldnt trigger, but safefail
+	if n == 1:
+		return "A"
+	if n == 2:
+		return "B"
+	if n == 3:
+		return "C"
+	return "D"
+
+
+static func yaw_from_mask(mask: int, edge_offset_steps: int = 1) -> float:
+	var first := -1
+	for i in range(6):
+		if (mask & (1 << i)) != 0:
+			first = i
+			break
+	if first == -1:
+		return 0.0
+	return float(first + edge_offset_steps) * (TAU / 6.0)

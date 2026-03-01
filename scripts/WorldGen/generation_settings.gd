@@ -41,3 +41,7 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 # Overworking half steps
 @export_category("Half steps")
 @export var use_half_steps: bool = true
+
+# Ocean
+@export_category("Ocean")
+@export var sea_level_units: int = 0
