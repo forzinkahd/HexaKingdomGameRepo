@@ -349,7 +349,7 @@ func atlas_uv(local_uv: Vector2, tile: Vector2i) -> Vector2:
 var _cap_by_xz := {}
 var _bottom_by_xz := {}
 
-func _spawn_surface_tiles(chunk: Chunk) -> void:
+"""func _spawn_surface_tiles(chunk: Chunk) -> void:
 	_cap_by_xz.clear()
 	var half_step_h := settings.voxel_height * 0.5
 
@@ -364,8 +364,42 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var cap_y := float(v.height_units) * half_step_h
 		cap.position = Vector3(v.world_position.x, cap_y, v.world_position.z)
 		if v.coast_mask != 0 and not v.is_sea:
-			push_warning("might need offset here")
-			cap.rotation.y = VoxelData.yaw_from_mask(v.coast_mask, 1) # use your edge_offset_steps if needed
+			cap.rotation.y = VoxelData.yaw_from_mask_centroid(v.coast_mask, 1) # use your edge_offset_steps if needed
+		_tag_tile_nodes(cap, v.grid_position_xz)
+		chunk.add_child(cap)
+		_cap_by_xz[v.grid_position_xz] = cap"""
+
+
+func _surface_cap_y(v: Voxel) -> float:
+	var half_step_h := settings.voxel_height * 0.5
+	var y := float(v.height_units) * half_step_h
+
+	# Coast is one half-step lower (your request)
+	if (not v.is_sea) and (v.coast_mask != 0):
+		y -= half_step_h
+
+	return y
+
+
+func _spawn_surface_tiles(chunk: Chunk) -> void:
+	_cap_by_xz.clear()
+
+	for v: Voxel in surface_voxels:
+		var scene := _top_scene_for_voxel(v) # your new resolver (sea/coast/base)
+		if scene == null:
+			continue
+
+		v.is_base_grass_cap = (scene == theme.grass_top_scene)
+
+		var cap := scene.instantiate() as Node3D
+
+		cap.position = Vector3(v.world_position.x, _surface_cap_y(v), v.world_position.z)
+
+		# Coast rotation (stable)
+		if (not v.is_sea) and (v.coast_mask != 0):
+			const COAST_EDGE_OFFSET_STEPS := 1  # <-- tune if needed for your art
+			cap.rotation.y = VoxelData.yaw_from_mask_centroid(v.coast_mask, COAST_EDGE_OFFSET_STEPS)
+
 		_tag_tile_nodes(cap, v.grid_position_xz)
 		chunk.add_child(cap)
 		_cap_by_xz[v.grid_position_xz] = cap
@@ -420,6 +454,10 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 
 	inst.position = pos
 	inst.rotation = rot
+	
+	if v.overlay == Voxel.Overlay.NONE:
+		inst.position.y = _surface_cap_y(v)
+	
 	_tag_tile_nodes(inst, v.grid_position_xz)
 	chunk.add_child(inst)
 	_cap_by_xz[key] = inst
@@ -781,7 +819,10 @@ func _spawn_forests(chunk: Chunk) -> void:
 	for v: Voxel in surface_voxels:
 		if v.buffer:
 			continue
-
+		
+		if v.is_sea or v.coast_mask != 0:
+			continue
+		
 		# height band
 		if v.height_units < theme.forest_min_height_units:
 			continue

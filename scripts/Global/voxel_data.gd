@@ -141,7 +141,30 @@ static func coast_letter_from_mask(mask: int) -> String:
 	return "D"
 
 
-static func yaw_from_mask(mask: int, edge_offset_steps: int = 1) -> float:
+static func yaw_from_mask_centroid(mask: int, offset_steps: int = 0) -> float:
+	if mask == 0:
+		return 0.0
+
+	var step := TAU / 6.0
+	var v := Vector2.ZERO
+
+	# Sum unit vectors for all set bits (stable for multi-edge masks)
+	for i in range(6):
+		if (mask & (1 << i)) != 0:
+			v += Vector2(cos(step * float(i)), sin(step * float(i)))
+
+	if v.length() < 0.0001:
+		return 0.0
+
+	var angle := atan2(v.y, v.x)
+	var idx := int(round(angle / step)) % 6
+	if idx < 0:
+		idx += 6
+
+	return float(idx + offset_steps) * step
+
+
+"""static func yaw_from_mask(mask: int, edge_offset_steps: int = 1) -> float:
 	var first := -1
 	for i in range(6):
 		if (mask & (1 << i)) != 0:
@@ -149,4 +172,4 @@ static func yaw_from_mask(mask: int, edge_offset_steps: int = 1) -> float:
 			break
 	if first == -1:
 		return 0.0
-	return float(first + edge_offset_steps) * (TAU / 6.0)
+	return float(first + edge_offset_steps) * (TAU / 6.0)"""
