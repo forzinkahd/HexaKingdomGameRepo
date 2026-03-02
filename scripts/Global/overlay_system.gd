@@ -5,6 +5,10 @@ class_name OverlaySystem
 # MIGHT BE REDUNDANT AFTER REFACTOR 25.02.26
 # =================================================
 
+
+func _ready() -> void:
+	push_warning("ayo what you doing here?")
+
 """func set_road(v: Voxel, on: bool) -> void:
 	if v == null:
 		return

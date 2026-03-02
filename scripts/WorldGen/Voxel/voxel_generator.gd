@@ -382,24 +382,29 @@ func _surface_cap_y(v: Voxel) -> float:
 
 
 func _spawn_surface_tiles(chunk: Chunk) -> void:
+	# hard clear any existing cap nodes
+	for ch in chunk.get_children():
+		if ch is Node3D and bool(ch.get_meta("is_surface_cap", false)):
+			ch.queue_free()
+	
 	_cap_by_xz.clear()
-
+	
 	for v: Voxel in surface_voxels:
 		var scene := _top_scene_for_voxel(v) # your new resolver (sea/coast/base)
 		if scene == null:
 			continue
-
+		
 		v.is_base_grass_cap = (scene == theme.grass_top_scene)
-
+		
 		var cap := scene.instantiate() as Node3D
-
+		cap.set_meta("is_surface_cap", true)
 		cap.position = Vector3(v.world_position.x, _surface_cap_y(v), v.world_position.z)
-
+		
 		# Coast rotation (stable)
 		if (not v.is_sea) and (v.coast_mask != 0):
 			const COAST_EDGE_OFFSET_STEPS := 1  # <-- tune if needed for your art
 			cap.rotation.y = VoxelData.yaw_from_mask_centroid(v.coast_mask, COAST_EDGE_OFFSET_STEPS)
-
+		
 		_tag_tile_nodes(cap, v.grid_position_xz)
 		chunk.add_child(cap)
 		_cap_by_xz[v.grid_position_xz] = cap
@@ -454,6 +459,7 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 
 	inst.position = pos
 	inst.rotation = rot
+	inst.set_meta("is_surface_cap", true)
 	
 	if v.overlay == Voxel.Overlay.NONE:
 		inst.position.y = _surface_cap_y(v)
