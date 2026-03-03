@@ -575,10 +575,18 @@ func _spawn_padding(chunk: Chunk) -> void:
 
 func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
 	# 1) mark sea
+	"""for v in surface_tiles:
+		var sea := (v.height_units <= settings.sea_level_units)
+		v.is_sea = sea
+		v.water = sea  # keep compatibility with existing code paths if needed"""
 	for v in surface_tiles:
 		var sea := (v.height_units <= settings.sea_level_units)
 		v.is_sea = sea
-		v.water = sea  # keep compatibility with existing code paths if needed
+		v.water = sea
+		
+		# hard reset state every generation
+		v.sea_is_coast_ring = false
+		v.coast_mask = 0
 	
 	# 2) compute coast masks for NON-sea tiles
 	for v in surface_tiles:
@@ -586,14 +594,14 @@ func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
 			#.coast_mask = 0
 			continue
 		
-		var mask := 0
+		"""var mask := 0
 		var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
 		for i in range(6):
 			var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
 			if n != null and n.is_sea:
 				mask |= (1 << i)
 		
-		v.coast_mask = mask
+		v.coast_mask = mask"""
 	
 	# 3) compute "coast ring" for SEA tiles (sea that borders land)
 	for v in surface_tiles:
@@ -743,6 +751,24 @@ func _overlay_yaw_from_mask(mask: int) -> float:
 	var step := TAU / 6.0
 	const EDGE_OFFSET_STEPS := 1 # change this if your asset's "edge 0" isn't Godot's edge 0
 	return float(first + EDGE_OFFSET_STEPS) * step
+
+
+func _yaw_from_mask_dirs(x_col: int, mask: int) -> float:
+	var dirs := VoxelData.neighbor_dirs_for_col(x_col) # Array[Vector2i], length 6
+	var acc := Vector2.ZERO
+	for i in range(6):
+		if (mask & (1 << i)) != 0:
+			acc += Vector2(dirs[i].x, dirs[i].y)
+	
+	if acc.length() < 0.001:
+		return 0.0
+	
+	# Godot yaw: atan2(z, x). Here (x,z) maps to (acc.x, acc.y)
+	var yaw := atan2(acc.y, acc.x)
+	
+	# asset authoring offset (tune once)
+	const ASSET_YAW_OFFSET := 0.0
+	return yaw + ASSET_YAW_OFFSET
 
 
 func _play_place_bounce(node: Node3D, chunk: Node) -> void:
