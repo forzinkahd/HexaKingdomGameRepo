@@ -52,6 +52,7 @@ var move_cost: float = 1.0  # later: road cheaper, mud higher, etc.
 
 # coastal surface
 var is_sea: bool = false
+var sea_is_coast_ring: bool = false
 var coast_mask: int = 0
 
 func has_resource() -> bool:
