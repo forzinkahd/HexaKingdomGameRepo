@@ -7,7 +7,12 @@ class_name OverlayVisuals
 var _road_nodes: Dictionary = {}  # Vector2i -> Node3D
 var _river_nodes: Dictionary = {} # Vector2i -> Node3D
 
-func refresh_voxel(v: Voxel) -> void:
+# ==============================
+# Is this still used?
+# ===============================
+
+
+"""func refresh_voxel(v: Voxel) -> void:
 	#print("refresh_voxel overlay=", v.overlay, " road_mask=", v.road_mask, " river_mask=", v.river_mask)
 	if v == null:
 		return
@@ -131,4 +136,4 @@ func debug_spawn_one(road_scene: PackedScene, river_scene: PackedScene, pos: Vec
 		var w := river_scene.instantiate() as Node3D
 		w.position = pos + Vector3(2, 0.1, 0)
 		overlay_root.add_child(w)
-		print("Spawned debug river at ", w.global_position)
+		print("Spawned debug river at ", w.global_position)"""

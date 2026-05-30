@@ -29,6 +29,7 @@ const tile_map = {
 		"bottom": Vector2i(8, 0)
 	}
 }
+# Hi
 
 ## Shorthand for different layout/neighbor configurations depending on map-shape and stagger
 const HEXAGONAL_NEIGHBOR_DIRECTIONS: Array[Vector2i] = [
@@ -70,8 +71,12 @@ const RIVER_LETTER_TO_INDEX := {
 	"N": 13, "O": 14, "P": 15
 }
 
+
+# only point to adjust edge offset for coast tiles!!!
+const COAST_ASSET_EDGE0_OFFSET_STEPS: int = 1
+
 const COAST_LETTER_TO_INDEX := {
-	"A": 0, "B": 1, "C": 2, "D": 3
+	"A": 0, "B": 1, "C": 2, "D": 3, "E": 4
 }
 
 static func get_tile_neighbor_table(row) -> Array[Vector2i]:
@@ -129,19 +134,28 @@ static func variant_letter_from_mask(mask: int) -> String:
 
 static func coast_letter_from_mask(mask: int) -> String:
 	var n := mask_bit_count(mask)
-	if n <= 0:
-		push_warning("coast is weird")
-		return "A"	# shouldnt trigger, but safefail
-	if n == 1:
-		return "A"
-	if n == 2:
-		return "B"
-	if n == 3:
-		return "C"
-	return "D"
+	match n:
+		0:
+			return "A"   # shouldn't happen; fallback
+		1:
+			return "A"   # single edge
+		2:
+			# Two adjacent neighbors = outer corner (B)
+			# Two opposite neighbors = narrow peninsula, still use B
+			return "B"
+		3:
+			return "C"
+		_:
+			return "D"   # 4, 5, or 6 neighbors (peninsula tip)
 
 
-static func yaw_from_mask_centroid(mask: int, offset_steps: int = 0) -> float:
+# coast rotation setting
+static func yaw_from_edge(edge: int, offset_steps: int = 0) -> float:
+	var step := TAU / 6.0
+	return float(edge + offset_steps) * step
+
+
+"""static func yaw_from_mask_centroid(mask: int, offset_steps: int = 0) -> float:
 	if mask == 0:
 		return 0.0
 
@@ -161,15 +175,4 @@ static func yaw_from_mask_centroid(mask: int, offset_steps: int = 0) -> float:
 	if idx < 0:
 		idx += 6
 
-	return float(idx + offset_steps) * step
-
-
-"""static func yaw_from_mask(mask: int, edge_offset_steps: int = 1) -> float:
-	var first := -1
-	for i in range(6):
-		if (mask & (1 << i)) != 0:
-			first = i
-			break
-	if first == -1:
-		return 0.0
-	return float(first + edge_offset_steps) * (TAU / 6.0)"""
+	return float(idx + offset_steps) * step"""

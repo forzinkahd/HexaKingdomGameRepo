@@ -6,10 +6,10 @@ class_name OverlaySystem
 # =================================================
 
 
-func _ready() -> void:
-	push_warning("ayo what you doing here?")
 
-"""func set_road(v: Voxel, on: bool) -> void:
+
+func set_road(v: Voxel, on: bool) -> void:
+	push_warning("ayo what you doing here?")
 	if v == null:
 		return
 	
@@ -22,6 +22,7 @@ func _ready() -> void:
 
 
 func set_river(v: Voxel, on: bool) -> void:
+	push_warning("ayo what you doing here?")
 	if v == null:
 		return
 	
@@ -39,6 +40,7 @@ func set_river(v: Voxel, on: bool) -> void:
 
 
 func _recalc_masks_around(center: Voxel) -> void:
+	push_warning("ayo what you doing here?")
 	_recalc_masks(center)
 	var dirs: Array = VoxelData.get_tile_neighbor_table(center.grid_position_xz.x)
 	for i in range(6):
@@ -49,6 +51,7 @@ func _recalc_masks_around(center: Voxel) -> void:
 
 
 func _recalc_masks(v: Voxel) -> void:
+	push_warning("ayo what you doing here?")
 	v.road_mask = _calc_mask(v, Voxel.Overlay.ROAD)
 	v.river_mask = _calc_mask(v, Voxel.Overlay.RIVER)
 	
@@ -65,6 +68,7 @@ func _recalc_masks(v: Voxel) -> void:
 
 
 func _calc_mask(v: Voxel, which: int) -> int:
+	push_warning("ayo what you doing here?")
 	if v.overlay != which:
 		return 0
 	
@@ -75,4 +79,4 @@ func _calc_mask(v: Voxel, which: int) -> int:
 		var n: Voxel = WorldMap.surface_layer.get(nk)
 		if n != null and n.overlay == which:
 			mask |= (1 << i)
-	return mask"""
+	return mask

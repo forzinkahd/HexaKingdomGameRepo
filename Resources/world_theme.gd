@@ -58,7 +58,7 @@ func river_scene(letter: String) -> PackedScene:
 
 
 func coast_scene(letter: String) -> PackedScene:
-	var idx: int = VoxelData.COAST_LETTER_TO_INDEX.get(letter, -1)
+	var idx: int = VoxelData.COAST_LETTER_TO_INDEX.get(letter, 0)
 	if idx < 0 or idx >= coast_variants.size():
 		return null
 	return coast_variants[idx]

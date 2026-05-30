@@ -54,6 +54,9 @@ var move_cost: float = 1.0  # later: road cheaper, mud higher, etc.
 var is_sea: bool = false
 var sea_is_coast_ring: bool = false
 var coast_mask: int = 0
+var has_coast_cap: bool = false
+var coast_variant: String = ""
+var coast_yaw: float = 0.0
 
 func has_resource() -> bool:
 	return resource_id != &""

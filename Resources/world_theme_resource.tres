@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://rt1qpmhcyumk" path="res://Scenes/TerrainVoxels/tile_base_mountain_foundation_bottom.tscn" id="4_dmiqk"]
 [ext_resource type="PackedScene" uid="uid://b1jjbv4aqepx4" path="res://Scenes/TerrainVoxels/Rivers/tile_base_coast_d.tscn" id="4_t13c0"]
 [ext_resource type="PackedScene" uid="uid://byphhysv82hgg" path="res://Scenes/TerrainVoxels/tile_base_mountain_b.tscn" id="5_ckmn6"]
+[ext_resource type="PackedScene" uid="uid://brnbt0y2dp5ca" path="res://Assets/Meshes/Terrain/coast/hex_coast_E.gltf" id="5_ho3vv"]
 [ext_resource type="PackedScene" uid="uid://byhc0yq1qpn5n" path="res://Scenes/TerrainVoxels/tile_base_mountain_c.tscn" id="6_dmiqk"]
 [ext_resource type="PackedScene" uid="uid://c5lcx0gbg0nx7" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_a.tscn" id="9_hic5v"]
 [ext_resource type="PackedScene" uid="uid://cgueanc0upb5b" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_a.tscn" id="9_nfbn7"]
@@ -62,5 +63,5 @@ mountain_foundation_bottom_scene = ExtResource("4_dmiqk")
 tree_cluster_scenes = Array[PackedScene]([ExtResource("10_0ye04"), ExtResource("11_ef15h"), ExtResource("12_61onh")])
 road_variants = Array[PackedScene]([ExtResource("9_hic5v"), ExtResource("10_g0hk2"), ExtResource("11_1svpa"), ExtResource("12_sma3h"), ExtResource("13_7jrbf"), ExtResource("14_bapqs"), ExtResource("15_7g8g1"), ExtResource("16_xyrth"), ExtResource("17_lbpeh"), ExtResource("18_740v2"), ExtResource("19_5xrpn"), ExtResource("20_rdt4p"), ExtResource("21_evukd")])
 river_variants = Array[PackedScene]([ExtResource("9_nfbn7"), ExtResource("10_ygtr0"), ExtResource("11_57cfd"), ExtResource("12_5ccbd"), ExtResource("13_e5sdi"), ExtResource("14_ttff6"), ExtResource("15_ho3vv"), ExtResource("16_j3e3m"), ExtResource("17_t13c0"), ExtResource("18_647gl"), ExtResource("19_4p7u4"), ExtResource("20_ngx7d"), ExtResource("21_nkx4u"), ExtResource("22_7v408"), ExtResource("23_kvgjy"), ExtResource("24_ygtr0")])
-coast_variants = Array[PackedScene]([ExtResource("1_ttff6"), ExtResource("2_ho3vv"), ExtResource("3_j3e3m"), ExtResource("4_t13c0")])
+coast_variants = Array[PackedScene]([ExtResource("1_ttff6"), ExtResource("2_ho3vv"), ExtResource("3_j3e3m"), ExtResource("4_t13c0"), ExtResource("5_ho3vv")])
 metadata/_custom_type_script = "uid://bfdmepmayfg4u"
