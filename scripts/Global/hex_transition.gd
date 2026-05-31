@@ -41,7 +41,7 @@ static func are_bits_adjacent(mask: int) -> bool:
 	var diff := (bits[1] - bits[0] + 6) % 6
 	return diff == 1 or diff == 5
 
-
+# rework time
 # Compute a 6-bit neighbor mask for any transition type.
 # condition(neighbor: Voxel) -> bool: return true if this neighbor triggers the transition.
 # Null neighbors (map edge) are passed as null — let your condition handle them.
