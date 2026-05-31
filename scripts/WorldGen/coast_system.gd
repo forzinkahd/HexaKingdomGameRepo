@@ -7,7 +7,7 @@ const COAST_C := 2
 const COAST_D := 3
 const COAST_E := 4
 
-const COAST_EDGE_OFFSET_STEPS := 1 # tune only once after assets are aligned
+#const COAST_EDGE_OFFSET_STEPS := 1 # tune only once after assets are aligned
 
 
 static func rebuild(surface_tiles: Array[Voxel]) -> void:
@@ -55,15 +55,11 @@ static func _is_water(v: Voxel) -> bool:
 		or v.water_kind == Voxel.WaterKind.RIVER
 
 
-# Returns Vector2(variant_index, yaw)
 static func _resolve_contiguous_coast(mask: int) -> Vector2:
 	var run := _contiguous_run(mask)
-
 	var run_len := int(run.x)
 	var run_start := int(run.y)
 
-	# Unsupported shape, e.g. bits 1 and 3.
-	# Use E rather than lying to the visual system.
 	if run_len <= 0:
 		return Vector2(COAST_E, 0.0)
 
@@ -80,10 +76,24 @@ static func _resolve_contiguous_coast(mask: int) -> Vector2:
 		_:
 			variant = COAST_E
 
-	var step := TAU / 6.0
-	var yaw := float(run_start + COAST_EDGE_OFFSET_STEPS) * step
-
+	var yaw := _coast_yaw_from_run(run_start, run_len)
 	return Vector2(variant, yaw)
+
+
+static func _coast_yaw_from_run(run_start: int, run_len: int) -> float:
+	var step := TAU / 6.0
+
+	# For A, center = start.
+	# For B, center is halfway between two sides.
+	# For C, center is the middle side.
+	# For D, center is halfway between the two middle sides.
+	var run_center := float(run_start) + (float(run_len) - 1.0) * 0.5
+
+	# Tune this once based on how your coast assets are authored.
+	# Start with 0. If all coast tiles are consistently rotated 60° off, change by +/-1.
+	const COAST_ASSET_OFFSET_STEPS := 0.0
+
+	return (run_center + COAST_ASSET_OFFSET_STEPS) * step
 
 
 # Returns Vector2(run_len, run_start).
