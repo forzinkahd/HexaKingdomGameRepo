@@ -384,7 +384,23 @@ var _bottom_by_xz := {}
 
 func _surface_cap_y(v: Voxel) -> float:
 	var half_step_h := settings.voxel_height * 0.5
-	return float(v.height_units) * half_step_h
+
+	# Default terrain cap height
+	var y := float(v.height_units) * half_step_h
+
+	# Any sea tile should sit on the sea plane
+	if v.is_sea:
+		y = float(settings.sea_level_units) * half_step_h
+
+	# Optional extra nudge down if the coast mesh pivot sits a bit high
+	#if v.is_sea and v.sea_is_coast_ring:
+		# y -= 0.05 * settings.voxel_height
+		# If it is still too high, try:
+		# y -= 0.10 * settings.voxel_height
+		# or, if your mesh is a full half-step too high:
+		# y -= half_step_h
+
+	return y
 
 
 """func _spawn_surface_tiles(chunk: Chunk) -> void:

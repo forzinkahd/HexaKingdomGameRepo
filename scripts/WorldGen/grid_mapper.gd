@@ -28,9 +28,10 @@ func calculate_map_positions() -> Array[Voxel]:
 	
 	for v in voxels:
 		assign_height_units(v)
-	
-	LakeSystem.apply_lakes(voxels, settings)
-	
+
+	if settings.use_corner_ocean:
+		_apply_corner_ocean(voxels)
+
 	print("Created ", voxels.size(), " positions")
 	print("Noise Range: ", noise_range)
 	WorldMap.noise_range = noise_range
@@ -127,6 +128,65 @@ func assign_height_units(v: Voxel) -> void:
 		v.water = false
 		v.is_sea = false
 		v.water_kind = Voxel.WaterKind.NONE
+
+
+func _apply_corner_ocean(voxels: Array[Voxel]) -> void:
+	var corner_axial: Vector2i = _corner_anchor(settings.ocean_corner)
+	var core_r: int = settings.ocean_corner_radius
+	var fade_r: int = settings.ocean_transition_radius
+	var max_transition_h: int = settings.ocean_transition_max_height_units
+
+	for v in voxels:
+		var dist: int = _hex_distance(v.grid_position_xz, corner_axial)
+
+		# Optional coastline wobble from terrain noise
+		var wobble: float = v.noise * settings.ocean_noise_strength
+		var d: float = float(dist) + wobble
+
+		# Fully ocean
+		if d <= float(core_r):
+			v.height_units = settings.sea_level_units
+			continue
+
+		# Outside corner-ocean influence
+		if d >= float(core_r + fade_r):
+			continue
+
+		# In transition band: smoothly ramp from sea -> low plains
+		var t := inverse_lerp(float(core_r), float(core_r + fade_r), d)
+		t = smoothstep(0.0, 1.0, t)
+
+		var allowed_height := settings.sea_level_units + int(round(
+			lerp(0.0, float(max_transition_h), t)
+		))
+
+		v.height_units = min(v.height_units, allowed_height)
+
+
+func _corner_anchor(corner: int) -> Vector2i:
+	var r := settings.radius
+
+	match corner:
+		GenerationSettings.OceanCorner.EAST:
+			return Vector2i(r, 0)
+		GenerationSettings.OceanCorner.NORTH_EAST:
+			return Vector2i(r, -r)
+		GenerationSettings.OceanCorner.NORTH_WEST:
+			return Vector2i(0, -r)
+		GenerationSettings.OceanCorner.WEST:
+			return Vector2i(-r, 0)
+		GenerationSettings.OceanCorner.SOUTH_WEST:
+			return Vector2i(-r, r)
+		GenerationSettings.OceanCorner.SOUTH_EAST:
+			return Vector2i(0, r)
+		_:
+			return Vector2i(0, r)
+
+
+func _hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var dq := a.x - b.x
+	var dr := a.y - b.y
+	return int((abs(dq) + abs(dr) + abs(dq + dr)) / 2)
 
 
 func _normalized_tile_noise(raw_noise: float) -> float:

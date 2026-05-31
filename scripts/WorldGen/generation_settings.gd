@@ -42,6 +42,7 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 @export_category("Half steps")
 @export var use_half_steps: bool = true
 
+###########################################
 # Ocean
 @export_category("Ocean")
 @export var sea_level_units: int = 0
@@ -56,6 +57,32 @@ var forced_ocean_edge_width: int = 2
 @export_range(2, 16, 1)
 var coastal_plain_width: int = 4
 
+enum OceanCorner {
+	EAST,
+	NORTH_EAST,
+	NORTH_WEST,
+	WEST,
+	SOUTH_WEST,
+	SOUTH_EAST
+}
+
+@export var use_corner_ocean: bool = true
+@export var ocean_corner: OceanCorner = OceanCorner.SOUTH_WEST
+
+# Tiles fully inside this radius become ocean
+@export_range(0, 64, 1) var ocean_corner_radius: int = 6
+
+# Additional fade distance from full ocean into low coastal plains
+@export_range(0, 64, 1) var ocean_transition_radius: int = 6
+
+# Maximum height allowed at the OUTER edge of the transition zone
+# Example: 2 means the transition ends as flat plains 2 half-steps above sea
+@export_range(0, 16, 1) var ocean_transition_max_height_units: int = 2
+
+# Optional small coastline wobble
+@export_range(0.0, 1.0, 0.01) var ocean_noise_strength: float = 0.15
+
+#########################################
 
 @export_category("Terrain Bands")
 @export_range(1, 6, 1)
@@ -70,6 +97,7 @@ var mountain_min_height_units_gen: int = 9
 @export_range(0.0, 1.0, 0.01)
 var mountain_noise_threshold: float = 0.84
 
+###########################################
 
 @export_category("Lakes")
 @export_range(0, 20, 1)
