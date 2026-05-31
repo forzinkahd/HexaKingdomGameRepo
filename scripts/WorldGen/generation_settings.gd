@@ -24,6 +24,8 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 @export_range(0.0, 1.0, 0.01) var cliff_threshold: float = 0.82
 @export_range(0, 64, 1) var cliff_boost_units: int = 10
 
+@export_category("Rendering")
+@export var use_instanced_surface_caps: bool = true
 
 @export_category("Voxel")
 @export_range(0.5, 10) var voxel_size : float = 1 # Size scalar
@@ -38,10 +40,28 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 @export var map_edge_buffer = 1
 @export_range(1, 99) var spacing = 4
 
+@export_category("Ocean")
+@export var sea_level_units: int = 0
+@export var forced_ocean_edge: String = "south_west"
+@export_range(1, 8, 1) var forced_ocean_edge_width: int = 2
+
+@export_category("Terrain Bands")
+@export var plains_max_height_units: int = 2
+@export var hills_max_height_units: int = 8
+@export var mountain_min_height_units_gen: int = 9
+
+@export_category("Lakes")
+@export var lake_attempts: int = 18
+@export var lake_min_size_tiles: int = 7
+@export var lake_max_radius: int = 3
+@export var lake_min_height_units: int = 1
+@export var lake_max_height_units: int = 2
+
+@export_category("Coasts")
+@export_range(0, 5, 1) var coast_yaw_offset_steps: int = 0
+@export var coast_mask_uses_land_edges: bool = true
+
+
 # Overworking half steps
 @export_category("Half steps")
 @export var use_half_steps: bool = true
-
-# Ocean
-@export_category("Ocean")
-@export var sea_level_units: int = 0

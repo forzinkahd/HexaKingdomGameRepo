@@ -177,3 +177,60 @@ func diamond_buffer_filter(col: int, row: int, limit: int) -> bool:
 
 func circular_buffer_filter(col: int, row: int, limit: int) -> bool:
 	return col * col + row * row > limit * limit
+
+
+static func height_units_for_tile(xz: Vector2i, settings: GenerationSettings) -> int:
+	if _is_forced_ocean_edge_xz(xz, settings):
+		return settings.sea_level_units
+
+	var n := settings.noise.get_noise_2d(float(xz.x), float(xz.y))
+	n = (n + 1.0) * 0.5
+
+	var q := xz.x
+	var r := xz.y
+	var s := -q - r
+	var dist_from_center := float(max(abs(q), abs(r), abs(s))) / float(settings.radius)
+
+	var continental := clampf((1.0 - dist_from_center) * 0.65 + n * 0.35, 0.0, 1.0)
+
+	if continental < 0.20:
+		return 0
+
+	# Plains: first and second half-step above ocean.
+	if continental < 0.55:
+		return 1 if n < 0.65 else 2
+
+	# Rolling hills.
+	if continental < 0.86:
+		return 3 + int(floor(n * 5.0))
+
+	# Mountain peaks.
+	if n > settings.cliff_threshold:
+		return settings.mountain_min_height_units_gen + int(floor(n * float(settings.cliff_boost_units)))
+
+	return settings.hills_max_height_units
+
+
+static func _is_forced_ocean_edge_xz(xz: Vector2i, settings: GenerationSettings) -> bool:
+	var radius := settings.radius
+	var width := settings.forced_ocean_edge_width
+
+	var q := xz.x
+	var r := xz.y
+	var s := -q - r
+
+	match settings.forced_ocean_edge:
+		"east":
+			return q >= radius - width
+		"west":
+			return q <= -radius + width
+		"south_east":
+			return r >= radius - width
+		"north_west":
+			return r <= -radius + width
+		"north_east":
+			return s >= radius - width
+		"south_west":
+			return s <= -radius + width
+		_:
+			return s <= -radius + width

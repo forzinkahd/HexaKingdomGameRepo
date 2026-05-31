@@ -17,6 +17,20 @@ var air_probability : float = 0
 var surface_voxel := false
 var is_base_grass_cap: bool = false
 
+
+enum SurfaceKind { LAND, OCEAN, LAKE }
+
+var surface_kind: SurfaceKind = SurfaceKind.LAND
+var is_water: bool = false
+var water_body_id: int = -1
+
+# Coast visual result, computed by CoastSystem.
+var has_coast_cap: bool = false
+var coast_mask: int = 0
+var coast_variant: String = ""
+var coast_yaw: float = 0.0
+
+
 var neighbors = []
 var placeable = true			# see voxel_generator.gd
 var occupier : Unit
@@ -53,10 +67,10 @@ var move_cost: float = 1.0  # later: road cheaper, mud higher, etc.
 # coastal surface
 var is_sea: bool = false
 var sea_is_coast_ring: bool = false
-var coast_mask: int = 0
+"""var coast_mask: int = 0
 var has_coast_cap: bool = false
 var coast_variant: String = ""
-var coast_yaw: float = 0.0
+var coast_yaw: float = 0.0"""
 
 func has_resource() -> bool:
 	return resource_id != &""

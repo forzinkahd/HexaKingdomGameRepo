@@ -86,10 +86,14 @@ func prepared_chunk(surface) -> Chunk:
 	var surface_tiles: Array[Voxel] = _build_surface_from_map()
 	surface_voxels = surface_tiles
 	WorldMap.set_map(map, surface_voxels)
-	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
 	
 	# surface_layer is populated, calculate sea/coast state
-	_compute_sea_and_coast(surface_voxels)
+	#_compute_sea_and_coast(surface_voxels)   # deprecated
+	OceanSystem.apply(surface_voxels, settings)
+	LakeSystem.apply(surface_voxels, settings)
+	CoastSystem.apply(surface_voxels, settings)
+	
+	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
 	
 	# Spawn custom visuals
 	_spawn_columns(chunk)		# bottom geometry
@@ -255,21 +259,25 @@ func build_hex_prism(voxel: Voxel) -> Dictionary:
 	if draw_face_towards(neighbor):
 		voxel.surface_voxel = true
 		surface_voxels.append(voxel)
-		for i in range(sides):
-			var angle = TAU * float(i) / float(sides)
-			var x = cos(angle) * size
-			var z = sin(angle) * size
-			verts.append(pos + Vector3(x, height, z))
-			# map inside [0,1] as circle
-			uvs.append(atlas_uv(Vector2(0.5 + cos(angle)*0.5, 0.5 + sin(angle)*0.5), top_tile))
-		# center vertex
-		verts.append(pos + top_offset)
-		uvs.append(atlas_uv(Vector2(0.5, 0.5), top_tile))
-		# top triangles
-		for i in range(sides):
-			indices.append(top_start + i)
-			indices.append(top_start + ((i + 1) % sides))
-			indices.append(top_start + sides)  # center
+
+		# If we spawn tile caps as scenes, do not also bake a mesh top.
+		if settings.use_instanced_surface_caps:
+			pass
+		else:
+			for i in range(sides):
+				var angle = TAU * float(i) / float(sides)
+				var x = cos(angle) * size
+				var z = sin(angle) * size
+				verts.append(pos + Vector3(x, height, z))
+				uvs.append(atlas_uv(Vector2(0.5 + cos(angle) * 0.5, 0.5 + sin(angle) * 0.5), top_tile))
+
+			verts.append(pos + top_offset)
+			uvs.append(atlas_uv(Vector2(0.5, 0.5), top_tile))
+
+			for i in range(sides):
+				indices.append(top_start + i)
+				indices.append(top_start + ((i + 1) % sides))
+				indices.append(top_start + sides)
 	
 	## BOTTOM
 	neighbor = voxel.grid_position_xyz
@@ -495,14 +503,13 @@ func _top_scene_for_voxel(v: Voxel) -> PackedScene:
 	if v == null or theme == null:
 		return null
 
-	if v.is_sea and v.sea_is_coast_ring:
-		var letter := VoxelData.coast_variant_from_mask(v.coast_mask)
-		if letter != "":
-			var scene := theme.coast_scene(letter)
-			if scene != null:
-				return scene
+	if v.has_coast_cap:
+		return theme.coast_scene(v.coast_variant)
 
-	if v.is_sea:
+	if v.surface_kind == Voxel.SurfaceKind.OCEAN:
+		return theme.sea_top_scene
+
+	if v.surface_kind == Voxel.SurfaceKind.LAKE:
 		return theme.sea_top_scene
 
 	return _top_scene_for_voxel_type(v.type)
@@ -521,8 +528,20 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var cap := scene.instantiate() as Node3D
 		cap.position = Vector3(v.world_position.x, _surface_cap_y(v), v.world_position.z)
 
-		if v.is_sea and v.sea_is_coast_ring and v.coast_mask != 0:
-			cap.rotation.y = _coast_yaw(v)
+		if v.has_coast_cap:
+			cap.rotation.y = v.coast_yaw
+
+			var edges := []
+			for i in range(6):
+				if (v.coast_mask & (1 << i)) != 0:
+					edges.append(i)
+
+			print(
+				"COAST xz=", v.grid_position_xz,
+				" variant=", v.coast_variant,
+				" edges=", edges,
+				" yaw=", rad_to_deg(v.coast_yaw)
+			)
 
 		_tag_tile_nodes(cap, v.grid_position_xz)
 		cap_root.add_child(cap)
@@ -652,13 +671,15 @@ func _replace_cap_at(chunk: Chunk, v: Voxel, new_scene: PackedScene) -> void:
 
 	inst.position = pos
 	inst.rotation = rot
+	if v.has_coast_cap:
+		inst.rotation.y = v.coast_yaw
 	inst.set_meta("is_surface_cap", true)
 	
 	if v.overlay == Voxel.Overlay.NONE:
 		inst.position.y = _surface_cap_y(v)
 	
 	_tag_tile_nodes(inst, v.grid_position_xz)
-	chunk.add_child(inst)
+	_get_or_create_cap_root(chunk).add_child(inst)
 	_cap_by_xz[key] = inst
 	_play_place_bounce(inst, chunk)
 
@@ -957,6 +978,12 @@ func _spawn_mountains(chunk: Chunk) -> void:
 		# Only above threshold
 		if v.height_units < theme.mountain_min_height_units:
 			continue
+			
+		if v.is_water:
+			continue
+
+		if v.has_coast_cap:
+			continue
 
 		# Optional chance
 		if theme.mountain_chance < 1.0:
@@ -1043,6 +1070,12 @@ func _spawn_forests(chunk: Chunk) -> void:
 		if v.height_units < theme.forest_min_height_units:
 			continue
 		if v.height_units > theme.forest_max_height_units:
+			continue
+		
+		if v.is_water:
+			continue
+
+		if v.has_coast_cap:
 			continue
 
 		# don't place on mountain tiles
