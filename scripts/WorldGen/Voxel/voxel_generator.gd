@@ -88,14 +88,18 @@ func prepared_chunk(surface) -> Chunk:
 	WorldMap.set_map(map, surface_voxels)
 	CoastSystem.rebuild(surface_voxels)
 	
-	# Only for debugging
+	var bad_land_coasts := 0
 	var coast_counts := [0, 0, 0, 0, 0]
-	for v in surface_voxels:
-		if v.is_coast and v.coast_variant_index >= 0:
-			coast_counts[v.coast_variant_index] += 1
 
-	print("Coast counts A-E: ", coast_counts)
-	# End of debugging
+	for v in surface_voxels:
+		if v.is_coast:
+			if not v.is_sea and not v.water:
+				bad_land_coasts += 1
+
+			if v.coast_variant_index >= 0 and v.coast_variant_index < coast_counts.size():
+				coast_counts[v.coast_variant_index] += 1
+
+	print("Coast counts A-E: ", coast_counts, " bad land coasts: ", bad_land_coasts)
 	
 	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
 	
@@ -385,8 +389,6 @@ var _bottom_by_xz := {}
 func _surface_cap_y(v: Voxel) -> float:
 	var half_step_h := settings.voxel_height * 0.5
 
-	# Water and coast caps should visually sit at sea level.
-	# The logical land voxel may still be height 1 or 2, but the coast mesh itself is a transition mesh.
 	if v.is_sea or v.water or v.is_coast:
 		return float(settings.sea_level_units) * half_step_h
 
@@ -512,15 +514,17 @@ func _top_scene_for_voxel(v: Voxel) -> PackedScene:
 	if v == null or theme == null:
 		return null
 
+	# Coast must win over sea because coast now lives on water-edge tiles.
+	if v.is_coast and v.coast_variant_index >= 0:
+		if v.coast_variant_index < theme.coast_variants.size():
+			return theme.coast_variants[v.coast_variant_index]
+
+	# Plain water after coast.
 	if v.water_kind == Voxel.WaterKind.OCEAN or v.is_sea:
 		return theme.sea_top_scene
 
 	if v.water_kind == Voxel.WaterKind.LAKE:
 		return theme.sea_top_scene
-
-	if v.is_coast and v.coast_variant_index >= 0:
-		if v.coast_variant_index < theme.coast_variants.size():
-			return theme.coast_variants[v.coast_variant_index]
 
 	return _top_scene_for_voxel_type(v.type)
 
@@ -540,9 +544,6 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 
 		if v.is_coast:
 			cap.rotation.y = v.coast_yaw
-		
-		if v.is_sea and v.sea_is_coast_ring and v.coast_mask != 0:
-			cap.rotation.y = _coast_yaw(v)
 
 		_tag_tile_nodes(cap, v.grid_position_xz)
 		cap_root.add_child(cap)

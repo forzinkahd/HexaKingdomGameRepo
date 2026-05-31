@@ -1,13 +1,15 @@
 extends Object
 class_name CoastSystem
 
-const COAST_A := 0
-const COAST_B := 1
-const COAST_C := 2
-const COAST_D := 3
-const COAST_E := 4
+const COAST_A := 0 # 1 adjacent land side
+const COAST_B := 1 # 2 adjacent land sides
+const COAST_C := 2 # 3 adjacent land sides
+const COAST_D := 3 # 4 adjacent land sides
+const COAST_E := 4 # fallback / filler
 
-#const COAST_EDGE_OFFSET_STEPS := 1 # tune only once after assets are aligned
+# Tune this only after the logic is correct.
+# Try 0.0 first, then +/-1.0 if all coast pieces are one hex side off.
+const COAST_ASSET_OFFSET_STEPS := -0.5
 
 
 static func rebuild(surface_tiles: Array[Voxel]) -> void:
@@ -17,11 +19,13 @@ static func rebuild(surface_tiles: Array[Voxel]) -> void:
 		v.coast_variant_index = -1
 		v.coast_yaw = 0.0
 
+	# Coast now belongs to WATER tiles that touch LAND.
+	# This avoids lowering land caps into their own columns.
 	for v in surface_tiles:
-		if _is_water(v):
+		if not _is_water(v):
 			continue
 
-		var mask := _water_neighbor_mask(v)
+		var mask := _land_neighbor_mask(v)
 		if mask == 0:
 			continue
 
@@ -32,13 +36,13 @@ static func rebuild(surface_tiles: Array[Voxel]) -> void:
 		v.coast_yaw = resolved.y
 
 
-static func _water_neighbor_mask(v: Voxel) -> int:
+static func _land_neighbor_mask(v: Voxel) -> int:
 	var mask := 0
 	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
 
 	for i in range(6):
 		var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
-		if n != null and _is_water(n):
+		if n != null and not _is_water(n):
 			mask |= (1 << i)
 
 	return mask
@@ -55,6 +59,7 @@ static func _is_water(v: Voxel) -> bool:
 		or v.water_kind == Voxel.WaterKind.RIVER
 
 
+# Returns Vector2(variant_index, yaw)
 static func _resolve_contiguous_coast(mask: int) -> Vector2:
 	var run := _contiguous_run(mask)
 	var run_len := int(run.x)
@@ -76,24 +81,18 @@ static func _resolve_contiguous_coast(mask: int) -> Vector2:
 		_:
 			variant = COAST_E
 
-	var yaw := _coast_yaw_from_run(run_start, run_len)
+	var yaw := _yaw_from_contiguous_run(run_start, run_len)
 	return Vector2(variant, yaw)
 
 
-static func _coast_yaw_from_run(run_start: int, run_len: int) -> float:
+static func _yaw_from_contiguous_run(run_start: int, run_len: int) -> float:
 	var step := TAU / 6.0
 
-	# For A, center = start.
-	# For B, center is halfway between two sides.
-	# For C, center is the middle side.
-	# For D, center is halfway between the two middle sides.
-	var run_center := float(run_start) + (float(run_len) - 1.0) * 0.5
+	# For B/C/D, rotate toward the center of the adjacent land arc,
+	# not merely toward the first side of the mask.
+	var center_side := float(run_start) + (float(run_len) - 1.0) * 0.5
 
-	# Tune this once based on how your coast assets are authored.
-	# Start with 0. If all coast tiles are consistently rotated 60° off, change by +/-1.
-	const COAST_ASSET_OFFSET_STEPS := 0.0
-
-	return (run_center + COAST_ASSET_OFFSET_STEPS) * step
+	return (center_side + COAST_ASSET_OFFSET_STEPS) * step
 
 
 # Returns Vector2(run_len, run_start).
