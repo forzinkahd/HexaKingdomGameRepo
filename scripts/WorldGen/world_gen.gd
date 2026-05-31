@@ -43,34 +43,48 @@ func init_seed():
 
 
 ## Start of world_generation, time each step
-func generate_world():
-	var starttime = Time.get_ticks_msec()
-	var interval = {"Start of Generation!" : starttime}
-	
-	## Get all positions through the gridmapper
-	var mapper = GridMapper.new()
-	var voxels = mapper.calculate_map_positions()
-	interval["Calculate Map Positions -- "] = Time.get_ticks_msec()
+func generate_world() -> void:
+	var starttime := Time.get_ticks_msec()
+	var interval := {"Start": starttime}
 
+	# Step 1: Generate base tile positions and heights
+	var mapper := GridMapper.new()
+	var voxels := mapper.calculate_map_positions()
+	interval["Calculate positions -- "] = Time.get_ticks_msec()
+
+	# Step 2: Carve lakes into plains BEFORE mesh generation
+	# (lake tiles get height = sea_level_units, becoming water in mesh)
+	if settings.lakes_enabled:
+		var lake_gen := LakeGenerator.new()
+		lake_gen.generate(voxels, settings)
+	interval["Generate lakes -- "] = Time.get_ticks_msec()
+
+	# Step 3: Build voxel mesh (includes coast computation and tile spawning)
 	_vg = VoxelGenerator.new()
 	_vg.theme = world_theme
 	_chunk = _vg.generate_chunk(voxels, interval)
 	chunks.add_child(_chunk)
 	_chunk.init_chunk()
-	interval["Create Voxel Mesh -- "] = Time.get_ticks_msec()
-	#print("World theme is: ", world_theme)
-	
-	print_generation_results(starttime, interval)
+	_chunk.name = "MainChunk"
+	interval["Build mesh -- "] = Time.get_ticks_msec()
+
+	# Step 4: Place rivers as overlays AFTER mesh (overlay system needs chunk)
+	if settings.rivers_enabled:
+		var river_placer := RiverPlacer.new()
+		river_placer.place(_vg.surface_voxels, _vg, _chunk, settings)
+	interval["Place rivers -- "] = Time.get_ticks_msec()
+
+	# Step 5: Configure runtime systems
 	placement_system.configure_runtime(_vg, _chunk)
-	interaction_tracker.init()
-	
-	
-	# Configure road tool runtime references
 	if road_tool != null:
 		road_tool.world_theme = world_theme
 		road_tool.configure_runtime(_vg, _chunk)
 	else:
 		push_warning("world_gen: road_tool not assigned")
+
+	interaction_tracker.init()
+
+	print_generation_results(starttime, interval)
 
 
 # ---------------------------------------------------------------------------------------------

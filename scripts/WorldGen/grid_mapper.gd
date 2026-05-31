@@ -104,29 +104,15 @@ func noise_at_tile(pos : Vector3, texture : FastNoiseLite) -> float:
 
 
 func assign_height_units(v: Voxel) -> void:
-	# normalize noise [-1..1-ish] to [0..1]
-	var n: float = float(v.noise)
-	var min_n: float = float(noise_range.x)
-	var max_n: float = float(noise_range.y)
-	
-	var denom: float = max(0.000001, max_n - min_n)
-	
-	var t: float = clampf((n - min_n) / denom, 0.0, 1.0)
-	t = pow(t, settings.height_curve)						# >1 -> more lowlands, sharper peaks; <1 -> more highlands
-	if t > settings.cliff_threshold:
-		v.height_units = min(settings.max_height_units, v.height_units + settings.cliff_boost_units)
+	# Normalize noise to [0, 1]
+	var n := float(v.noise)
+	var min_n := float(noise_range.x)
+	var max_n := float(noise_range.y)
+	var denom : Variant = max(0.000001, max_n - min_n)
+	var t := clampf((n - min_n) / denom, 0.0, 1.0)
 
-	# map to integer half-steps
-	v.height_units = int(round(t * float(settings.max_height_units)))
-
-	# quantize into bigger steps (cliffs/terraces)
-	var q: int = max(1, settings.terrace_quantum_units)
-	v.height_units = int(round(float(v.height_units) / float(q))) * q
-
-	# optional: keep buffer flatter / lower
-	if v.buffer:
-		v.height_units = min(v.height_units, 2)
-
+	# Delegate to TerrainShaper for biome-aware height assignment
+	TerrainShaper.assign_height(v, t, settings)
 
 
 ### Bounds
@@ -242,7 +228,7 @@ func _height_units_for_tile(xz: Vector2i) -> int:
 
 func _is_forced_ocean_edge_xz(xz: Vector2i) -> bool:
 	var radius := settings.radius
-	var width := settings.forced_ocean_edge_width
+	var width : Variant = settings.forced_ocean_edge_width
 
 	var q := xz.x
 	var r := xz.y

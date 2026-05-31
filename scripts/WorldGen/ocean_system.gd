@@ -2,7 +2,7 @@ extends Node
 class_name OceanSystem
 
 
-static func apply(surface_tiles: Array[Voxel], settings: GenerationSettings) -> void:
+"""static func apply(surface_tiles: Array[Voxel], settings: GenerationSettings) -> void:
 	for v in surface_tiles:
 		v.surface_kind = Voxel.SurfaceKind.LAND
 		v.is_water = false
@@ -31,7 +31,7 @@ static func _set_ocean(v: Voxel) -> void:
 
 static func _is_forced_ocean_edge(v: Voxel, settings: GenerationSettings) -> bool:
 	var radius := settings.radius
-	var width := settings.forced_ocean_edge_width
+	var width : Variant = settings.forced_ocean_edge_width
 
 	var q := v.grid_position_xz.x
 	var r := v.grid_position_xz.y
@@ -51,4 +51,4 @@ static func _is_forced_ocean_edge(v: Voxel, settings: GenerationSettings) -> boo
 		"south_west":
 			return s <= -radius + width
 		_:
-			return s <= -radius + width
+			return s <= -radius + width"""

@@ -88,10 +88,10 @@ func prepared_chunk(surface) -> Chunk:
 	WorldMap.set_map(map, surface_voxels)
 	
 	# surface_layer is populated, calculate sea/coast state
-	#_compute_sea_and_coast(surface_voxels)   # deprecated
-	OceanSystem.apply(surface_voxels, settings)
-	LakeSystem.apply(surface_voxels, settings)
-	CoastSystem.apply(surface_voxels, settings)
+	_compute_sea_and_coast(surface_voxels)   # deprecated
+	#OceanSystem.apply(surface_voxels, settings)
+	#LakeSystem.apply(surface_voxels, settings)
+	#CoastSystem.apply(surface_voxels, settings)
 	
 	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
 	
@@ -261,7 +261,7 @@ func build_hex_prism(voxel: Voxel) -> Dictionary:
 		surface_voxels.append(voxel)
 
 		# If we spawn tile caps as scenes, do not also bake a mesh top.
-		if settings.use_instanced_surface_caps:
+		"""if settings.use_instanced_surface_caps:
 			pass
 		else:
 			for i in range(sides):
@@ -277,7 +277,7 @@ func build_hex_prism(voxel: Voxel) -> Dictionary:
 			for i in range(sides):
 				indices.append(top_start + i)
 				indices.append(top_start + ((i + 1) % sides))
-				indices.append(top_start + sides)
+				indices.append(top_start + sides)"""
 	
 	## BOTTOM
 	neighbor = voxel.grid_position_xyz
@@ -412,39 +412,38 @@ const COAST_BAKED_ROT := -PI / 6.0 - PI * 2.0 / 3.0
 
 
 func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
-	# Pass 1: mark sea
+	# Pass 1: mark sea (ocean AND lakes — both are at sea_level_units)
 	for v in surface_tiles:
 		v.is_sea = (v.height_units <= settings.sea_level_units)
 		v.water = v.is_sea
 		v.coast_mask = 0
 		v.sea_is_coast_ring = false
 
-	# Pass 2: remove isolated sea tiles (no sea neighbors).
-	# Loop until stable so chains of isolated tiles are all removed.
+	# Pass 2: remove truly isolated sea tiles (no sea neighbors).
+	# A single water tile surrounded entirely by land looks wrong.
+	# Lakes have 7+ tiles so their perimeter tiles always have sea neighbors.
 	var changed := true
 	while changed:
 		changed = false
 		for v in surface_tiles:
-			if not v.is_sea:
-				continue
-			var has_sea_neighbor := false
+			if not v.is_sea: continue
 			var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+			var has_sea_neighbor := false
 			for i in range(6):
 				var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
 				if n != null and n.is_sea:
 					has_sea_neighbor = true
 					break
 			if not has_sea_neighbor:
+				# Promote to lowest plains height
 				v.is_sea = false
 				v.water = false
 				v.height_units = settings.sea_level_units + 1
 				changed = true
 
-	# Pass 3: compute coast masks on remaining sea tiles.
-	# Bits point toward land neighbors.
+	# Pass 3: coast ring on SEA tiles — bits point toward adjacent land
 	for v in surface_tiles:
-		if not v.is_sea:
-			continue
+		if not v.is_sea: continue
 		var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
 		var mask := 0
 		for i in range(6):
@@ -536,12 +535,12 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 				if (v.coast_mask & (1 << i)) != 0:
 					edges.append(i)
 
-			print(
+			"""print(
 				"COAST xz=", v.grid_position_xz,
 				" variant=", v.coast_variant,
 				" edges=", edges,
 				" yaw=", rad_to_deg(v.coast_yaw)
-			)
+			)"""
 
 		_tag_tile_nodes(cap, v.grid_position_xz)
 		cap_root.add_child(cap)
@@ -1052,64 +1051,49 @@ func _spawn_mountains(chunk: Chunk) -> void:
 
 
 func _spawn_forests(chunk: Chunk) -> void:
-	if theme == null:
-		return
-	if theme.tree_cluster_scenes.is_empty():
+	if theme == null or theme.tree_cluster_scenes.is_empty():
 		return
 
 	var half_step_h: float = settings.voxel_height * 0.5
 
 	for v: Voxel in surface_voxels:
-		if v.buffer:
-			continue
-		
-		if v.is_sea or v.coast_mask != 0:
-			continue
-		
-		# height band
-		if v.height_units < theme.forest_min_height_units:
-			continue
-		if v.height_units > theme.forest_max_height_units:
-			continue
-		
-		if v.is_water:
-			continue
+		if v.buffer or v.is_sea: continue
 
-		if v.has_coast_cap:
-			continue
+		# Don't place on height band outside forest zone
+		if v.height_units < theme.forest_min_height_units: continue
+		if v.height_units > theme.forest_max_height_units: continue
 
-		# don't place on mountain tiles
+		# Don't place on mountains
 		if theme.forest_avoid_mountains and _has_mountain_by_xz.has(v.grid_position_xz):
 			continue
 
-		# chance (deterministic)
-		var rng := RandomNumberGenerator.new()
-		rng.seed = _tile_seed(v, 771231) # salt
-		if rng.randf() > theme.forest_chance:
-			continue
+		# Don't place on immediate water-adjacent tiles (looks odd)
+		var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+		var has_water_neighbor := false
+		for i in range(6):
+			var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
+			if n != null and n.is_sea:
+				has_water_neighbor = true
+				break
+		if has_water_neighbor: continue
 
-		# pick variant
+		# Chance check (deterministic)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = _tile_seed(v, 771231)
+		if rng.randf() > theme.forest_chance: continue
+
 		var idx := rng.randi_range(0, theme.tree_cluster_scenes.size() - 1)
 		var scene := theme.tree_cluster_scenes[idx]
-		if scene == null:
-			continue
+		if scene == null: continue
 
-		var inst := scene.instantiate() as TreeCluster		# possibly return to Node3D
-
-		# place on cap height
+		var inst := scene.instantiate() as TreeCluster
 		var y := float(v.height_units) * half_step_h
 		inst.position = Vector3(v.world_position.x, y, v.world_position.z)
-
-		# small random rotation looks nice
 		inst.rotation.y = rng.randf_range(0.0, TAU)
-
 		chunk.add_child(inst)
-		
-		inst.home_voxel = v			# possibly delete
-		v.resource_id = &"tree_cluster"
 
-		# mark tile unplaceable for villages/units if you want
-		#v.placeable = false
+		inst.home_voxel = v
+		v.resource_id = &"tree_cluster"
 
 
 # -------------------------------------------------------------------
