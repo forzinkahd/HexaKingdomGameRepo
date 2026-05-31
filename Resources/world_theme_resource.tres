@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://rt1qpmhcyumk" path="res://Scenes/TerrainVoxels/tile_base_mountain_foundation_bottom.tscn" id="4_dmiqk"]
 [ext_resource type="PackedScene" uid="uid://b1jjbv4aqepx4" path="res://Scenes/TerrainVoxels/Rivers/tile_base_coast_d.tscn" id="4_t13c0"]
 [ext_resource type="PackedScene" uid="uid://byphhysv82hgg" path="res://Scenes/TerrainVoxels/tile_base_mountain_b.tscn" id="5_ckmn6"]
-[ext_resource type="PackedScene" uid="uid://brnbt0y2dp5ca" path="res://Assets/Meshes/Terrain/coast/hex_coast_E.gltf" id="5_ho3vv"]
+[ext_resource type="PackedScene" uid="uid://bam3oj0ev8gid" path="res://Scenes/TerrainVoxels/Rivers/tile_base_coast_e.tscn" id="5_ho3vv"]
 [ext_resource type="PackedScene" uid="uid://byhc0yq1qpn5n" path="res://Scenes/TerrainVoxels/tile_base_mountain_c.tscn" id="6_dmiqk"]
 [ext_resource type="PackedScene" uid="uid://c5lcx0gbg0nx7" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_a.tscn" id="9_hic5v"]
 [ext_resource type="PackedScene" uid="uid://cgueanc0upb5b" path="res://Scenes/TerrainVoxels/Rivers/tile_base_river_a.tscn" id="9_nfbn7"]

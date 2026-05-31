@@ -132,21 +132,21 @@ static func variant_letter_from_mask(mask: int) -> String:
 			return "M"
 
 
-static func coast_letter_from_mask(mask: int) -> String:
-	var n := mask_bit_count(mask)
+static func coast_variant_from_mask(mask: int) -> String:
+	if mask == 0:
+		return ""
+	var n := HexTransition.bit_count(mask)
 	match n:
-		0:
-			return "A"   # shouldn't happen; fallback
-		1:
-			return "A"   # single edge
+		1: return "A"
 		2:
-			# Two adjacent neighbors = outer corner (B)
-			# Two opposite neighbors = narrow peninsula, still use B
-			return "B"
-		3:
-			return "C"
-		_:
-			return "D"   # 4, 5, or 6 neighbors (peninsula tip)
+			# Two opposite edges cancel the centroid — treat as single edge
+			if HexTransition.are_bits_adjacent(mask):
+				return "B"
+			return "A"
+		3: return "C"
+		4: return "E"
+		5: return "D"
+		_: return ""  # 6 bits = fully enclosed, handled separately
 
 
 # coast rotation setting

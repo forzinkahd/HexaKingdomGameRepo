@@ -376,6 +376,138 @@ func _surface_cap_y(v: Voxel) -> float:
 	return float(v.height_units) * half_step_h
 
 
+"""func _spawn_surface_tiles(chunk: Chunk) -> void:
+	var cap_root := _get_or_create_cap_root(chunk)
+	_clear_children(cap_root)
+	_cap_by_xz.clear()
+
+	for v: Voxel in surface_voxels:
+		var scene := _top_scene_for_voxel(v)
+		if scene == null:
+			continue
+
+		var cap := scene.instantiate() as Node3D
+		cap.position = Vector3(v.world_position.x, _surface_cap_y(v), v.world_position.z)
+
+		if v.is_sea and v.sea_is_coast_ring and v.coast_mask != 0:
+			if HexTransition.bit_count(v.coast_mask) <= COAST_MAX_BITS_FOR_ART:
+				cap.rotation.y = _coast_yaw(v)
+
+		_tag_tile_nodes(cap, v.grid_position_xz)
+		cap_root.add_child(cap)
+		_cap_by_xz[v.grid_position_xz] = cap"""
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+const COAST_BAKED_ROT := -PI / 6.0 - PI * 2.0 / 3.0
+
+
+func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
+	# Pass 1: mark sea
+	for v in surface_tiles:
+		v.is_sea = (v.height_units <= settings.sea_level_units)
+		v.water = v.is_sea
+		v.coast_mask = 0
+		v.sea_is_coast_ring = false
+
+	# Pass 2: remove isolated sea tiles (no sea neighbors).
+	# Loop until stable so chains of isolated tiles are all removed.
+	var changed := true
+	while changed:
+		changed = false
+		for v in surface_tiles:
+			if not v.is_sea:
+				continue
+			var has_sea_neighbor := false
+			var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+			for i in range(6):
+				var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
+				if n != null and n.is_sea:
+					has_sea_neighbor = true
+					break
+			if not has_sea_neighbor:
+				v.is_sea = false
+				v.water = false
+				v.height_units = settings.sea_level_units + 1
+				changed = true
+
+	# Pass 3: compute coast masks on remaining sea tiles.
+	# Bits point toward land neighbors.
+	for v in surface_tiles:
+		if not v.is_sea:
+			continue
+		var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+		var mask := 0
+		for i in range(6):
+			var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
+			if n != null and not n.is_sea:
+				mask |= (1 << i)
+		if mask != 0:
+			v.coast_mask = mask
+			v.sea_is_coast_ring = true
+
+
+func _coast_yaw(v: Voxel) -> float:
+	var acc := Vector2.ZERO
+	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+
+	for i in range(6):
+		if (v.coast_mask & (1 << i)) == 0:
+			continue
+		var nk := v.grid_position_xz + dirs[i]
+		var n: Voxel = WorldMap.surface_layer.get(nk)
+		var dir := Vector2.ZERO
+		if n != null:
+			var dx := n.world_position.x - v.world_position.x
+			var dz := n.world_position.z - v.world_position.z
+			var len := sqrt(dx * dx + dz * dz)
+			if len > 0.0001:
+				dir = Vector2(dx, dz) / len
+		else:
+			dir = Vector2(float(dirs[i].x), float(dirs[i].y)).normalized()
+		acc += dir
+
+	# Opposite edges cancel each other — fall back to first set bit direction
+	if acc.length() < 0.0001:
+		for i in range(6):
+			if (v.coast_mask & (1 << i)) == 0:
+				continue
+			var nk := v.grid_position_xz + dirs[i]
+			var n: Voxel = WorldMap.surface_layer.get(nk)
+			if n != null:
+				var dx := n.world_position.x - v.world_position.x
+				var dz := n.world_position.z - v.world_position.z
+				var len := sqrt(dx * dx + dz * dz)
+				if len > 0.0001:
+					acc = Vector2(dx, dz) / len
+			else:
+				acc = Vector2(float(dirs[i].x), float(dirs[i].y)).normalized()
+			break
+
+	if acc.length() < 0.0001:
+		return 0.0
+
+	return atan2(acc.x, acc.y) - COAST_BAKED_ROT
+
+
+func _top_scene_for_voxel(v: Voxel) -> PackedScene:
+	if v == null or theme == null:
+		return null
+
+	if v.is_sea and v.sea_is_coast_ring:
+		var letter := VoxelData.coast_variant_from_mask(v.coast_mask)
+		if letter != "":
+			var scene := theme.coast_scene(letter)
+			if scene != null:
+				return scene
+
+	if v.is_sea:
+		return theme.sea_top_scene
+
+	return _top_scene_for_voxel_type(v.type)
+
+
 func _spawn_surface_tiles(chunk: Chunk) -> void:
 	var cap_root := _get_or_create_cap_root(chunk)
 	_clear_children(cap_root)
@@ -396,31 +528,63 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		cap_root.add_child(cap)
 		_cap_by_xz[v.grid_position_xz] = cap
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-const COAST_BAKED_ROT := PI / 6.0 + PI / 2.5
+"""###############
+# Tune this until coast art faces the correct direction.
+# Your assets have a 30deg baked rotation, so start at -PI/6.
+# If wrong by one hex step, adjust by +/- PI/3.
+const COAST_BAKED_ROT := -PI / 6.0 - PI / 3.0
+
+# Isolated sea tiles fully surrounded by land look bad with coast art.
+# Tiles with this many or more land neighbors use plain water instead.
+const COAST_MAX_BITS_FOR_ART := 4
+
 
 func _coast_yaw(v: Voxel) -> float:
-	var acc := Vector2.ZERO
-	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+	var result := VoxelData.coast_variant_from_mask(v.coast_mask)
+	return HexTransition.rotation_from_steps(result["cw_steps"], COAST_BAKED_ROT)
 
-	for i in range(6):
-		if (v.coast_mask & (1 << i)) == 0:
+
+func _top_scene_for_voxel(v: Voxel) -> PackedScene:
+	if v == null or theme == null:
+		return null
+
+	if v.is_sea and v.sea_is_coast_ring:
+		# Isolated tiles surrounded on too many sides look bad — use plain water
+		if HexTransition.bit_count(v.coast_mask) > COAST_MAX_BITS_FOR_ART:
+			return theme.sea_top_scene
+		var result := VoxelData.coast_variant_from_mask(v.coast_mask)
+		var scene := theme.coast_scene(result["letter"])
+		if scene != null:
+			return scene
+
+	if v.is_sea:
+		return theme.sea_top_scene
+
+	return _top_scene_for_voxel_type(v.type)
+
+
+func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
+	# Pass 1: mark sea
+	for v in surface_tiles:
+		v.is_sea = (v.height_units <= settings.sea_level_units)
+		v.water = v.is_sea
+		v.coast_mask = 0
+		v.sea_is_coast_ring = false
+
+	# Pass 2: coast mask on SEA tiles, bits point toward land neighbors.
+	# Map edge (null neighbor) counts as sea, so no bit set for missing neighbors.
+	for v in surface_tiles:
+		if not v.is_sea:
 			continue
-		var nk := v.grid_position_xz + dirs[i]
-		var n: Voxel = WorldMap.surface_layer.get(nk)
-		if n != null:
-			var dx := n.world_position.x - v.world_position.x
-			var dz := n.world_position.z - v.world_position.z
-			var len := sqrt(dx * dx + dz * dz)
-			if len > 0.0001:
-				acc += Vector2(dx, dz) / len
-		else:
-			acc += Vector2(float(dirs[i].x), float(dirs[i].y)).normalized()
-
-	if acc.length() < 0.0001:
-		return 0.0
-
-	return atan2(acc.x, acc.y) - COAST_BAKED_ROT
+		var mask := HexTransition.compute_mask(v, func(n: Voxel) -> bool:
+			return n != null and not n.is_sea
+		)
+		if mask != 0:
+			v.coast_mask = mask
+			v.sea_is_coast_ring = true
+###############"""
 
 
 const CAP_ROOT_NAME := "_Caps"
@@ -586,7 +750,7 @@ func _spawn_padding(chunk: Chunk) -> void:
 				chunk.add_child(pad)
 
 
-func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
+"""func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
 	for v in surface_tiles:
 		v.is_sea = (v.height_units <= settings.sea_level_units)
 		v.water = v.is_sea
@@ -605,7 +769,7 @@ func _compute_sea_and_coast(surface_tiles: Array[Voxel]) -> void:
 				mask |= (1 << i)
 		if mask != 0:
 			v.coast_mask = mask
-			v.sea_is_coast_ring = true
+			v.sea_is_coast_ring = true"""
 
 
 func refresh_overlay_at(chunk: Chunk, v: Voxel) -> void:
@@ -970,7 +1134,7 @@ func _build_xz_lookup() -> void:
 		_map_xz[v.grid_position_xz] = v
 
 
-func _top_scene_for_voxel(v: Voxel) -> PackedScene:
+"""func _top_scene_for_voxel(v: Voxel) -> PackedScene:
 	if v == null or theme == null:
 		return null
 
@@ -983,7 +1147,7 @@ func _top_scene_for_voxel(v: Voxel) -> PackedScene:
 	if v.is_sea:
 		return theme.sea_top_scene
 
-	return _top_scene_for_voxel_type(v.type)
+	return _top_scene_for_voxel_type(v.type)"""
 
 
 """func _top_scene_for_voxel(v: Voxel) -> PackedScene:
