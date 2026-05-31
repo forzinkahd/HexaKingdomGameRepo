@@ -52,7 +52,7 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 var forced_ocean_edge: String = "WEST"
 
 @export_range(1, 8, 1)
-var forced_ocean_edge_width: int = 2
+var forced_ocean_edge_width: int = 0
 
 @export_range(2, 16, 1)
 var coastal_plain_width: int = 4

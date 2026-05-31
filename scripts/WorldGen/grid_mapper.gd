@@ -139,20 +139,21 @@ func _apply_corner_ocean(voxels: Array[Voxel]) -> void:
 	for v in voxels:
 		var dist: int = _hex_distance(v.grid_position_xz, corner_axial)
 
-		# Optional coastline wobble from terrain noise
-		var wobble: float = v.noise * settings.ocean_noise_strength
-		var d: float = float(dist) + wobble
+		# Use normalized-ish noise so the wobble is predictable.
+		var n := _normalized_tile_noise(v.noise)
+		var wobble := (n - 0.5) * 2.0 * settings.ocean_noise_strength
+		var d := float(dist) + wobble
 
-		# Fully ocean
+		# Full ocean core.
 		if d <= float(core_r):
-			v.height_units = settings.sea_level_units
+			_set_ocean(v)
 			continue
 
-		# Outside corner-ocean influence
+		# Outside corner-ocean influence.
 		if d >= float(core_r + fade_r):
 			continue
 
-		# In transition band: smoothly ramp from sea -> low plains
+		# Transition band: sea -> low plains.
 		var t := inverse_lerp(float(core_r), float(core_r + fade_r), d)
 		t = smoothstep(0.0, 1.0, t)
 
@@ -161,6 +162,14 @@ func _apply_corner_ocean(voxels: Array[Voxel]) -> void:
 		))
 
 		v.height_units = min(v.height_units, allowed_height)
+
+		# Important: if the transition still clamps to sea level, it is ocean too.
+		if v.height_units <= settings.sea_level_units:
+			_set_ocean(v)
+		else:
+			v.water = false
+			v.is_sea = false
+			v.water_kind = Voxel.WaterKind.NONE
 
 
 func _corner_anchor(corner: int) -> Vector2i:
