@@ -29,6 +29,8 @@ func calculate_map_positions() -> Array[Voxel]:
 	for v in voxels:
 		assign_height_units(v)
 	
+	LakeSystem.apply_lakes(voxels, settings)
+	
 	print("Created ", voxels.size(), " positions")
 	print("Noise Range: ", noise_range)
 	WorldMap.noise_range = noise_range
@@ -104,28 +106,88 @@ func noise_at_tile(pos : Vector3, texture : FastNoiseLite) -> float:
 
 
 func assign_height_units(v: Voxel) -> void:
-	# normalize noise [-1..1-ish] to [0..1]
-	var n: float = float(v.noise)
+	var normalized_noise := _normalized_tile_noise(v.noise)
+	var ocean_distance := _distance_from_forced_ocean_edge(v.grid_position_xz)
+
+	if ocean_distance < settings.forced_ocean_edge_width:
+		_set_ocean(v)
+		return
+
+	var h := _height_from_bands(v.grid_position_xz, normalized_noise, ocean_distance)
+
+	var q: int = max(1, settings.terrace_quantum_units)
+	h = int(round(float(h) / float(q))) * q
+	h = clampi(h, settings.sea_level_units, settings.max_height_units)
+
+	v.height_units = h
+
+	if v.height_units <= settings.sea_level_units:
+		_set_ocean(v)
+	else:
+		v.water = false
+		v.is_sea = false
+		v.water_kind = Voxel.WaterKind.NONE
+
+
+func _normalized_tile_noise(raw_noise: float) -> float:
 	var min_n: float = float(noise_range.x)
 	var max_n: float = float(noise_range.y)
-	
 	var denom: float = max(0.000001, max_n - min_n)
-	
-	var t: float = clampf((n - min_n) / denom, 0.0, 1.0)
-	t = pow(t, settings.height_curve)						# >1 -> more lowlands, sharper peaks; <1 -> more highlands
-	if t > settings.cliff_threshold:
-		v.height_units = min(settings.max_height_units, v.height_units + settings.cliff_boost_units)
+	return clampf((raw_noise - min_n) / denom, 0.0, 1.0)
 
-	# map to integer half-steps
-	v.height_units = int(round(t * float(settings.max_height_units)))
 
-	# quantize into bigger steps (cliffs/terraces)
-	var q: int = max(1, settings.terrace_quantum_units)
-	v.height_units = int(round(float(v.height_units) / float(q))) * q
+func _set_ocean(v: Voxel) -> void:
+	v.height_units = settings.sea_level_units
+	v.water = true
+	v.is_sea = true
+	v.water_kind = Voxel.WaterKind.OCEAN
+	v.walkable = false
+	v.move_cost = INF
 
-	# optional: keep buffer flatter / lower
-	if v.buffer:
-		v.height_units = min(v.height_units, 2)
+
+func _height_from_bands(xz: Vector2i, n: float, ocean_distance: int) -> int:
+	var edge_t := clampf(float(ocean_distance - settings.forced_ocean_edge_width) / float(max(1, settings.coastal_plain_width)), 0.0, 1.0)
+
+	# Low coastal shelf: many buildable plains near ocean.
+	if edge_t < 1.0:
+		var plain_noise := pow(n, 1.8)
+		return settings.sea_level_units + 1 + int(round(plain_noise * float(settings.plains_max_height_units - 1)))
+
+	# Inland plains are still common.
+	if n < 0.48:
+		return settings.sea_level_units + randi_range(1, settings.plains_max_height_units)
+
+	# Rolling hills.
+	if n < settings.mountain_noise_threshold:
+		var hill_t := inverse_lerp(0.48, settings.mountain_noise_threshold, n)
+		return settings.plains_max_height_units + 1 + int(round(hill_t * float(settings.hills_max_height_units - settings.plains_max_height_units)))
+
+	# Mountain peaks.
+	var peak_t := inverse_lerp(settings.mountain_noise_threshold, 1.0, n)
+	return settings.mountain_min_height_units_gen + int(round(peak_t * float(settings.cliff_boost_units)))
+
+
+func _distance_from_forced_ocean_edge(xz: Vector2i) -> int:
+	var q := xz.x
+	var r := xz.y
+	var s := -q - r
+	var radius := settings.radius
+
+	match settings.forced_ocean_edge:
+		"WEST":
+			return q + radius
+		"EAST":
+			return radius - q
+		"NORTH_WEST":
+			return r + radius
+		"SOUTH_EAST":
+			return radius - r
+		"NORTH_EAST":
+			return s + radius
+		"SOUTH_WEST":
+			return radius - s
+		_:
+			return q + radius
 
 
 

@@ -58,6 +58,14 @@ var has_coast_cap: bool = false
 var coast_variant: String = ""
 var coast_yaw: float = 0.0
 
+enum WaterKind { NONE, OCEAN, LAKE, RIVER }
+
+var water_kind: WaterKind = WaterKind.NONE
+var water_body_id: int = -1
+
+var is_coast: bool = false
+var coast_variant_index: int = -1
+
 func has_resource() -> bool:
 	return resource_id != &""
 

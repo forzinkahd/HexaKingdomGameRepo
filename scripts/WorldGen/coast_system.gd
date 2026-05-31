@@ -1,127 +1,111 @@
-extends Node
+extends Object
 class_name CoastSystem
 
-# Masks are 6 bits. We will only accept "contiguous runs" of length 1..4.
-# If not representable, we degrade to E (filler) or A (single).
+const COAST_A := 0
+const COAST_B := 1
+const COAST_C := 2
+const COAST_D := 3
+const COAST_E := 4
 
-static func recalc(surface_tiles: Array[Voxel], sea_level_units: int) -> void:
-	# Reset
+const COAST_EDGE_OFFSET_STEPS := 1 # tune only once after assets are aligned
+
+
+static func rebuild(surface_tiles: Array[Voxel]) -> void:
 	for v in surface_tiles:
-		v.is_sea = (v.height_units <= sea_level_units)
-		v.water = v.is_sea
-		
-		v.sea_is_coast_ring = false
+		v.is_coast = false
 		v.coast_mask = 0
-		
-		v.has_coast_cap = false
-		v.coast_variant = ""
+		v.coast_variant_index = -1
 		v.coast_yaw = 0.0
-		
-	# Coast ring: SEA tiles that touch LAND
+
 	for v in surface_tiles:
-		if not v.is_sea:
+		if _is_water(v):
 			continue
-		
-		var mask_to_land := _mask_to_land(v)
-		if mask_to_land == 0:
+
+		var mask := _water_neighbor_mask(v)
+		if mask == 0:
 			continue
-		
-		v.sea_is_coast_ring = true
-		
-		# IMPORTANT: your art is defined by SEA connections, not LAND connections.
-		# Convert land-neighbor mask into "sea edges mask":
-		# sea_edges are the edges that are NOT land-touching.
-		var sea_mask := (~mask_to_land) & 0x3F
-		
-		# Classify sea_mask into A/B/C/D/E and compute yaw from the contiguous run
-		var result := _coast_variant_and_yaw_from_sea_mask(sea_mask)
-		
-		v.has_coast_cap = true
-		v.coast_variant = result.variant
-		v.coast_yaw = result.yaw
-		
-		# keep for debugging/inspection if you want
-		v.coast_mask = sea_mask
+
+		var resolved := _resolve_contiguous_coast(mask)
+		v.is_coast = true
+		v.coast_mask = mask
+		v.coast_variant_index = int(resolved.x)
+		v.coast_yaw = resolved.y
 
 
-static func _mask_to_land(v: Voxel) -> int:
+static func _water_neighbor_mask(v: Voxel) -> int:
 	var mask := 0
 	var dirs := VoxelData.neighbor_dirs_for_col(v.grid_position_xz.x)
+
 	for i in range(6):
 		var n: Voxel = WorldMap.surface_layer.get(v.grid_position_xz + dirs[i])
-		if n != null and (not n.is_sea):
+		if n != null and _is_water(n):
 			mask |= (1 << i)
+
 	return mask
 
 
-# Returns a Dictionary {variant: String, yaw: float}
-# sea_mask meaning: bit i == 1 means "edge i is sea" (water is open on that edge)
-static func _coast_variant_and_yaw_from_sea_mask(sea_mask: int) -> Dictionary:
-	var count := VoxelData.mask_bit_count(sea_mask)
-	
-	# Your definition:
-	# A: 1 sea edge
-	# B: 2 adjacent sea edges
-	# C: 3 adjacent sea edges
-	# D: 4 adjacent sea edges
-	# E: 0 sea edges (filler / tiny beaches)
-	#
-	# We must reject non-adjacent patterns (like 1+3). For those, choose a fallback.
-	
-	if count == 0:
-		return {"variant": "E", "yaw": 0.0}
-	
-	# Find the best contiguous run of 1s in sea_mask (circular)
-	var run := _best_contiguous_run(sea_mask)
-	
-	# run.len is 1..6, run.start is 0..5
-	# If the mask is fragmented, run.len will be < count.
-	# We degrade by taking the largest run only.
-	var run_len: int = run.len
-	var start_edge: int = run.start
-	
-	# Clamp run_len to supported set (1..4). If 5/6 ever happens, treat as 4.
-	if run_len >= 4:
-		run_len = 4
-	
-	var variant := ""
+static func _is_water(v: Voxel) -> bool:
+	if v == null:
+		return false
+
+	return v.water \
+		or v.is_sea \
+		or v.water_kind == Voxel.WaterKind.OCEAN \
+		or v.water_kind == Voxel.WaterKind.LAKE \
+		or v.water_kind == Voxel.WaterKind.RIVER
+
+
+# Returns Vector2(variant_index, yaw)
+static func _resolve_contiguous_coast(mask: int) -> Vector2:
+	var run := _contiguous_run(mask)
+
+	var run_len := int(run.x)
+	var run_start := int(run.y)
+
+	# Unsupported shape, e.g. bits 1 and 3.
+	# Use E rather than lying to the visual system.
+	if run_len <= 0:
+		return Vector2(COAST_E, 0.0)
+
+	var variant := COAST_E
 	match run_len:
-		1: variant = "A"
-		2: variant = "B"
-		3: variant = "C"
-		4: variant = "D"
-		_: variant = "A"
-	
-	# Yaw: rotate so that the run's START EDGE aligns with the mesh's authored "start".
-	# You will tune this once.
-	var yaw: float = VoxelData.yaw_from_edge(start_edge, VoxelData.COAST_ASSET_EDGE0_OFFSET_STEPS)
-	
-	return {"variant": variant, "yaw": yaw}
+		1:
+			variant = COAST_A
+		2:
+			variant = COAST_B
+		3:
+			variant = COAST_C
+		4:
+			variant = COAST_D
+		_:
+			variant = COAST_E
+
+	var step := TAU / 6.0
+	var yaw := float(run_start + COAST_EDGE_OFFSET_STEPS) * step
+
+	return Vector2(variant, yaw)
 
 
-# Find the longest contiguous run of 1 bits on a 6-bit ring.
-# Returns {start:int, len:int}
-static func _best_contiguous_run(mask: int) -> Dictionary:
-	var best_len := 0
-	var best_start := 0
-	
+# Returns Vector2(run_len, run_start).
+# If the set bits are not one contiguous circular run, returns Vector2(-1, 0).
+static func _contiguous_run(mask: int) -> Vector2:
+	var bits: Array[int] = []
+	for i in range(6):
+		if (mask & (1 << i)) != 0:
+			bits.append(i)
+
+	if bits.is_empty():
+		return Vector2(0, 0)
+
+	var count := bits.size()
+
 	for start in range(6):
-		# only consider starts where bit is 1
-		if (mask & (1 << start)) == 0:
-			continue
-		
-		var l := 0
-		for k in range(6):
-			var i := (start + k) % 6
-			if (mask & (1 << i)) != 0:
-				l += 1
-			else:
-				break
-		
-		if l > best_len:
-			best_len = l
-			best_start = start
+		var test_mask := 0
+		for k in range(count):
+			var side := (start + k) % 6
+			test_mask |= (1 << side)
 
-	# If mask is 0, return 0
-	return {"start": best_start, "len": best_len}
-	
+		if test_mask == mask:
+			return Vector2(count, start)
+
+	return Vector2(-1, 0)

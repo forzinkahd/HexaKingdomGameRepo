@@ -45,3 +45,44 @@ enum shape {HEXAGONAL, RECTANGULAR, DIAMOND, CIRCLE}
 # Ocean
 @export_category("Ocean")
 @export var sea_level_units: int = 0
+
+@export_category("Ocean Shape")
+@export_enum("WEST", "EAST", "NORTH_WEST", "NORTH_EAST", "SOUTH_WEST", "SOUTH_EAST")
+var forced_ocean_edge: String = "WEST"
+
+@export_range(1, 8, 1)
+var forced_ocean_edge_width: int = 2
+
+@export_range(2, 16, 1)
+var coastal_plain_width: int = 4
+
+
+@export_category("Terrain Bands")
+@export_range(1, 6, 1)
+var plains_max_height_units: int = 2
+
+@export_range(3, 10, 1)
+var hills_max_height_units: int = 7
+
+@export_range(8, 32, 1)
+var mountain_min_height_units_gen: int = 9
+
+@export_range(0.0, 1.0, 0.01)
+var mountain_noise_threshold: float = 0.84
+
+
+@export_category("Lakes")
+@export_range(0, 20, 1)
+var lake_attempts: int = 0
+
+@export_range(7, 60, 1)
+var lake_min_tiles: int = 7
+
+@export_range(7, 120, 1)
+var lake_max_tiles: int = 24
+
+@export_range(1, 8, 1)
+var lake_margin_from_ocean_edge: int = 5
+
+@export_range(1, 6, 1)
+var lake_max_height_units: int = 3

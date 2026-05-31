@@ -15,7 +15,7 @@ const ATLAS_RES   = Vector2i(512, 512)	# full atlas resolution in pixels
 const TILE_SIZE   = Vector2i(16, 16)	# usable area of one tile
 const TILE_STRIDE = Vector2i(18, 18)	# includes padding
 const TILE_MARGIN = Vector2i(5, 5)		# margin before first tile, always +1 of the actual padded border
-const COAST_EDGE_OFFSET_STEPS: int = 2
+#const COAST_EDGE_OFFSET_STEPS: int = 2
 
 # Define base hexagon
 const base_vertices = [
@@ -86,10 +86,21 @@ func prepared_chunk(surface) -> Chunk:
 	var surface_tiles: Array[Voxel] = _build_surface_from_map()
 	surface_voxels = surface_tiles
 	WorldMap.set_map(map, surface_voxels)
+	CoastSystem.rebuild(surface_voxels)
+	
+	# Only for debugging
+	var coast_counts := [0, 0, 0, 0, 0]
+	for v in surface_voxels:
+		if v.is_coast and v.coast_variant_index >= 0:
+			coast_counts[v.coast_variant_index] += 1
+
+	print("Coast counts A-E: ", coast_counts)
+	# End of debugging
+	
 	print("Surface voxels:", surface_voxels.size(), " total voxels:", map.size())
 	
 	# surface_layer is populated, calculate sea/coast state
-	_compute_sea_and_coast(surface_voxels)
+	#_compute_sea_and_coast(surface_voxels) # deprecated
 	
 	# Spawn custom visuals
 	_spawn_columns(chunk)		# bottom geometry
@@ -495,15 +506,15 @@ func _top_scene_for_voxel(v: Voxel) -> PackedScene:
 	if v == null or theme == null:
 		return null
 
-	if v.is_sea and v.sea_is_coast_ring:
-		var letter := VoxelData.coast_variant_from_mask(v.coast_mask)
-		if letter != "":
-			var scene := theme.coast_scene(letter)
-			if scene != null:
-				return scene
-
-	if v.is_sea:
+	if v.water_kind == Voxel.WaterKind.OCEAN or v.is_sea:
 		return theme.sea_top_scene
+
+	if v.water_kind == Voxel.WaterKind.LAKE:
+		return theme.sea_top_scene
+
+	if v.is_coast and v.coast_variant_index >= 0:
+		if v.coast_variant_index < theme.coast_variants.size():
+			return theme.coast_variants[v.coast_variant_index]
 
 	return _top_scene_for_voxel_type(v.type)
 
@@ -521,6 +532,9 @@ func _spawn_surface_tiles(chunk: Chunk) -> void:
 		var cap := scene.instantiate() as Node3D
 		cap.position = Vector3(v.world_position.x, _surface_cap_y(v), v.world_position.z)
 
+		if v.is_coast:
+			cap.rotation.y = v.coast_yaw
+		
 		if v.is_sea and v.sea_is_coast_ring and v.coast_mask != 0:
 			cap.rotation.y = _coast_yaw(v)
 
@@ -958,6 +972,12 @@ func _spawn_mountains(chunk: Chunk) -> void:
 		if v.height_units < theme.mountain_min_height_units:
 			continue
 
+		if v.water or v.is_sea or v.water_kind != Voxel.WaterKind.NONE:
+			continue
+
+		if v.is_coast:
+			continue
+
 		# Optional chance
 		if theme.mountain_chance < 1.0:
 			var rng_chance := RandomNumberGenerator.new()
@@ -1034,6 +1054,12 @@ func _spawn_forests(chunk: Chunk) -> void:
 
 	for v: Voxel in surface_voxels:
 		if v.buffer:
+			continue
+		
+		if v.water or v.is_sea or v.water_kind != Voxel.WaterKind.NONE:
+			continue
+
+		if v.is_coast:
 			continue
 		
 		if v.is_sea or v.coast_mask != 0:

@@ -73,7 +73,7 @@ const RIVER_LETTER_TO_INDEX := {
 
 
 # only point to adjust edge offset for coast tiles!!!
-const COAST_ASSET_EDGE0_OFFSET_STEPS: int = 1
+const COAST_ASSET_EDGE0_OFFSET_STEPS: int = 2
 
 const COAST_LETTER_TO_INDEX := {
 	"A": 0, "B": 1, "C": 2, "D": 3, "E": 4
