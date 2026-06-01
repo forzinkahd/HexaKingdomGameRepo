@@ -55,7 +55,7 @@ var forced_ocean_edge: String = "WEST"
 var forced_ocean_edge_width: int = 0
 
 @export_range(2, 16, 1)
-var coastal_plain_width: int = 4
+var coastal_plain_width: int = 0
 
 enum OceanCorner {
 	EAST,
