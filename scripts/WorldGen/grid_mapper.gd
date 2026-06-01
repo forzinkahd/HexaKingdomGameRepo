@@ -131,44 +131,44 @@ func assign_height_units(v: Voxel) -> void:
 
 
 func _apply_corner_ocean(voxels: Array[Voxel]) -> void:
-	var corner_axial: Vector2i = _corner_anchor(settings.ocean_corner)
-	var core_r: int = settings.ocean_corner_radius
-	var fade_r: int = settings.ocean_transition_radius
-	var max_transition_h: int = settings.ocean_transition_max_height_units
+	if not settings.use_corner_ocean:
+		return
+
+	var corner: Vector2i  = _corner_anchor(settings.ocean_corner)
+	var core_r: int       = settings.ocean_corner_radius
+	var fade_r: int       = settings.ocean_transition_radius
+	var max_h:  int       = settings.ocean_transition_max_height_units
 
 	for v in voxels:
-		var dist: int = _hex_distance(v.grid_position_xz, corner_axial)
+		var dist: int = _hex_distance(v.grid_position_xz, corner)
 
-		# Use normalized-ish noise so the wobble is predictable.
-		var n := _normalized_tile_noise(v.noise)
-		var wobble := (n - 0.5) * 2.0 * settings.ocean_noise_strength
-		var d := float(dist) + wobble
-
-		# Full ocean core.
-		if d <= float(core_r):
+		# ── Core ocean ──────────────────────────────────────────────────────
+		# Integer hex distance gives a perfect hexagonal region.
+		# Because the anchor is AT the map corner, only 3 of the 6 hex sides
+		# are inside the map, so the coastline has exactly 3 straight edges.
+		if dist <= core_r:
 			_set_ocean(v)
 			continue
 
-		# Outside corner-ocean influence.
-		if d >= float(core_r + fade_r):
+		# ── Outside influence zone ──────────────────────────────────────────
+		if dist >= core_r + fade_r:
 			continue
 
-		# Transition band: sea -> low plains.
-		var t := inverse_lerp(float(core_r), float(core_r + fade_r), d)
-		t = smoothstep(0.0, 1.0, t)
+		# ── Transition band ─────────────────────────────────────────────────
+		# Smoothly raise the allowed height from sea level to max_h as we
+		# move away from the core, giving a gentle coastal plain.
+		var t := smoothstep(0.0, 1.0,
+			inverse_lerp(float(core_r), float(core_r + fade_r), float(dist))
+		)
 
-		var allowed_height := settings.sea_level_units + int(round(
-			lerp(0.0, float(max_transition_h), t)
-		))
+		var allowed_h := settings.sea_level_units + int(round(lerp(0.0, float(max_h), t)))
+		v.height_units = mini(v.height_units, allowed_h)
 
-		v.height_units = min(v.height_units, allowed_height)
-
-		# Important: if the transition still clamps to sea level, it is ocean too.
 		if v.height_units <= settings.sea_level_units:
 			_set_ocean(v)
 		else:
-			v.water = false
-			v.is_sea = false
+			v.water      = false
+			v.is_sea     = false
 			v.water_kind = Voxel.WaterKind.NONE
 
 
