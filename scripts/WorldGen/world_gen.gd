@@ -1,4 +1,44 @@
 extends Node
+class_name WorldGenController
+
+@export var settings: GenerationSettings
+@export var world_theme: WorldTheme
+@export var world_renderer: WorldRenderer
+@export var placement_system: PlacementSystem
+@export var road_tool: RoadTool
+@export var object_placer: ObjectPlacer
+
+@onready var interaction_tracker: Node3D = $"../Interaction_tracker"
+
+var generation_result: GenerationResult
+
+func _ready() -> void:
+	_clear_runtime()
+	call_deferred("_generate_world")
+
+func _clear_runtime() -> void:
+	WorldMap.clear_map()
+	object_placer.clear_objects()
+
+func _generate_world() -> void:
+	var pipeline := WorldGenerationPipeline.new()
+	generation_result = pipeline.generate(settings, world_theme)
+
+	WorldMap.load_generation_result(generation_result)
+
+	var render_result := world_renderer.render(generation_result, settings, world_theme)
+
+	placement_system.configure_runtime(render_result.voxel_generator, render_result.chunk)
+	interaction_tracker.init()
+
+	if road_tool != null:
+		road_tool.world_theme = world_theme
+		road_tool.configure_runtime(render_result.voxel_generator, render_result.chunk)
+
+
+
+
+"""extends Node
 
 # Dependencies
 @export var settings : GenerationSettings
@@ -111,4 +151,4 @@ func get_placeable_voxels() -> Array[Voxel]:
 			continue
 		placeable_tiles.append(voxel)
 	print(str(placeable_tiles.size()) + " placeable tiles")
-	return placeable_tiles
+	return placeable_tiles"""
