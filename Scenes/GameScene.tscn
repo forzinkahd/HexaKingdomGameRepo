@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://regx54qdcye7" path="res://Scenes/camera_rig.gd" id="1_qolck"]
 [ext_resource type="Texture2D" uid="uid://b23jrfa2h4i8l" path="res://Assets/Materials/SkyBG.png" id="2_l7mlp"]
 [ext_resource type="Script" uid="uid://cr1mxhuqd7thp" path="res://scripts/WorldGen/world_gen.gd" id="3_davhy"]
-[ext_resource type="Resource" uid="uid://c6hfos2qpgqth" path="res://Resources/GenerationSettings/test.tres" id="4_58wc8"]
 [ext_resource type="Resource" uid="uid://dhdal01tj7qvh" path="res://Resources/world_theme_resource.tres" id="5_7rq2r"]
 [ext_resource type="PackedScene" path="res://scenes/Cursors/path_overlay.tscn" id="9_6pl24"]
 [ext_resource type="Script" uid="uid://dal880y43rf11" path="res://scripts/WorldGen/object_placer.gd" id="9_p13dw"]
@@ -90,14 +89,8 @@ stretch_mode = 4
 
 [node name="Builder" type="Node" parent="." unique_id=1283482510]
 
-[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("object_placer", "overlay_visuals", "road_tool", "placement_system")]
+[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190]
 script = ExtResource("3_davhy")
-settings = ExtResource("4_58wc8")
-object_placer = NodePath("../ObjectPlacer")
-world_theme = ExtResource("5_7rq2r")
-overlay_visuals = NodePath("../OverlayVisuals")
-road_tool = NodePath("../RoadTool")
-placement_system = NodePath("../PlacementSystem")
 
 [node name="ObjectPlacer" type="Node" parent="Builder" unique_id=1196252014]
 script = ExtResource("9_p13dw")

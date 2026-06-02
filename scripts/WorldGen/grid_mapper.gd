@@ -6,34 +6,27 @@ var noise_range := Vector2(99999, -99999)
 
 ## Main entry point, Get all positions to spawn tiles on
 func calculate_map_positions() -> Array[Voxel]:
-	var voxels : Array[Voxel]
+	var voxels: Array[Voxel]
 	settings = WorldMap.world_settings
 
-	## Diamond and Circle also use the rectangular bounds. They carve our their shape from that rectangle
-	## using their individual shape filters 
-	var stagger : bool
+	var stagger := false
 	match settings.map_shape:
-		0:
-			stagger = false
-			voxels = generate_map(hexagonal_bounds(), stagger, hexagonal_buffer_filter)
-		1:
+		GenerationSettings.shape.HEXAGONAL:
+			voxels = generate_map(hexagonal_bounds(), false, hexagonal_buffer_filter)
+		GenerationSettings.shape.RECTANGULAR:
 			stagger = true
-			voxels = generate_map(rectangle_bounds(), stagger, rectangular_buffer_filter)
-		2:
+			voxels = generate_map(rectangle_bounds(), true, rectangular_buffer_filter)
+		GenerationSettings.shape.DIAMOND:
 			stagger = true
-			voxels = generate_map(rectangle_bounds(), stagger, diamond_buffer_filter, diamond_shape_filter)
-		3:
+			voxels = generate_map(rectangle_bounds(), true, diamond_buffer_filter, diamond_shape_filter)
+		GenerationSettings.shape.CIRCLE:
 			stagger = true
-			voxels = generate_map(rectangle_bounds(), stagger, circular_buffer_filter, circle_shape_filter)
-	
-	for v in voxels:
-		assign_height_units(v)
+			voxels = generate_map(rectangle_bounds(), true, circular_buffer_filter, circle_shape_filter)
 
-	if settings.use_corner_ocean:
-		_apply_corner_ocean(voxels)
+	NoiseStage.new().run_voxels(settings, voxels, self)
+	HeightStage.new().run_voxels(settings, voxels, noise_range)
+	WaterStage.new().run_voxels(settings, voxels)
 
-	print("Created ", voxels.size(), " positions")
-	print("Noise Range: ", noise_range)
 	WorldMap.noise_range = noise_range
 	WorldMap.is_map_staggered = stagger
 	return voxels
