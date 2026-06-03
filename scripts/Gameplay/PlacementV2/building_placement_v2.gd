@@ -1,135 +1,139 @@
 class_name BuildingPlacementV2
 extends Node
 
-signal building_placed(tile: WorldTile, definition: BuildingDefinition, instance: Node3D)
-signal placement_state_changed(tile: WorldTile, allowed: bool, reason: String)
+signal placement_changed(tile: WorldTile, result: PlacementRulesV2.PlacementResult)
+signal building_placed(building: PlacedBuildingV2, tile: WorldTile)
+signal placement_failed(tile: WorldTile, reason: String)
 
 @export var picker: WorldTilePicker
 @export var preview: BuildingPreviewV2
+@export var occupancy: WorldOccupancyV2
 @export var building_root: Node3D
 @export var active_definition: BuildingDefinition
-@export var enabled: bool = true
-@export var place_button: MouseButton = MOUSE_BUTTON_RIGHT
-@export var print_debug: bool = true
 
-var selected_tile: WorldTile
-var selected_visual_node: Node3D
-var occupied_coords: Dictionary = {}
-var last_result: PlacementRulesV2.PlacementResult
+@export var place_button: MouseButton = MOUSE_BUTTON_RIGHT
+@export var place_y_offset: float = 0.0
+@export var print_debug: bool = false
+
+var current_tile: WorldTile
+var current_visual_node: Node3D
+var current_result: PlacementRulesV2.PlacementResult
 
 
 func _ready() -> void:
+	if picker != null:
+		picker.tile_selected.connect(_on_tile_selected)
+
+	if occupancy == null:
+		occupancy = get_node_or_null("../WorldOccupancyV2") as WorldOccupancyV2
+
 	if building_root == null:
 		building_root = Node3D.new()
 		building_root.name = "PlacedBuildings"
 		add_child(building_root)
 
-	if preview != null:
-		preview.set_definition(active_definition)
-
-	if picker != null:
-		bind_picker(picker)
-
-
-func bind_picker(target_picker: WorldTilePicker) -> void:
-	if target_picker == null:
-		return
-
-	if not target_picker.tile_selected.is_connected(_on_tile_selected):
-		target_picker.tile_selected.connect(_on_tile_selected)
-
-
-func set_building_definition(definition: BuildingDefinition) -> void:
-	active_definition = definition
-	if preview != null:
-		preview.set_definition(active_definition)
-	_update_preview()
-
 
 func _input(event: InputEvent) -> void:
-	if not enabled:
-		return
-
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
+
 		if mb.button_index == place_button and mb.pressed:
-			attempt_place_selected_tile()
-			get_viewport().set_input_as_handled()
+			if try_place_current():
+				get_viewport().set_input_as_handled()
 
 
 func _on_tile_selected(tile: WorldTile, visual_node: Node3D) -> void:
-	selected_tile = tile
-	selected_visual_node = visual_node
-	_update_preview()
+	current_tile = tile
+	current_visual_node = visual_node
+	_update_current_result()
 
 
-func _update_preview() -> void:
-	last_result = PlacementRulesV2.can_place(selected_tile, active_definition, occupied_coords)
+func _update_current_result() -> void:
+	current_result = PlacementRulesV2.validate(current_tile, active_definition, occupancy)
 
 	if preview != null:
-		preview.show_for_tile(selected_tile, selected_visual_node, last_result.allowed)
+		preview.show_preview(current_tile, current_visual_node, active_definition, current_result.valid)
 
-	placement_state_changed.emit(selected_tile, last_result.allowed, last_result.reason)
+	placement_changed.emit(current_tile, current_result)
 
 
-func attempt_place_selected_tile() -> bool:
-	last_result = PlacementRulesV2.can_place(selected_tile, active_definition, occupied_coords)
+func try_place_current() -> bool:
+	_update_current_result()
 
-	if not last_result.allowed:
+	if current_result == null or not current_result.valid:
+		var reason := "Invalid placement"
+		if current_result != null:
+			reason = current_result.reason
+
+		placement_failed.emit(current_tile, reason)
+
 		if print_debug:
-			print("Placement rejected: ", last_result.reason)
-		placement_state_changed.emit(selected_tile, false, last_result.reason)
-		_update_preview()
+			print("Placement failed: ", reason)
+
 		return false
 
-	var instance := _create_building_instance()
-	if instance == null:
-		if print_debug:
-			print("Placement rejected: building scene could not be instantiated")
+	var building := _spawn_building(current_tile, active_definition)
+
+	if building == null:
+		placement_failed.emit(current_tile, "Could not spawn building")
 		return false
 
-	var offset := active_definition.y_offset if active_definition != null else 0.12
-	var base_position := selected_tile.world_position
-	if selected_visual_node != null:
-		base_position = selected_visual_node.global_position
+	if occupancy != null:
+		if not occupancy.occupy(current_tile, building):
+			building.queue_free()
+			placement_failed.emit(current_tile, "Tile already occupied")
+			_update_current_result()
+			return false
 
-	instance.global_position = base_position + Vector3.UP * offset
-	building_root.add_child(instance)
-
-	occupied_coords[selected_tile.coord] = instance
-	selected_tile.buildable = false
+	building_placed.emit(building, current_tile)
 
 	if print_debug:
-		print("Placed building '", active_definition.display_name if active_definition != null else "Unknown", "' at ", selected_tile.coord)
+		print("Placed building: ", building.get_display_name(), " at ", current_tile.coord)
 
-	building_placed.emit(selected_tile, active_definition, instance)
-	_update_preview()
+	_update_current_result()
 	return true
 
 
-func _create_building_instance() -> Node3D:
-	if active_definition != null and active_definition.scene != null:
-		var node := active_definition.scene.instantiate()
-		if node is Node3D:
-			return node as Node3D
-		node.queue_free()
+func _spawn_building(tile: WorldTile, definition: BuildingDefinition) -> PlacedBuildingV2:
+	var root := PlacedBuildingV2.new()
+	root.setup(definition, tile)
 
-	return _create_fallback_building()
+	var visual: Node3D = null
+
+	if definition != null and definition.scene != null:
+		visual = definition.scene.instantiate() as Node3D
+
+	if visual == null:
+		visual = _fallback_building_visual()
+
+	root.add_child(visual)
+
+	var base_position := tile.world_position
+
+	if current_visual_node != null:
+		base_position = current_visual_node.global_position
+
+	root.global_position = base_position + Vector3.UP * place_y_offset
+
+	if building_root != null:
+		building_root.add_child(root)
+	else:
+		add_child(root)
+
+	return root
 
 
-func _create_fallback_building() -> Node3D:
-	var root := Node3D.new()
-	root.name = "FallbackBuilding"
-
+func _fallback_building_visual() -> Node3D:
 	var mesh_instance := MeshInstance3D.new()
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(0.65, 0.65, 0.65)
-	mesh_instance.mesh = mesh
-	mesh_instance.position = Vector3.UP * 0.325
+	mesh_instance.name = "FallbackBuildingVisual"
+
+	var box := BoxMesh.new()
+	box.size = Vector3(0.7, 0.7, 0.7)
+	mesh_instance.mesh = box
+	mesh_instance.position = Vector3.UP * 0.35
 
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.65, 0.45, 0.25)
+	mat.albedo_color = Color(0.75, 0.5, 0.25)
 	mesh_instance.material_override = mat
 
-	root.add_child(mesh_instance)
-	return root
+	return mesh_instance

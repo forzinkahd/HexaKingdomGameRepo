@@ -2,30 +2,34 @@ class_name PlacementRulesV2
 extends RefCounted
 
 class PlacementResult:
-	var allowed: bool = false
-	var reason: String = ""
+	var valid: bool = false
+	var reason: String = "No result"
 
 	static func ok() -> PlacementResult:
 		var result := PlacementResult.new()
-		result.allowed = true
+		result.valid = true
 		result.reason = "OK"
 		return result
 
 	static func fail(message: String) -> PlacementResult:
 		var result := PlacementResult.new()
-		result.allowed = false
+		result.valid = false
 		result.reason = message
 		return result
 
 
-static func can_place(tile: WorldTile, definition: BuildingDefinition, occupied_coords: Dictionary) -> PlacementResult:
+static func validate(
+	tile: WorldTile,
+	definition: BuildingDefinition,
+	occupancy: WorldOccupancyV2 = null
+) -> PlacementResult:
 	if tile == null:
 		return PlacementResult.fail("No tile selected")
 
 	if definition == null:
 		return PlacementResult.fail("No building selected")
 
-	if occupied_coords.has(tile.coord):
+	if occupancy != null and occupancy.is_occupied(tile):
 		return PlacementResult.fail("Tile already occupied")
 
 	if not tile.buildable:
@@ -46,6 +50,6 @@ static func can_place(tile: WorldTile, definition: BuildingDefinition, occupied_
 				return PlacementResult.fail("Cannot build on hills")
 		WorldTile.BiomeKind.MOUNTAIN:
 			if not definition.allow_mountain:
-				return PlacementResult.fail("Cannot build on mountain")
+				return PlacementResult.fail("Cannot build on mountains")
 
 	return PlacementResult.ok()

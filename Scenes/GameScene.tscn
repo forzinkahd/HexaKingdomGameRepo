@@ -38,6 +38,7 @@
 [ext_resource type="Script" uid="uid://bwopxu318rtp5" path="res://scripts/Gameplay/PlacementV2/building_placement_v2.gd" id="34_cxw7u"]
 [ext_resource type="Script" uid="uid://dvlqgi0sbj8rh" path="res://scripts/WorldInteraction/world_tile_debug_panel.gd" id="34_rsfko"]
 [ext_resource type="Resource" uid="uid://cnlgrcnnfi7bo" path="res://Resources/Buildings/test_building.tres" id="35_cxw7u"]
+[ext_resource type="Script" uid="uid://dumh35q66e28h" path="res://scripts/Gameplay/PlacementV2/world_occupancy_v2.gd" id="36_jmmro"]
 [ext_resource type="Script" uid="uid://cbfp7o673ondm" path="res://scripts/Gameplay/PlacementV2/placement_debug_label_v2.gd" id="37_jmmro"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
@@ -195,12 +196,16 @@ picker = NodePath("../WorldTilePicker")
 [node name="BuildingPreviewV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1004577143]
 script = ExtResource("33_1dmga")
 
-[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "building_root")]
+[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "building_root")]
 script = ExtResource("34_cxw7u")
 picker = NodePath("../../WorldInteraction/WorldTilePicker")
 preview = NodePath("../BuildingPreviewV2")
+occupancy = NodePath("../WorldOccupancyV2")
 building_root = NodePath("../PlacedBuildings")
 active_definition = ExtResource("35_cxw7u")
+
+[node name="WorldOccupancyV2" type="Node" parent="Builder/GameplayV2" unique_id=1325980519]
+script = ExtResource("36_jmmro")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

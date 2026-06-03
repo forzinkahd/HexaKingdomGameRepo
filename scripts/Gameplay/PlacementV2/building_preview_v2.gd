@@ -1,40 +1,38 @@
 class_name BuildingPreviewV2
 extends Node3D
 
-@export var valid_color: Color = Color(0.2, 1.0, 0.25, 0.55)
-@export var invalid_color: Color = Color(1.0, 0.15, 0.1, 0.55)
-@export var fallback_radius: float = 0.72
-@export var fallback_height: float = 0.12
+@export var y_offset: float = 0.08
+@export var valid_color: Color = Color(0.2, 1.0, 0.2, 0.45)
+@export var invalid_color: Color = Color(1.0, 0.15, 0.1, 0.45)
 
-var current_definition: BuildingDefinition
-var current_instance: Node3D
-var fallback_mesh: MeshInstance3D
+var _preview_visual: Node3D
+var _last_definition: BuildingDefinition
 
 
 func _ready() -> void:
 	visible = false
 
 
-func set_definition(definition: BuildingDefinition) -> void:
-	current_definition = definition
-	_rebuild_preview_visual()
-
-
-func show_for_tile(tile: WorldTile, visual_node: Node3D, allowed: bool) -> void:
+func show_preview(
+	tile: WorldTile,
+	visual_node: Node3D,
+	definition: BuildingDefinition,
+	is_valid: bool
+) -> void:
 	if tile == null:
 		visible = false
 		return
 
+	if definition != _last_definition or _preview_visual == null:
+		_rebuild_preview(definition)
+
 	var base_position := tile.world_position
+
 	if visual_node != null:
 		base_position = visual_node.global_position
 
-	var offset := 0.18
-	if current_definition != null:
-		offset = current_definition.preview_y_offset
-
-	global_position = base_position + Vector3.UP * offset
-	_apply_preview_material(allowed)
+	global_position = base_position + Vector3.UP * y_offset
+	_apply_preview_material(is_valid)
 	visible = true
 
 
@@ -42,40 +40,38 @@ func hide_preview() -> void:
 	visible = false
 
 
-func _rebuild_preview_visual() -> void:
+func _rebuild_preview(definition: BuildingDefinition) -> void:
 	for child in get_children():
 		child.queue_free()
 
-	current_instance = null
-	fallback_mesh = null
+	_last_definition = definition
+	_preview_visual = null
 
-	if current_definition != null and current_definition.scene != null:
-		var node := current_definition.scene.instantiate()
-		if node is Node3D:
-			current_instance = node as Node3D
-			add_child(current_instance)
-			_apply_preview_material(false)
-			return
-		else:
-			node.queue_free()
+	if definition != null and definition.scene != null:
+		_preview_visual = definition.scene.instantiate() as Node3D
 
-	fallback_mesh = MeshInstance3D.new()
-	fallback_mesh.name = "FallbackBuildingPreview"
+	if _preview_visual == null:
+		_preview_visual = _fallback_preview_visual()
 
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = fallback_radius
-	mesh.bottom_radius = fallback_radius
-	mesh.height = fallback_height
-	mesh.radial_segments = 32
-	fallback_mesh.mesh = mesh
-
-	add_child(fallback_mesh)
-	_apply_preview_material(false)
+	add_child(_preview_visual)
 
 
-func _apply_preview_material(allowed: bool) -> void:
+func _fallback_preview_visual() -> Node3D:
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.name = "FallbackPreviewVisual"
+
+	var box := BoxMesh.new()
+	box.size = Vector3(0.7, 0.7, 0.7)
+	mesh_instance.mesh = box
+	mesh_instance.position = Vector3.UP * 0.35
+
+	return mesh_instance
+
+
+func _apply_preview_material(is_valid: bool) -> void:
+	var color := valid_color if is_valid else invalid_color
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = valid_color if allowed else invalid_color
+	mat.albedo_color = color
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 
