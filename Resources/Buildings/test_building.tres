@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3 uid="uid://cnlgrcnnfi7bo"]
+
+[ext_resource type="PackedScene" uid="uid://ddtv17ptoucpe" path="res://Scenes/Kingdom/Buildings/obj_blue_workshop.tscn" id="1_q6mqs"]
+[ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="1_s37y0"]
+
+[resource]
+script = ExtResource("1_s37y0")
+scene = ExtResource("1_q6mqs")
+metadata/_custom_type_script = "uid://mcoahjj711n3"

@@ -1,5 +1,5 @@
 extends Resource
-class_name BuildingDefinition
+class_name BuildingDefinitionOld
 
 @export var id: StringName
 @export var scene: PackedScene
