@@ -9,7 +9,7 @@ const COAST_E := 4 # fallback / filler
 
 # Tune this only after the logic is correct.
 # Try 0.0 first, then +/-1.0 if all coast pieces are one hex side off.
-const COAST_ASSET_OFFSET_STEPS := -0.5
+const COAST_ASSET_OFFSET_STEPS := 0.5
 
 
 static func rebuild(surface_tiles: Array[Voxel]) -> void:

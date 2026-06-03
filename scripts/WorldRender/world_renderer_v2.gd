@@ -35,7 +35,8 @@ func _render_tile(root: Node3D, tile: WorldTile, settings: GenerationSettingsV2,
 	node.name = "Tile_%s_%s" % [tile.coord.x, tile.coord.y]
 	node.position = Vector3(tile.world_position.x, _tile_y(tile, settings), tile.world_position.z)
 	if tile.coast_variant_index >= 0:
-		node.rotation.y = tile.coast_yaw
+		print("Coast rotation currently commented out here")
+		#node.rotation.y = tile.coast_yaw
 	_tag_tile_node_recursive(node, tile)
 	
 	if use_debug_materials:
@@ -127,6 +128,7 @@ func _create_debug_materials() -> void:
 
 	_debug_materials["ocean"] = _make_material(Color(0.1, 0.25, 0.8))
 	_debug_materials["coast"] = _make_material(Color(0.85, 0.75, 0.35))
+	_debug_materials["coast_water"] = _make_material(Color(0.15, 0.45, 0.95))
 	_debug_materials["plains"] = _make_material(Color(0.25, 0.65, 0.25))
 	_debug_materials["forest"] = _make_material(Color(0.1, 0.4, 0.15))
 	_debug_materials["hills"] = _make_material(Color(0.45, 0.35, 0.2))
@@ -150,6 +152,8 @@ func _debug_material_for_tile(tile: WorldTile) -> Material:
 		_debug_materials["fallback"] = fallback
 
 	if tile.water_kind == WorldTile.WaterKind.OCEAN:
+		if tile.coast_mask != 0:
+			return _debug_materials.get("coast_water", _debug_materials.get("ocean", fallback))
 		return _debug_materials.get("ocean", fallback)
 
 	if tile.coast_mask != 0:

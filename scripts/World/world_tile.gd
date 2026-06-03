@@ -19,6 +19,7 @@ var coast_mask: int = 0
 var coast_variant_index: int = -1
 var coast_yaw: float = 0.0
 
+
 var walkable: bool = true
 var buildable: bool = true
 var move_cost: float = 1.0

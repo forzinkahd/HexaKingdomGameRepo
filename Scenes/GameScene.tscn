@@ -34,6 +34,7 @@
 [ext_resource type="Script" uid="uid://c2cgqps47v2q" path="res://scripts/WorldInteraction/world_tile_picker.gd" id="31_6gwdq"]
 [ext_resource type="Script" uid="uid://bjcnmr44ogc3g" path="res://scripts/Tools/preview_system.gd" id="31_bl770"]
 [ext_resource type="Script" uid="uid://bbsq5rwam2kl6" path="res://scripts/WorldInteraction/selected_tile_marker.gd" id="32_rsfko"]
+[ext_resource type="Script" uid="uid://dvlqgi0sbj8rh" path="res://scripts/WorldInteraction/world_tile_debug_panel.gd" id="34_rsfko"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -179,8 +180,9 @@ metadata/_custom_type_script = "uid://bjcnmr44ogc3g"
 script = ExtResource("31_6gwdq")
 camera = NodePath("../../../CameraParent/Camera3D")
 
-[node name="SelectedTileMarker" type="Node3D" parent="Builder/WorldInteraction" unique_id=1910991595]
+[node name="SelectedTileMarker" type="Node3D" parent="Builder/WorldInteraction" unique_id=1910991595 node_paths=PackedStringArray("picker")]
 script = ExtResource("32_rsfko")
+picker = NodePath("../WorldTilePicker")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
@@ -218,6 +220,15 @@ grow_vertical = 0
 texture = ExtResource("13_w22tq")
 expand_mode = 3
 stretch_mode = 4
+
+[node name="TileDebugLabel" type="Label" parent="Control" unique_id=797205666 node_paths=PackedStringArray("picker")]
+layout_mode = 1
+offset_left = 18.0
+offset_top = 328.0
+offset_right = 178.0
+offset_bottom = 553.0
+script = ExtResource("34_rsfko")
+picker = NodePath("../../Builder/WorldInteraction/WorldTilePicker")
 
 [node name="Chunks" type="Node3D" parent="." unique_id=1209535752]
 

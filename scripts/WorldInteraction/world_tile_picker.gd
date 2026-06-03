@@ -5,7 +5,7 @@ signal tile_selected(tile: WorldTile, visual_node: Node3D)
 
 @export var camera: Camera3D
 @export var ray_length: float = 2000.0
-@export var print_debug: bool = true
+@export var print_debug: bool = false
 
 var selected_tile: WorldTile
 var selected_node: Node3D
@@ -18,13 +18,13 @@ func _input(event: InputEvent) -> void:
 			_pick_tile(mb.position)
 			get_viewport().set_input_as_handled()
 
-func _pick_tile(screen_position: Vector2) -> void:
+func _pick_tile(screen_position: Vector2) -> bool:
 	if camera == null:
 		camera = get_viewport().get_camera_3d()
 
 	if camera == null:
 		push_warning("WorldTilePicker: no camera available.")
-		return
+		return false
 
 	var origin := camera.project_ray_origin(screen_position)
 	var direction := camera.project_ray_normal(screen_position)
@@ -37,9 +37,7 @@ func _pick_tile(screen_position: Vector2) -> void:
 	var result := camera.get_world_3d().direct_space_state.intersect_ray(params)
 
 	if result.is_empty():
-		if print_debug:
-			print("WorldTilePicker: no hit")
-		return
+		return false
 
 	var collider := result.get("collider") as Object
 	var node := collider as Node
@@ -47,18 +45,33 @@ func _pick_tile(screen_position: Vector2) -> void:
 	while node != null:
 		if node.has_meta("world_tile"):
 			selected_tile = node.get_meta("world_tile")
-			selected_node = node as Node3D
+			selected_node = _find_node3d_with_tile(node)
+
+			if selected_node == null:
+				selected_node = node as Node3D
 
 			if print_debug:
 				_print_tile(selected_tile)
 
 			tile_selected.emit(selected_tile, selected_node)
-			return
+			return true
 
 		node = node.get_parent()
 
-	if print_debug:
-		print("WorldTilePicker: hit object without world_tile metadata: ", collider)
+	return false
+
+
+func _find_node3d_with_tile(start: Node) -> Node3D:
+	var node := start
+
+	while node != null:
+		if node is Node3D and node.has_meta("world_tile"):
+			return node as Node3D
+
+		node = node.get_parent()
+
+	return null
+
 
 func _print_tile(tile: WorldTile) -> void:
 	print(
