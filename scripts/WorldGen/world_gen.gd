@@ -1,154 +1,137 @@
 extends Node
 class_name WorldGenController
 
-@export var settings: GenerationSettings
+@export_category("WorldGen2")
+@export var settings: Resource
 @export var world_theme: WorldTheme
-@export var world_renderer: WorldRenderer
-@export var placement_system: PlacementSystem
-@export var road_tool: RoadTool
-@export var object_placer: ObjectPlacer
+@export var render_on_ready: bool = true
+@export var clear_existing_world: bool = true
+@export var output_parent_path: NodePath = ^"../../Chunks"
 
-@onready var interaction_tracker: Node3D = $"../Interaction_tracker"
-
-var generation_result: GenerationResult
+var current_settings: GenerationSettingsV2
+var current_map: WorldMapData
+var current_world_root: Node3D
 
 func _ready() -> void:
-	_clear_runtime()
-	call_deferred("_generate_world")
+	if render_on_ready:
+		call_deferred("generate_world")
 
-func _clear_runtime() -> void:
-	WorldMap.clear_map()
-	object_placer.clear_objects()
+func generate_world() -> void:
+	current_settings = _settings_as_v2(settings)
+	_clear_previous_world()
 
-func _generate_world() -> void:
-	var pipeline := WorldGenerationPipeline.new()
-	generation_result = pipeline.generate(settings, world_theme)
+	current_map = WorldGeneratorV2.new().generate(current_settings)
+	current_world_root = WorldRendererV2.new().render(current_map, current_settings, world_theme)
+	_get_output_parent().add_child(current_world_root)
 
-	WorldMap.load_generation_result(generation_result)
+	_print_generation_summary()
 
-	var render_result := world_renderer.render(generation_result, settings, world_theme)
+func regenerate() -> void:
+	generate_world()
 
-	placement_system.configure_runtime(render_result.voxel_generator, render_result.chunk)
-	interaction_tracker.init()
+func get_placeable_tiles() -> Array[WorldTile]:
+	if current_map == null:
+		return []
+	return current_map.placeable_tiles()
 
-	if road_tool != null:
-		road_tool.world_theme = world_theme
-		road_tool.configure_runtime(render_result.voxel_generator, render_result.chunk)
+# Compatibility shim for old callers. The clean world model no longer returns Voxel objects.
+func get_placeable_voxels() -> Array:
+	push_warning("WorldGen2 uses WorldTile, not Voxel. Call get_placeable_tiles() instead.")
+	return []
 
+func _get_output_parent() -> Node:
+	if output_parent_path != NodePath() and has_node(output_parent_path):
+		return get_node(output_parent_path)
+	return self
 
+func _clear_previous_world() -> void:
+	if not clear_existing_world:
+		return
+	if current_world_root != null and is_instance_valid(current_world_root):
+		current_world_root.queue_free()
+		current_world_root = null
+	var parent := _get_output_parent()
+	for child in parent.get_children():
+		if child.name == "WorldGen2Root":
+			child.queue_free()
 
+func _settings_as_v2(source: Resource) -> GenerationSettingsV2:
+	if source is GenerationSettingsV2:
+		return source as GenerationSettingsV2
 
-"""extends Node
+	var result := GenerationSettingsV2.new()
+	if source == null:
+		return result
 
-# Dependencies
-@export var settings : GenerationSettings
-@export_category("Dependencies")
-@export var object_placer : ObjectPlacer
-@onready var interaction_tracker: Node3D = $"../Interaction_tracker"
-@onready var chunks: Node3D = $"../../Chunks"
-@export var world_theme: WorldTheme
-@export var overlay_visuals: OverlayVisuals		# mainly debug
-@export var road_tool: RoadTool
-@export var placement_system: PlacementSystem
-#UI
-@onready var label: RichTextLabel = $"../../Control/VBoxContainer/RichTextLabel"
+	_copy_int_if_present(source, result, "map_seed")
+	_copy_int_if_present(source, result, "radius")
+	_copy_int_if_present(source, result, "max_height_units")
+	_copy_int_if_present(source, result, "sea_level_units")
+	_copy_int_if_present(source, result, "forced_ocean_edge_width")
+	_copy_int_if_present(source, result, "coastal_plain_width")
+	_copy_int_if_present(source, result, "ocean_corner_radius")
+	_copy_int_if_present(source, result, "ocean_transition_radius")
+	_copy_int_if_present(source, result, "plains_max_height_units")
+	_copy_int_if_present(source, result, "hills_max_height_units")
+	_copy_int_if_present(source, result, "mountain_min_height_units_gen", "mountain_min_height_units")
+	_copy_float_if_present(source, result, "voxel_size", "tile_size")
+	_copy_float_if_present(source, result, "voxel_height", "height_step")
+	_copy_float_if_present(source, result, "height_curve")
+	_copy_bool_if_present(source, result, "use_corner_ocean")
 
+	var old_noise = source.get("noise")
+	if old_noise is FastNoiseLite:
+		result.noise = old_noise
 
-var _vg: VoxelGenerator
-var _chunk: Chunk
+	var forced_edge = source.get("forced_ocean_edge")
+	if forced_edge is String:
+		result.forced_ocean_edge = _edge_string_to_v2(forced_edge)
 
+	var corner = source.get("ocean_corner")
+	if corner is int:
+		result.ocean_corner = clampi(corner, 0, 5)
 
-# --------------------------------------------------------------------------------------------
-# WORLD GENERATION
-# --------------------------------------------------------------------------------------------
+	return result
 
-## Starting point: Generate a random seed, create the tiles, place POI's
-func _ready() -> void:
-	WorldMap.clear_map()
-	WorldMap.world_settings = settings
-	init_seed()
-	var children = chunks.get_children() + get_children()
-	for c in children:
-		c.free()
-	object_placer.clear_objects()
-	call_deferred("generate_world")
+func _copy_int_if_present(source: Object, target: Object, source_name: String, target_name: String = "") -> void:
+	var value = source.get(source_name)
+	if value == null:
+		return
+	target.set(target_name if target_name != "" else source_name, int(value))
 
+func _copy_float_if_present(source: Object, target: Object, source_name: String, target_name: String = "") -> void:
+	var value = source.get(source_name)
+	if value == null:
+		return
+	target.set(target_name if target_name != "" else source_name, float(value))
 
-# Randomize if no seed has been set
-func init_seed():
-	if settings.map_seed == 0 or settings.map_seed == null:
-		settings.noise.seed = randi()
-	else:
-		settings.noise.seed = settings.map_seed
+func _copy_bool_if_present(source: Object, target: Object, source_name: String, target_name: String = "") -> void:
+	var value = source.get(source_name)
+	if value == null:
+		return
+	target.set(target_name if target_name != "" else source_name, bool(value))
 
+func _edge_string_to_v2(edge: String) -> int:
+	match edge:
+		"WEST": return GenerationSettingsV2.OceanEdge.WEST
+		"EAST": return GenerationSettingsV2.OceanEdge.EAST
+		"NORTH_WEST": return GenerationSettingsV2.OceanEdge.NORTH_WEST
+		"NORTH_EAST": return GenerationSettingsV2.OceanEdge.NORTH_EAST
+		"SOUTH_WEST": return GenerationSettingsV2.OceanEdge.SOUTH_WEST
+		"SOUTH_EAST": return GenerationSettingsV2.OceanEdge.SOUTH_EAST
+		_: return GenerationSettingsV2.OceanEdge.NONE
 
-## Start of world_generation, time each step
-func generate_world():
-	var starttime = Time.get_ticks_msec()
-	var interval = {"Start of Generation!" : starttime}
-	
-	## Get all positions through the gridmapper
-	var mapper = GridMapper.new()
-	var voxels = mapper.calculate_map_positions()
-	interval["Calculate Map Positions -- "] = Time.get_ticks_msec()
-
-	_vg = VoxelGenerator.new()
-	_vg.theme = world_theme
-	_chunk = _vg.generate_chunk(voxels, interval)
-	chunks.add_child(_chunk)
-	_chunk.init_chunk()
-	interval["Create Voxel Mesh -- "] = Time.get_ticks_msec()
-	#print("World theme is: ", world_theme)
-	
-	print_generation_results(starttime, interval)
-	placement_system.configure_runtime(_vg, _chunk)
-	interaction_tracker.init()
-	
-	
-	# Configure road tool runtime references
-	if road_tool != null:
-		road_tool.world_theme = world_theme
-		road_tool.configure_runtime(_vg, _chunk)
-	else:
-		push_warning("world_gen: road_tool not assigned")
-
-
-# ---------------------------------------------------------------------------------------------
-# OG PROTOTYPE CODE
-# ---------------------------------------------------------------------------------------------
-
-## This mess of a function loops through the timing results of generate_world and prints them
-func print_generation_results(start : float, dict : Dictionary):
-	print("\n")
-	label.text = ""
-	var last_val = start
-	var total = 0
-	var unit = "ms"
-	
-	for key in dict:
-		var val = dict[key]
-		if val == start:
-			continue
-		var passed = val - last_val
-		label.text += "[b]" + str(key) + "[/b]" + "[i]" + str(passed) + "ms\n" + "[/i]"
-		last_val = val
-		total += passed
-
-	if total > 999: 
-		unit = "s"
-		total *= 0.001
-
-	print("Total completion time: ", total, unit)
-	label.text += "[b]Total completion time: [/b][i]" + str(total) + unit + "[/i]"
-
-
-## Ignore buffer and ocean to return for object placer
-func get_placeable_voxels() -> Array[Voxel]:
-	var placeable_tiles : Array[Voxel] = []
-	for key in WorldMap.surface_layer:
-		var voxel: Voxel = WorldMap.surface_layer[key]
-		if voxel.buffer or not voxel.placeable:
-			continue
-		placeable_tiles.append(voxel)
-	print(str(placeable_tiles.size()) + " placeable tiles")
-	return placeable_tiles"""
+func _print_generation_summary() -> void:
+	if current_map == null:
+		return
+	var land := 0
+	var ocean := 0
+	var coast := 0
+	for tile in current_map.tiles:
+		if tile.is_water():
+			ocean += 1
+		else:
+			land += 1
+		if tile.coast_variant_index >= 0:
+			coast += 1
+	print("WorldGen2: tiles=%s land=%s water=%s coast=%s seed=%s" % [current_map.tiles.size(), land, ocean, coast, current_map.seed])

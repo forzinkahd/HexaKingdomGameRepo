@@ -28,6 +28,7 @@ var initialized = false
 @export var resource_root: Node3D
 @export var road_tool: RoadTool
 @export var tool_controller: ToolController
+@export var legacy_interaction_enabled: bool = false
 
 @onready var build_panel: Panel = $"../../HUD/BuildPanel"
 @onready var town_center_button: Button = $"../../HUD/BuildPanel/TownCenterButton"
@@ -130,6 +131,9 @@ func init():
 
 
 func _process(_delta: float) -> void:
+	if not legacy_interaction_enabled:
+		return
+	
 	#mode select
 	if Input.is_action_just_pressed("Build"):
 		interact_mode = mode.BUILD
@@ -140,6 +144,9 @@ func _process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not legacy_interaction_enabled:
+		return
+	
 	if event is InputEventMouseButton and event.pressed:
 		var mb := event as InputEventMouseButton
 		
