@@ -3,6 +3,10 @@ extends RefCounted
 
 
 @export var use_debug_materials: bool = true
+@export_group("Visual Orientation")
+@export var tile_visual_yaw_offset_degrees: float = 30.0
+@export var padding_visual_yaw_offset_degrees: float = 0.0
+@export var apply_tile_visual_yaw_offset: bool = true
 
 var _debug_materials: Dictionary = {}
 
@@ -34,6 +38,10 @@ func _render_tile(root: Node3D, tile: WorldTile, settings: GenerationSettingsV2,
 		return
 	node.name = "Tile_%s_%s" % [tile.coord.x, tile.coord.y]
 	node.position = Vector3(tile.world_position.x, _tile_y(tile, settings), tile.world_position.z)
+	
+	if apply_tile_visual_yaw_offset:
+		node.rotation.y += deg_to_rad(tile_visual_yaw_offset_degrees)
+	
 	if tile.coast_variant_index >= 0:
 		print("Coast rotation currently commented out here")
 		#node.rotation.y = tile.coast_yaw
@@ -57,6 +65,10 @@ func _render_padding(root: Node3D, tile: WorldTile, settings: GenerationSettings
 			continue
 		padding.name = "Padding_%s_%s_%s" % [tile.coord.x, tile.coord.y, i]
 		padding.position = Vector3(tile.world_position.x, float(i) * settings.height_step, tile.world_position.z)
+		
+		if apply_tile_visual_yaw_offset:
+			padding.rotation.y += deg_to_rad(padding_visual_yaw_offset_degrees)
+		
 		_tag_tile_node_recursive(padding, tile)
 		root.add_child(padding)
 
