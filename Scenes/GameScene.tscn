@@ -36,11 +36,15 @@
 [ext_resource type="Script" uid="uid://bwopxu318rtp5" path="res://scripts/Gameplay/PlacementV2/building_placement_v2.gd" id="34_cxw7u"]
 [ext_resource type="Script" uid="uid://ypasu4wcjna7" path="res://scripts/Gameplay/PlacementV2/world_economy_v2.gd" id="34_jmmro"]
 [ext_resource type="Script" uid="uid://dvlqgi0sbj8rh" path="res://scripts/WorldInteraction/world_tile_debug_panel.gd" id="34_rsfko"]
+[ext_resource type="Resource" uid="uid://cnlgrcnnfi7bo" path="res://Resources/Buildings/test_building.tres" id="35_cxw7u"]
 [ext_resource type="Script" uid="uid://b6fkribwkjynt" path="res://scripts/Gameplay/PlacementV2/world_production_v2.gd" id="35_vgicg"]
 [ext_resource type="Script" uid="uid://dumh35q66e28h" path="res://scripts/Gameplay/PlacementV2/world_occupancy_v2.gd" id="36_jmmro"]
+[ext_resource type="Script" uid="uid://dkfdc7nhihlvk" path="res://scripts/Gameplay/PlacementV2/building_catalog_v2.gd" id="36_v14ik"]
+[ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="37_evxj1"]
 [ext_resource type="Script" uid="uid://cbfp7o673ondm" path="res://scripts/Gameplay/PlacementV2/placement_debug_label_v2.gd" id="37_jmmro"]
 [ext_resource type="Script" uid="uid://b6qet4cr2r73c" path="res://scripts/Gameplay/PlacementV2/economy_debug_label_v2.gd" id="38_vgicg"]
 [ext_resource type="Script" uid="uid://b4vagg00mevci" path="res://scripts/Gameplay/PlacementV2/production_debug_label_v2.gd" id="40_sjxqr"]
+[ext_resource type="Script" uid="uid://3xk4gvpw03qk" path="res://scripts/Gameplay/PlacementV2/build_menu_v2.gd" id="42_ustms"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -204,7 +208,6 @@ occupancy = NodePath("../WorldOccupancyV2")
 economy = NodePath("../WorldEconomyV2")
 production = NodePath("../WorldProductionV2")
 building_root = NodePath("../PlacedBuildings")
-active_definition = ExtResource("32_cxw7u")
 
 [node name="WorldOccupancyV2" type="Node" parent="Builder/GameplayV2" unique_id=1325980519]
 script = ExtResource("36_jmmro")
@@ -215,6 +218,35 @@ script = ExtResource("34_jmmro")
 [node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy")]
 script = ExtResource("35_vgicg")
 economy = NodePath("../WorldEconomyV2")
+
+[node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
+script = ExtResource("36_v14ik")
+buildings = Array[ExtResource("37_evxj1")]([ExtResource("35_cxw7u"), ExtResource("32_cxw7u")])
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
+
+[node name="UI" type="Control" parent="UI" unique_id=1213390962]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "button_container")]
+layout_mode = 0
+offset_left = 502.0
+offset_top = 24.0
+offset_right = 870.0
+offset_bottom = 210.0
+script = ExtResource("42_ustms")
+catalog = NodePath("../../../Builder/GameplayV2/BuildingCatalogV2")
+placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
+button_container = NodePath("MarginContainer/BuildMenuButtons")
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/UI/BuildMenuPanel" unique_id=673339057]
+layout_mode = 2
+
+[node name="BuildMenuButtons" type="VBoxContainer" parent="UI/UI/BuildMenuPanel/MarginContainer" unique_id=1342369685]
+layout_mode = 2
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
