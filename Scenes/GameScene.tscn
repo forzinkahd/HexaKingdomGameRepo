@@ -15,12 +15,9 @@
 [ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 [ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
-[ext_resource type="Resource" uid="uid://bvewfnglri4ov" path="res://Scenes/Kingdom/Buildings/blue_workshop.tres" id="18_hgvmy"]
 [ext_resource type="Script" uid="uid://c0esfdcq17by5" path="res://scripts/Managers/task_manager.gd" id="18_pgw7i"]
 [ext_resource type="Script" uid="uid://c3rn4fk4pr1lk" path="res://scripts/Managers/unit_manager.gd" id="18_v7xhk"]
-[ext_resource type="Script" uid="uid://kcjwafuybtl5" path="res://Resources/building_definition.gd" id="19_v7xhk"]
 [ext_resource type="PackedScene" uid="uid://b4tb1r4fpi0y3" path="res://Scenes/Units/blue_villager.tscn" id="19_wukv0"]
-[ext_resource type="Resource" uid="uid://bispph7vljlug" path="res://Scenes/Kingdom/Buildings/blue_banner_tc.tres" id="20_wukv0"]
 [ext_resource type="PackedScene" uid="uid://3v4vv8oddvo6" path="res://Scenes/Units/blue_builder.tscn" id="21_ebcm8"]
 [ext_resource type="Script" uid="uid://x168kplgypou" path="res://scripts/hud.gd" id="22_wukv0"]
 [ext_resource type="Script" uid="uid://cfcvw2va2hsk6" path="res://scripts/Managers/construction_manager.gd" id="23_4v654"]
@@ -33,13 +30,15 @@
 [ext_resource type="Script" uid="uid://dfbskwr3bfovn" path="res://scripts/Tools/overlay_connectivity.gd" id="30_82uqo"]
 [ext_resource type="Script" uid="uid://c2cgqps47v2q" path="res://scripts/WorldInteraction/world_tile_picker.gd" id="31_6gwdq"]
 [ext_resource type="Script" uid="uid://bjcnmr44ogc3g" path="res://scripts/Tools/preview_system.gd" id="31_bl770"]
+[ext_resource type="Resource" uid="uid://wgwut2v8wnhe" path="res://Resources/Buildings/TestLumberCamp.tres" id="32_cxw7u"]
 [ext_resource type="Script" uid="uid://bbsq5rwam2kl6" path="res://scripts/WorldInteraction/selected_tile_marker.gd" id="32_rsfko"]
 [ext_resource type="Script" uid="uid://dw8v2ht1kadlv" path="res://scripts/Gameplay/PlacementV2/building_preview_v2.gd" id="33_1dmga"]
 [ext_resource type="Script" uid="uid://bwopxu318rtp5" path="res://scripts/Gameplay/PlacementV2/building_placement_v2.gd" id="34_cxw7u"]
+[ext_resource type="Script" uid="uid://ypasu4wcjna7" path="res://scripts/Gameplay/PlacementV2/world_economy_v2.gd" id="34_jmmro"]
 [ext_resource type="Script" uid="uid://dvlqgi0sbj8rh" path="res://scripts/WorldInteraction/world_tile_debug_panel.gd" id="34_rsfko"]
-[ext_resource type="Resource" uid="uid://cnlgrcnnfi7bo" path="res://Resources/Buildings/test_building.tres" id="35_cxw7u"]
 [ext_resource type="Script" uid="uid://dumh35q66e28h" path="res://scripts/Gameplay/PlacementV2/world_occupancy_v2.gd" id="36_jmmro"]
 [ext_resource type="Script" uid="uid://cbfp7o673ondm" path="res://scripts/Gameplay/PlacementV2/placement_debug_label_v2.gd" id="37_jmmro"]
+[ext_resource type="Script" uid="uid://b6qet4cr2r73c" path="res://scripts/Gameplay/PlacementV2/economy_debug_label_v2.gd" id="38_vgicg"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -126,7 +125,6 @@ tool_controller = NodePath("../ToolController")
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root", "construction_manager")]
 script = ExtResource("18_gipt1")
 placed_root = NodePath("../../PlacedObjects")
-buildings = Array[ExtResource("19_v7xhk")]([ExtResource("20_wukv0"), ExtResource("18_hgvmy")])
 construction_manager = NodePath("../ConstructionManager")
 
 [node name="UnitManager" type="Node" parent="Builder" unique_id=1615816696 node_paths=PackedStringArray("units_root")]
@@ -196,16 +194,20 @@ picker = NodePath("../WorldTilePicker")
 [node name="BuildingPreviewV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1004577143]
 script = ExtResource("33_1dmga")
 
-[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "building_root")]
+[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "building_root")]
 script = ExtResource("34_cxw7u")
 picker = NodePath("../../WorldInteraction/WorldTilePicker")
 preview = NodePath("../BuildingPreviewV2")
 occupancy = NodePath("../WorldOccupancyV2")
+economy = NodePath("../WorldEconomyV2")
 building_root = NodePath("../PlacedBuildings")
-active_definition = ExtResource("35_cxw7u")
+active_definition = ExtResource("32_cxw7u")
 
 [node name="WorldOccupancyV2" type="Node" parent="Builder/GameplayV2" unique_id=1325980519]
 script = ExtResource("36_jmmro")
+
+[node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
+script = ExtResource("34_jmmro")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
@@ -253,7 +255,7 @@ offset_bottom = 553.0
 script = ExtResource("34_rsfko")
 picker = NodePath("../../Builder/WorldInteraction/WorldTilePicker")
 
-[node name="PlacementDebugLabelV2" type="Label" parent="Control" unique_id=500742387 node_paths=PackedStringArray("placement")]
+[node name="PlacementDebugLabelV2" type="Label" parent="Control" unique_id=500742387 node_paths=PackedStringArray("placement", "economy")]
 layout_mode = 0
 offset_left = 443.0
 offset_top = 520.0
@@ -261,6 +263,16 @@ offset_right = 587.0
 offset_bottom = 608.0
 script = ExtResource("37_jmmro")
 placement = NodePath("../../Builder/GameplayV2/BuildingPlacementV2")
+economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
+
+[node name="EconomyDebugLabelV2" type="Label" parent="Control" unique_id=1737414156 node_paths=PackedStringArray("economy")]
+layout_mode = 0
+offset_left = 1024.0
+offset_top = 381.0
+offset_right = 1217.0
+offset_bottom = 544.0
+script = ExtResource("38_vgicg")
+economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
 [node name="Chunks" type="Node3D" parent="." unique_id=1209535752]
 

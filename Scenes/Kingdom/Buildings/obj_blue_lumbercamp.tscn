@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://chncwiy0xkbdo"]
+
+[ext_resource type="PackedScene" uid="uid://cnx2afy4p1wxc" path="res://Assets/Meshes/Structures/BlueStructures/building_lumbermill_blue.gltf" id="1_56y73"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_e2703"]
+height = 0.9937134
+
+[node name="obj_blue_lumbercamp" type="Node3D" unique_id=220540650]
+
+[node name="Visual" type="Node3D" parent="." unique_id=27357257]
+
+[node name="building_lumbermill_blue2" parent="Visual" unique_id=1998162182 instance=ExtResource("1_56y73")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=2034207589]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1908006302]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5031433, 0)
+shape = SubResource("CylinderShape3D_e2703")

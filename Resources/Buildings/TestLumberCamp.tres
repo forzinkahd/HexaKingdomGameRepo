@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3 uid="uid://wgwut2v8wnhe"]
+
+[ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="1_03hft"]
+[ext_resource type="PackedScene" uid="uid://chncwiy0xkbdo" path="res://Scenes/Kingdom/Buildings/obj_blue_lumbercamp.tscn" id="1_g620b"]
+
+[resource]
+script = ExtResource("1_03hft")
+id = &"test_lumber_camp"
+display_name = "Test Lumber Camp"
+category = 1
+scene = ExtResource("1_g620b")
+cost_wood = 25
+cost_stone = 10
+produces_resource = 1
+production_amount = 2
+allowed_biomes = Array[int]([1, 2, 3])
+metadata/_custom_type_script = "uid://mcoahjj711n3"

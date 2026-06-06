@@ -7,6 +7,7 @@ class_name WorldGenController
 @export var render_on_ready: bool = true
 @export var clear_existing_world: bool = true
 @export var output_parent_path: NodePath = ^"../../Chunks"
+@export var building_placement_v2: BuildingPlacementV2
 
 var current_settings: GenerationSettingsV2
 var current_map: WorldMapData
@@ -22,6 +23,10 @@ func generate_world() -> void:
 
 	current_map = WorldGeneratorV2.new().generate(current_settings)
 	current_world_root = WorldRendererV2.new().render(current_map, current_settings, world_theme)
+	
+	if building_placement_v2 != null:
+		building_placement_v2.configure_world_map(current_map)
+	
 	_get_output_parent().add_child(current_world_root)
 
 	_print_generation_summary()
