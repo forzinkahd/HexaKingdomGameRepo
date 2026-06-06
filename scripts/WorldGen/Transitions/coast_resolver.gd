@@ -1,8 +1,8 @@
 # scripts/WorldGen/transitions/coast_resolver.gd
-class_name CoastResolver
+class_name CoastResolverOld
 extends RefCounted
 
-func run(tiles: Array[WorldTile], by_xz: Dictionary[Vector2i, WorldTile]) -> void:
+"""func run(tiles: Array[WorldTile], by_xz: Dictionary[Vector2i, WorldTile]) -> void:
 	for tile in tiles:
 		tile.coast_mask = 0
 		tile.coast_variant_index = -1
@@ -22,4 +22,4 @@ func run(tiles: Array[WorldTile], by_xz: Dictionary[Vector2i, WorldTile]) -> voi
 		var resolved := _resolve_contiguous_coast(mask)
 		tile.coast_mask = mask
 		tile.coast_variant_index = int(resolved.x)
-		tile.coast_yaw = resolved.y
+		tile.coast_yaw = resolved.y"""
