@@ -36,9 +36,11 @@
 [ext_resource type="Script" uid="uid://bwopxu318rtp5" path="res://scripts/Gameplay/PlacementV2/building_placement_v2.gd" id="34_cxw7u"]
 [ext_resource type="Script" uid="uid://ypasu4wcjna7" path="res://scripts/Gameplay/PlacementV2/world_economy_v2.gd" id="34_jmmro"]
 [ext_resource type="Script" uid="uid://dvlqgi0sbj8rh" path="res://scripts/WorldInteraction/world_tile_debug_panel.gd" id="34_rsfko"]
+[ext_resource type="Script" uid="uid://b6fkribwkjynt" path="res://scripts/Gameplay/PlacementV2/world_production_v2.gd" id="35_vgicg"]
 [ext_resource type="Script" uid="uid://dumh35q66e28h" path="res://scripts/Gameplay/PlacementV2/world_occupancy_v2.gd" id="36_jmmro"]
 [ext_resource type="Script" uid="uid://cbfp7o673ondm" path="res://scripts/Gameplay/PlacementV2/placement_debug_label_v2.gd" id="37_jmmro"]
 [ext_resource type="Script" uid="uid://b6qet4cr2r73c" path="res://scripts/Gameplay/PlacementV2/economy_debug_label_v2.gd" id="38_vgicg"]
+[ext_resource type="Script" uid="uid://b4vagg00mevci" path="res://scripts/Gameplay/PlacementV2/production_debug_label_v2.gd" id="40_sjxqr"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -194,12 +196,13 @@ picker = NodePath("../WorldTilePicker")
 [node name="BuildingPreviewV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1004577143]
 script = ExtResource("33_1dmga")
 
-[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "building_root")]
+[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "production", "building_root")]
 script = ExtResource("34_cxw7u")
 picker = NodePath("../../WorldInteraction/WorldTilePicker")
 preview = NodePath("../BuildingPreviewV2")
 occupancy = NodePath("../WorldOccupancyV2")
 economy = NodePath("../WorldEconomyV2")
+production = NodePath("../WorldProductionV2")
 building_root = NodePath("../PlacedBuildings")
 active_definition = ExtResource("32_cxw7u")
 
@@ -208,6 +211,10 @@ script = ExtResource("36_jmmro")
 
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
+
+[node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy")]
+script = ExtResource("35_vgicg")
+economy = NodePath("../WorldEconomyV2")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
@@ -272,6 +279,16 @@ offset_top = 381.0
 offset_right = 1217.0
 offset_bottom = 544.0
 script = ExtResource("38_vgicg")
+economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
+
+[node name="ProductionDebugLavelV2" type="Label" parent="Control" unique_id=671436826 node_paths=PackedStringArray("production", "economy")]
+layout_mode = 0
+offset_left = 925.0
+offset_top = 181.0
+offset_right = 1199.0
+offset_bottom = 387.0
+script = ExtResource("40_sjxqr")
+production = NodePath("../../Builder/GameplayV2/WorldProductionV2")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
 [node name="Chunks" type="Node3D" parent="." unique_id=1209535752]

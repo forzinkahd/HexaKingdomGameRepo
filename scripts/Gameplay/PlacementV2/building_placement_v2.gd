@@ -9,6 +9,7 @@ signal placement_failed(tile: WorldTile, reason: String)
 @export var preview: BuildingPreviewV2
 @export var occupancy: WorldOccupancyV2
 @export var economy: WorldEconomyV2
+@export var production: WorldProductionV2
 @export var building_root: Node3D
 @export var active_definition: BuildingDefinition
 
@@ -31,6 +32,9 @@ func _ready() -> void:
 
 	if economy == null:
 		economy = get_node_or_null("../WorldEconomyV2") as WorldEconomyV2
+
+	if production == null:
+		production = get_node_or_null("../WorldProductionV2") as WorldProductionV2
 
 	if building_root == null:
 		building_root = Node3D.new()
@@ -122,6 +126,9 @@ func try_place_current() -> bool:
 			placement_failed.emit(current_tile, "Footprint overlaps occupied tile")
 			_update_current_result()
 			return false
+
+	if production != null:
+		production.register_building(building)
 
 	building_placed.emit(building, current_tile)
 

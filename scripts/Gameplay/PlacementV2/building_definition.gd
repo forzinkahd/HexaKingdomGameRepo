@@ -32,7 +32,10 @@ enum ProducedResource {
 @export_group("Production")
 @export var produces_resource: ProducedResource = ProducedResource.NONE
 @export_range(0, 9999) var production_amount: int = 0
-@export_range(0.1, 9999.0) var production_interval_seconds: float = 10.0
+
+# Kept for compatibility with older .tres files and UI text.
+# WorldProductionV2 now owns the actual global tick interval per resource.
+@export_range(0.1, 9999.0) var production_interval_seconds: float = 5.0
 
 @export_group("Placement")
 @export_range(0, 8) var footprint_radius: int = 0
@@ -92,10 +95,9 @@ func production_summary() -> String:
 	if produces_resource == ProducedResource.NONE or production_amount <= 0:
 		return "None"
 
-	return "%s +%d / %.1fs" % [
+	return "%s +%d / global tick" % [
 		resource_name(produces_resource),
-		production_amount,
-		production_interval_seconds
+		production_amount
 	]
 
 

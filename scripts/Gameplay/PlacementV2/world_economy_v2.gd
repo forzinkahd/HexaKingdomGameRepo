@@ -71,22 +71,68 @@ func add_production(definition: BuildingDefinition) -> void:
 	if definition == null:
 		return
 
-	if definition.production_amount <= 0:
+	add_resource(definition.produces_resource, definition.production_amount)
+
+
+func add_resource(resource: BuildingDefinition.ProducedResource, amount: int) -> void:
+	if amount <= 0:
 		return
 
-	match definition.produces_resource:
+	match resource:
 		BuildingDefinition.ProducedResource.WOOD:
-			wood += definition.production_amount
+			wood += amount
 		BuildingDefinition.ProducedResource.STONE:
-			stone += definition.production_amount
+			stone += amount
 		BuildingDefinition.ProducedResource.FOOD:
-			food += definition.production_amount
+			food += amount
 		BuildingDefinition.ProducedResource.GOLD:
-			gold += definition.production_amount
+			gold += amount
 		_:
 			return
 
 	resources_changed.emit()
+
+
+func remove_resource(resource: BuildingDefinition.ProducedResource, amount: int) -> bool:
+	if amount <= 0:
+		return true
+
+	match resource:
+		BuildingDefinition.ProducedResource.WOOD:
+			if wood < amount:
+				return false
+			wood -= amount
+		BuildingDefinition.ProducedResource.STONE:
+			if stone < amount:
+				return false
+			stone -= amount
+		BuildingDefinition.ProducedResource.FOOD:
+			if food < amount:
+				return false
+			food -= amount
+		BuildingDefinition.ProducedResource.GOLD:
+			if gold < amount:
+				return false
+			gold -= amount
+		_:
+			return false
+
+	resources_changed.emit()
+	return true
+
+
+func get_amount(resource: BuildingDefinition.ProducedResource) -> int:
+	match resource:
+		BuildingDefinition.ProducedResource.WOOD:
+			return wood
+		BuildingDefinition.ProducedResource.STONE:
+			return stone
+		BuildingDefinition.ProducedResource.FOOD:
+			return food
+		BuildingDefinition.ProducedResource.GOLD:
+			return gold
+		_:
+			return 0
 
 
 func summary() -> String:

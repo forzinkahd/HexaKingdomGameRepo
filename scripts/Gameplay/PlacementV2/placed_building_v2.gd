@@ -26,3 +26,20 @@ func get_display_name() -> String:
 		return "Unknown Building"
 
 	return definition.display_name
+
+
+func is_production_building() -> bool:
+	if definition == null:
+		return false
+
+	return (
+		definition.produces_resource != BuildingDefinition.ProducedResource.NONE
+		and definition.production_amount > 0
+	)
+
+
+func production_status_text() -> String:
+	if not is_production_building():
+		return "No production"
+
+	return definition.production_summary()
