@@ -33,15 +33,11 @@ func _ready() -> void:
 	_update_text()
 
 
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		accept_event()
-
-
 func _on_pressed() -> void:
 	if definition == null:
 		return
 
+	print("BuildMenuButtonV2 pressed: ", definition.id)
 	building_pressed.emit(definition)
 
 
@@ -60,9 +56,7 @@ func _update_text() -> void:
 		title = selected_prefix + title
 
 	lines.append(title)
-
-	var category_name := BuildingDefinition.category_name(definition.category)
-	lines.append(category_name)
+	lines.append(BuildingDefinition.category_name(definition.category))
 
 	if show_cost:
 		lines.append("Cost: %s" % [definition.cost_summary()])
