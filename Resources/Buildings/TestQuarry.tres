@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3 uid="uid://ckmd5ij17fs8m"]
+
+[ext_resource type="PackedScene" uid="uid://bluey6vavaihx" path="res://Scenes/Kingdom/Buildings/obj_blue_quarry.tscn" id="1_5vrul"]
+[ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="1_aqf3h"]
+
+[resource]
+script = ExtResource("1_aqf3h")
+id = &"test_quarry"
+display_name = "TestQuarry"
+category = 1
+scene = ExtResource("1_5vrul")
+cost_wood = 5
+cost_stone = 150
+produces_resource = 2
+production_amount = 2
+allow_coast = false
+allowed_biomes = Array[int]([3, 4, 5])
+allow_forest = false
+allow_mountain = true
+metadata/_custom_type_script = "uid://mcoahjj711n3"

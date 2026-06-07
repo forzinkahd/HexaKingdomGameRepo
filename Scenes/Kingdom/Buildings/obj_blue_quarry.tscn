@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bluey6vavaihx"]
+
+[ext_resource type="PackedScene" uid="uid://dg4qicoup2ak5" path="res://Assets/Meshes/Structures/BlueStructures/building_mine_blue.gltf" id="1_auaa6"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_auaa6"]
+height = 0.8267212
+radius = 0.6904297
+
+[node name="obj_blue_quarry" type="Node3D" unique_id=1471176248]
+
+[node name="Visual" type="Node3D" parent="." unique_id=2008016268]
+
+[node name="building_mine_blue2" parent="Visual" unique_id=127780299 instance=ExtResource("1_auaa6")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=379515626]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=785324612]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4269104, 0)
+shape = SubResource("CylinderShape3D_auaa6")

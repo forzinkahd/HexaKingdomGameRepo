@@ -44,6 +44,7 @@
 [ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="37_evxj1"]
 [ext_resource type="Script" uid="uid://cbfp7o673ondm" path="res://scripts/Gameplay/PlacementV2/placement_debug_label_v2.gd" id="37_jmmro"]
 [ext_resource type="Script" uid="uid://b6qet4cr2r73c" path="res://scripts/Gameplay/PlacementV2/economy_debug_label_v2.gd" id="38_vgicg"]
+[ext_resource type="Resource" uid="uid://ckmd5ij17fs8m" path="res://Resources/Buildings/TestQuarry.tres" id="40_p5lqy"]
 [ext_resource type="Script" uid="uid://b4vagg00mevci" path="res://scripts/Gameplay/PlacementV2/production_debug_label_v2.gd" id="40_sjxqr"]
 [ext_resource type="Script" uid="uid://3xk4gvpw03qk" path="res://scripts/Gameplay/PlacementV2/build_menu_v2.gd" id="42_ustms"]
 
@@ -224,7 +225,7 @@ economy = NodePath("../WorldEconomyV2")
 
 [node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
 script = ExtResource("36_v14ik")
-buildings = Array[ExtResource("37_evxj1")]([ExtResource("35_cxw7u"), ExtResource("32_cxw7u")])
+buildings = Array[ExtResource("37_evxj1")]([ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy")])
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
@@ -235,7 +236,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 1
 
-[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "button_container")]
+[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "economy", "button_container")]
 layout_mode = 0
 offset_left = 502.0
 offset_top = 24.0
@@ -244,6 +245,7 @@ offset_bottom = 210.0
 script = ExtResource("42_ustms")
 catalog = NodePath("../../../Builder/GameplayV2/BuildingCatalogV2")
 placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
+economy = NodePath("../../../Builder/GameplayV2/WorldEconomyV2")
 button_container = NodePath("MarginContainer/BuildMenuButtons")
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/UI/BuildMenuPanel" unique_id=673339057]

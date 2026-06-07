@@ -3,14 +3,16 @@ extends Control
 
 @export var catalog: BuildingCatalogV2
 @export var placement: BuildingPlacementV2
+@export var economy: WorldEconomyV2
 @export var button_container: Container
 
 @export var button_scene: PackedScene
 @export var rebuild_on_ready: bool = true
 @export var auto_connect_catalog_to_placement: bool = true
+@export var auto_use_placement_economy: bool = true
 
 @export_group("Fallback Button")
-@export var fallback_button_min_size: Vector2 = Vector2(180.0, 72.0)
+@export var fallback_button_min_size: Vector2 = Vector2(220.0, 88.0)
 
 var _buttons_by_definition: Dictionary = {}
 
@@ -23,12 +25,11 @@ func _ready() -> void:
 	else:
 		button_container.mouse_filter = Control.MOUSE_FILTER_PASS
 
-	if catalog != null:
-		if not catalog.catalog_changed.is_connected(_rebuild_buttons):
-			catalog.catalog_changed.connect(_rebuild_buttons)
+	if economy == null and auto_use_placement_economy and placement != null:
+		economy = placement.economy
 
-		if not catalog.active_building_changed.is_connected(_on_active_building_changed):
-			catalog.active_building_changed.connect(_on_active_building_changed)
+	_connect_catalog()
+	_connect_economy()
 
 	if rebuild_on_ready:
 		_rebuild_buttons()
@@ -40,6 +41,25 @@ func _ready() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		accept_event()
+
+
+func _connect_catalog() -> void:
+	if catalog == null:
+		return
+
+	if not catalog.catalog_changed.is_connected(_rebuild_buttons):
+		catalog.catalog_changed.connect(_rebuild_buttons)
+
+	if not catalog.active_building_changed.is_connected(_on_active_building_changed):
+		catalog.active_building_changed.connect(_on_active_building_changed)
+
+
+func _connect_economy() -> void:
+	if economy == null:
+		return
+
+	if not economy.resources_changed.is_connected(_refresh_buttons):
+		economy.resources_changed.connect(_refresh_buttons)
 
 
 func _rebuild_buttons() -> void:
@@ -62,6 +82,7 @@ func _rebuild_buttons() -> void:
 		_buttons_by_definition[definition] = button
 
 	_update_selected_buttons()
+	_refresh_buttons()
 
 
 func _create_button(definition: BuildingDefinition) -> BuildMenuButtonV2:
@@ -76,7 +97,7 @@ func _create_button(definition: BuildingDefinition) -> BuildMenuButtonV2:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
-	button.setup(definition)
+	button.setup(definition, economy)
 
 	if not button.building_pressed.is_connected(_on_button_building_pressed):
 		button.building_pressed.connect(_on_button_building_pressed)
@@ -85,6 +106,12 @@ func _create_button(definition: BuildingDefinition) -> BuildMenuButtonV2:
 
 
 func _on_button_building_pressed(definition: BuildingDefinition) -> void:
+	if definition == null:
+		return
+
+	if economy != null and not economy.can_afford(definition):
+		return
+
 	if catalog != null:
 		catalog.set_active_building(definition)
 	else:
@@ -109,3 +136,12 @@ func _update_selected_buttons() -> void:
 
 		if button != null:
 			button.set_selected(definition == active)
+
+
+func _refresh_buttons() -> void:
+	for definition in _buttons_by_definition.keys():
+		var button := _buttons_by_definition[definition] as BuildMenuButtonV2
+
+		if button != null:
+			button.set_economy(economy)
+			button.refresh_affordability()
