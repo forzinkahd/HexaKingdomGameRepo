@@ -13,6 +13,8 @@ var selected: bool = false
 
 func setup(source_definition: BuildingDefinition) -> void:
 	definition = source_definition
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	focus_mode = Control.FOCUS_NONE
 	_update_text()
 
 
@@ -22,8 +24,18 @@ func set_selected(value: bool) -> void:
 
 
 func _ready() -> void:
-	pressed.connect(_on_pressed)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	focus_mode = Control.FOCUS_NONE
+
+	if not pressed.is_connected(_on_pressed):
+		pressed.connect(_on_pressed)
+
 	_update_text()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		accept_event()
 
 
 func _on_pressed() -> void:

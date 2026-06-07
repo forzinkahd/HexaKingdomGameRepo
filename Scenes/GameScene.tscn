@@ -233,6 +233,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 1
 
 [node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "button_container")]
 layout_mode = 0

@@ -16,8 +16,12 @@ var _buttons_by_definition: Dictionary = {}
 
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP
+
 	if button_container == null:
 		push_warning("BuildMenuV2: button_container is not assigned. Assign a VBoxContainer in the inspector.")
+	else:
+		button_container.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	if catalog != null:
 		if not catalog.catalog_changed.is_connected(_rebuild_buttons):
@@ -31,6 +35,11 @@ func _ready() -> void:
 
 	if catalog != null:
 		_on_active_building_changed(catalog.get_active_building())
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		accept_event()
 
 
 func _rebuild_buttons() -> void:
@@ -66,6 +75,7 @@ func _create_button(definition: BuildingDefinition) -> BuildMenuButtonV2:
 		button.custom_minimum_size = fallback_button_min_size
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	button.setup(definition)
 
 	if not button.building_pressed.is_connected(_on_button_building_pressed):

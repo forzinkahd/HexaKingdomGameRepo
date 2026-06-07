@@ -16,6 +16,7 @@ signal placement_failed(tile: WorldTile, reason: String)
 @export var place_button: MouseButton = MOUSE_BUTTON_RIGHT
 @export var place_y_offset: float = 0.0
 @export var print_debug: bool = false
+@export var ignore_clicks_over_ui: bool = true
 
 var world_map: WorldMapData
 var current_tile: WorldTile
@@ -57,8 +58,23 @@ func _input(event: InputEvent) -> void:
 		var mb := event as InputEventMouseButton
 
 		if mb.button_index == place_button and mb.pressed:
+			if ignore_clicks_over_ui and _is_pointer_over_ui():
+				return
+
 			if try_place_current():
 				get_viewport().set_input_as_handled()
+
+
+func _is_pointer_over_ui() -> bool:
+	var hovered := get_viewport().gui_get_hovered_control()
+
+	while hovered != null:
+		if hovered.mouse_filter == Control.MOUSE_FILTER_STOP:
+			return true
+
+		hovered = hovered.get_parent_control()
+
+	return false
 
 
 func _on_tile_selected(tile: WorldTile, visual_node: Node3D) -> void:
