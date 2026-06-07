@@ -308,6 +308,7 @@ placement = NodePath("../../Builder/GameplayV2/BuildingPlacementV2")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
 [node name="EconomyDebugLabelV2" type="Label" parent="Control" unique_id=1737414156 node_paths=PackedStringArray("economy")]
+visible = false
 layout_mode = 0
 offset_left = 1024.0
 offset_top = 381.0
