@@ -66,7 +66,6 @@ cam = NodePath("Camera3D")
 transform = Transform3D(1, 0, 0, 0, 0.9985367, -0.054078784, 0, 0.054078784, 0.9985367, 0, 0, 0)
 current = true
 script = ExtResource("1_1xefc")
-movespeed = 18
 height = Vector2(-10, 40)
 rot = Vector2(-20, -90)
 sun = NodePath("../../Scene/DirectionalLight3D")
