@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3 uid="uid://yv3lrj8hovtr"]
+
+[ext_resource type="PackedScene" uid="uid://cnkx87hoiesu4" path="res://Scenes/Kingdom/Buildings/obj_blue_towncenter_2.tscn" id="1_ivbul"]
+[ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="1_rlgeq"]
+
+[resource]
+script = ExtResource("1_rlgeq")
+id = &"town_center_2"
+display_name = "Town Center"
+scene = ExtResource("1_ivbul")
+produces_resource = 4
+production_amount = 2
+allow_coast = false
+allowed_biomes = Array[int]([1, 3, 4])
+is_unique = true
+metadata/_custom_type_script = "uid://mcoahjj711n3"

@@ -26,8 +26,8 @@ func run(ctx: GenerationContext, tiles: Array[WorldTile]) -> void:
 
 		if tile.height_units >= ctx.settings.mountain_min_height_units_gen:
 			tile.biome_kind = WorldTile.BiomeKind.MOUNTAIN
-		elif _near_ocean(tile):
-			tile.biome_kind = WorldTile.BiomeKind.COAST
+		#elif _near_ocean(tile):
+			#tile.biome_kind = WorldTile.BiomeKind.COAST
 		elif tile.height_units <= ctx.settings.plains_max_height_units:
 			tile.biome_kind = WorldTile.BiomeKind.PLAINS
 		else:

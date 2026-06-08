@@ -48,8 +48,8 @@ func _render_tile(root: Node3D, tile: WorldTile, settings: GenerationSettingsV2,
 		node.rotation.y += deg_to_rad(tile_visual_yaw_offset_degrees)
 	
 	if tile.coast_variant_index >= 0:
-		print("Coast rotation currently commented out here")
-		#node.rotation.y = tile.coast_yaw
+		#print("Coast rotation currently commented out here")
+		node.rotation.y = tile.coast_yaw
 	_tag_tile_node_recursive(node, tile)
 	
 	if use_debug_materials:

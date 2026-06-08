@@ -7,4 +7,5 @@
 script = ExtResource("1_s37y0")
 id = &"test_building"
 scene = ExtResource("1_q6mqs")
+required_building_ids = Array[StringName]([&"town_center_2"])
 metadata/_custom_type_script = "uid://mcoahjj711n3"

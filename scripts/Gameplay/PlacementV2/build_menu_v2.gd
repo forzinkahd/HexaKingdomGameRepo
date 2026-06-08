@@ -4,15 +4,17 @@ extends Control
 @export var catalog: BuildingCatalogV2
 @export var placement: BuildingPlacementV2
 @export var economy: WorldEconomyV2
+@export var registry: BuildingRegistryV2
 @export var button_container: Container
 
 @export var button_scene: PackedScene
 @export var rebuild_on_ready: bool = true
 @export var auto_connect_catalog_to_placement: bool = true
 @export var auto_use_placement_economy: bool = true
+@export var auto_select_first_available: bool = true
 
 @export_group("Fallback Button")
-@export var fallback_button_min_size: Vector2 = Vector2(220.0, 88.0)
+@export var fallback_button_min_size: Vector2 = Vector2(220.0, 96.0)
 
 var _buttons_by_definition: Dictionary = {}
 
@@ -28,11 +30,18 @@ func _ready() -> void:
 	if economy == null and auto_use_placement_economy and placement != null:
 		economy = placement.economy
 
+	if registry == null:
+		registry = get_node_or_null("../BuildingRegistryV2") as BuildingRegistryV2
+
 	_connect_catalog()
 	_connect_economy()
+	_connect_registry()
 
 	if rebuild_on_ready:
 		_rebuild_buttons()
+
+	if auto_select_first_available and catalog != null:
+		_select_first_available_catalog_entry_if_needed()
 
 	if catalog != null:
 		_on_active_building_changed(catalog.get_active_building())
@@ -60,6 +69,21 @@ func _connect_economy() -> void:
 
 	if not economy.resources_changed.is_connected(_refresh_buttons):
 		economy.resources_changed.connect(_refresh_buttons)
+
+
+func _connect_registry() -> void:
+	if registry == null:
+		return
+
+	if not registry.registry_changed.is_connected(_on_registry_changed):
+		registry.registry_changed.connect(_on_registry_changed)
+
+
+func _on_registry_changed() -> void:
+	_refresh_buttons()
+
+	if auto_select_first_available:
+		_select_first_available_catalog_entry_if_needed()
 
 
 func _rebuild_buttons() -> void:
@@ -97,7 +121,7 @@ func _create_button(definition: BuildingDefinition) -> BuildMenuButtonV2:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
-	button.setup(definition, economy)
+	button.setup(definition, economy, registry)
 
 	if not button.building_pressed.is_connected(_on_button_building_pressed):
 		button.building_pressed.connect(_on_button_building_pressed)
@@ -109,7 +133,7 @@ func _on_button_building_pressed(definition: BuildingDefinition) -> void:
 	if definition == null:
 		return
 
-	if economy != null and not economy.can_afford(definition):
+	if not _is_definition_selectable(definition):
 		return
 
 	if catalog != null:
@@ -119,6 +143,11 @@ func _on_button_building_pressed(definition: BuildingDefinition) -> void:
 
 
 func _on_active_building_changed(definition: BuildingDefinition) -> void:
+	if definition != null and not _is_definition_selectable(definition):
+		if auto_select_first_available:
+			_select_first_available_catalog_entry_if_needed()
+			return
+
 	if auto_connect_catalog_to_placement and placement != null:
 		placement.set_active_definition(definition)
 
@@ -144,4 +173,40 @@ func _refresh_buttons() -> void:
 
 		if button != null:
 			button.set_economy(economy)
-			button.refresh_affordability()
+			button.set_registry(registry)
+			button.refresh_availability()
+
+
+func _select_first_available_catalog_entry_if_needed() -> void:
+	if catalog == null:
+		return
+
+	var active := catalog.get_active_building()
+
+	if active != null and _is_definition_selectable(active):
+		return
+
+	for definition in catalog.get_buildings():
+		if _is_definition_selectable(definition):
+			catalog.set_active_building(definition)
+			return
+
+	if auto_connect_catalog_to_placement and placement != null:
+		placement.set_active_definition(null)
+
+
+func _is_definition_selectable(definition: BuildingDefinition) -> bool:
+	if definition == null:
+		return false
+
+	if registry != null:
+		if not registry.is_unlocked(definition):
+			return false
+
+		if registry.is_unique_limit_reached(definition):
+			return false
+
+	if economy != null and not economy.can_afford(definition):
+		return false
+
+	return true

@@ -10,6 +10,7 @@ signal placement_failed(tile: WorldTile, reason: String)
 @export var occupancy: WorldOccupancyV2
 @export var economy: WorldEconomyV2
 @export var production: WorldProductionV2
+@export var registry: BuildingRegistryV2
 @export var building_root: Node3D
 @export var active_definition: BuildingDefinition
 
@@ -36,6 +37,9 @@ func _ready() -> void:
 
 	if production == null:
 		production = get_node_or_null("../WorldProductionV2") as WorldProductionV2
+
+	if registry == null:
+		registry = get_node_or_null("../BuildingRegistryV2") as BuildingRegistryV2
 
 	if building_root == null:
 		building_root = Node3D.new()
@@ -89,7 +93,8 @@ func _update_current_result() -> void:
 		active_definition,
 		occupancy,
 		economy,
-		world_map
+		world_map,
+		registry
 	)
 
 	if preview != null:
@@ -145,6 +150,9 @@ func try_place_current() -> bool:
 
 	if production != null:
 		production.register_building(building)
+
+	if registry != null:
+		registry.register_building(building)
 
 	building_placed.emit(building, current_tile)
 

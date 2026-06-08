@@ -26,7 +26,8 @@ static func validate(
 	definition: BuildingDefinition,
 	occupancy: WorldOccupancyV2 = null,
 	economy: WorldEconomyV2 = null,
-	world_map: WorldMapData = null
+	world_map: WorldMapData = null,
+	registry: BuildingRegistryV2 = null
 ) -> PlacementResult:
 	if tile == null:
 		return PlacementResult.fail("No tile selected")
@@ -35,6 +36,13 @@ static func validate(
 		return PlacementResult.fail("No building selected")
 
 	var footprint := HexFootprintV2.coords_in_radius(tile.coord, definition.footprint_radius)
+
+	if registry != null:
+		if not registry.is_unlocked(definition):
+			return PlacementResult.fail(registry.unlock_reason(definition), footprint)
+
+		if registry.is_unique_limit_reached(definition):
+			return PlacementResult.fail(registry.unique_reason(definition), footprint)
 
 	if economy != null and not economy.can_afford(definition):
 		return PlacementResult.fail(economy.missing_cost_reason(definition), footprint)

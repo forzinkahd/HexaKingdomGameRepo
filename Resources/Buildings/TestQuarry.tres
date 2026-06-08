@@ -17,4 +17,5 @@ allow_coast = false
 allowed_biomes = Array[int]([3, 4, 5])
 allow_forest = false
 allow_mountain = true
+required_building_ids = Array[StringName]([&"town_center_2"])
 metadata/_custom_type_script = "uid://mcoahjj711n3"

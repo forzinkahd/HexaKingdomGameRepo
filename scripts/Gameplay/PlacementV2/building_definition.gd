@@ -53,6 +53,15 @@ enum ProducedResource {
 @export var allow_hills: bool = true
 @export var allow_mountain: bool = false
 
+@export_group("Uniqueness")
+@export var is_unique: bool = false
+@export var unique_limit: int = 1
+@export var unique_scope_label: String = "town"
+
+# Early Tech tree progression
+@export_category("Requirements")
+@export var required_building_ids: Array[StringName] = []
+
 
 func has_explicit_biome_rules() -> bool:
 	return not allowed_biomes.is_empty()

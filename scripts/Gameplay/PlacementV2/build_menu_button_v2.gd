@@ -7,25 +7,40 @@ signal building_pressed(definition: BuildingDefinition)
 @export var show_cost: bool = true
 @export var show_production: bool = true
 @export var show_unaffordable_reason: bool = true
+@export var show_locked_reason: bool = true
+@export var show_unique_reason: bool = true
 
 @export var selected_prefix: String = "▶ "
 @export var affordable_prefix: String = ""
 @export var unaffordable_prefix: String = "✕ "
+@export var locked_prefix: String = "🔒 "
+@export var unique_blocked_prefix: String = "★ "
 
 @export_group("Visual State")
 @export var selected_modulate: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var normal_modulate: Color = Color(0.9, 0.9, 0.9, 1.0)
 @export var unaffordable_modulate: Color = Color(0.55, 0.55, 0.55, 0.75)
+@export var locked_modulate: Color = Color(0.42, 0.42, 0.42, 0.65)
+@export var unique_blocked_modulate: Color = Color(0.55, 0.48, 0.35, 0.75)
 
 var definition: BuildingDefinition
 var economy: WorldEconomyV2
+var registry: BuildingRegistryV2
+
 var selected: bool = false
 var affordable: bool = true
+var unlocked: bool = true
+var unique_available: bool = true
 
 
-func setup(source_definition: BuildingDefinition, source_economy: WorldEconomyV2 = null) -> void:
+func setup(
+	source_definition: BuildingDefinition,
+	source_economy: WorldEconomyV2 = null,
+	source_registry: BuildingRegistryV2 = null
+) -> void:
 	definition = source_definition
 	economy = source_economy
+	registry = source_registry
 
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	focus_mode = Control.FOCUS_NONE
@@ -39,9 +54,18 @@ func set_economy(source_economy: WorldEconomyV2) -> void:
 	_refresh_state()
 
 
+func set_registry(source_registry: BuildingRegistryV2) -> void:
+	registry = source_registry
+	_refresh_state()
+
+
 func set_selected(value: bool) -> void:
 	selected = value
 	button_pressed = selected
+	_refresh_state()
+
+
+func refresh_availability() -> void:
 	_refresh_state()
 
 
@@ -64,7 +88,7 @@ func _on_pressed() -> void:
 	if definition == null:
 		return
 
-	if not affordable:
+	if not unlocked or not affordable or not unique_available:
 		button_pressed = selected
 		return
 
@@ -72,23 +96,32 @@ func _on_pressed() -> void:
 
 
 func _refresh_state() -> void:
-	_update_affordability()
+	_update_availability()
 	_update_text()
 	_update_visual_state()
 
 
-func _update_affordability() -> void:
+func _update_availability() -> void:
 	if definition == null:
+		unlocked = false
 		affordable = false
+		unique_available = false
 		disabled = true
 		return
+
+	if registry == null:
+		unlocked = true
+		unique_available = true
+	else:
+		unlocked = registry.is_unlocked(definition)
+		unique_available = not registry.is_unique_limit_reached(definition)
 
 	if economy == null:
 		affordable = true
 	else:
 		affordable = economy.can_afford(definition)
 
-	disabled = not affordable
+	disabled = not unlocked or not affordable or not unique_available
 
 
 func _update_text() -> void:
@@ -101,6 +134,10 @@ func _update_text() -> void:
 
 	if selected:
 		title = selected_prefix + title
+	elif not unlocked:
+		title = locked_prefix + title
+	elif not unique_available:
+		title = unique_blocked_prefix + title
 	elif not affordable:
 		title = unaffordable_prefix + title
 	else:
@@ -122,7 +159,11 @@ func _update_text() -> void:
 	if definition.footprint_radius > 0:
 		lines.append("Footprint: r%d" % [definition.footprint_radius])
 
-	if not affordable and economy != null and show_unaffordable_reason:
+	if not unlocked and registry != null and show_locked_reason:
+		lines.append(registry.unlock_reason(definition))
+	elif not unique_available and registry != null and show_unique_reason:
+		lines.append(registry.unique_reason(definition))
+	elif not affordable and economy != null and show_unaffordable_reason:
 		lines.append(economy.missing_cost_reason(definition))
 
 	text = "\n".join(lines)
@@ -131,6 +172,10 @@ func _update_text() -> void:
 func _update_visual_state() -> void:
 	if selected:
 		modulate = selected_modulate
+	elif not unlocked:
+		modulate = locked_modulate
+	elif not unique_available:
+		modulate = unique_blocked_modulate
 	elif not affordable:
 		modulate = unaffordable_modulate
 	else:
