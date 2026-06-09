@@ -202,6 +202,10 @@ picker = NodePath("../WorldTilePicker")
 
 [node name="GameplayV2" type="Node3D" parent="Builder" unique_id=1441018621]
 
+[node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
+script = ExtResource("36_v14ik")
+buildings = Array[ExtResource("37_evxj1")]([ExtResource("38_1qxux"), ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy")])
+
 [node name="BuildingRegistryV2" type="Node" parent="Builder/GameplayV2" unique_id=1573309623 node_paths=PackedStringArray("placement")]
 script = ExtResource("42_c0ais")
 placement = NodePath("../BuildingPlacementV2")
@@ -210,10 +214,6 @@ placement = NodePath("../BuildingPlacementV2")
 script = ExtResource("32_c0ais")
 registry = NodePath("../BuildingRegistryV2")
 town_center_id = &"town_center_2"
-
-[node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
-script = ExtResource("36_v14ik")
-buildings = Array[ExtResource("37_evxj1")]([ExtResource("38_1qxux"), ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy")])
 
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
@@ -330,10 +330,10 @@ picker = NodePath("../../Builder/WorldInteraction/WorldTilePicker")
 
 [node name="PlacementDebugLabelV2" type="Label" parent="Control" unique_id=500742387 node_paths=PackedStringArray("placement", "economy")]
 layout_mode = 0
-offset_left = 443.0
-offset_top = 520.0
-offset_right = 587.0
-offset_bottom = 608.0
+offset_left = 433.0
+offset_top = 483.0
+offset_right = 642.0
+offset_bottom = 575.0
 script = ExtResource("37_jmmro")
 placement = NodePath("../../Builder/GameplayV2/BuildingPlacementV2")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
@@ -350,10 +350,10 @@ economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
 [node name="ProductionDebugLavelV2" type="Label" parent="Control" unique_id=671436826 node_paths=PackedStringArray("production", "economy")]
 layout_mode = 0
-offset_left = 925.0
-offset_top = 181.0
-offset_right = 1199.0
-offset_bottom = 387.0
+offset_left = 1348.0
+offset_top = 222.0
+offset_right = 1622.0
+offset_bottom = 428.0
 script = ExtResource("40_sjxqr")
 production = NodePath("../../Builder/GameplayV2/WorldProductionV2")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
