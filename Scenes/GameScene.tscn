@@ -31,6 +31,7 @@
 [ext_resource type="Script" uid="uid://dfbskwr3bfovn" path="res://scripts/Tools/overlay_connectivity.gd" id="30_82uqo"]
 [ext_resource type="Script" uid="uid://c2cgqps47v2q" path="res://scripts/WorldInteraction/world_tile_picker.gd" id="31_6gwdq"]
 [ext_resource type="Script" uid="uid://bjcnmr44ogc3g" path="res://scripts/Tools/preview_system.gd" id="31_bl770"]
+[ext_resource type="Script" uid="uid://d4g1yjtheqj3o" path="res://scripts/Gameplay/PlacementV2/town_center_manager_v2.gd" id="32_c0ais"]
 [ext_resource type="Resource" uid="uid://wgwut2v8wnhe" path="res://Resources/Buildings/TestLumberCamp.tres" id="32_cxw7u"]
 [ext_resource type="Script" uid="uid://bbsq5rwam2kl6" path="res://scripts/WorldInteraction/selected_tile_marker.gd" id="32_rsfko"]
 [ext_resource type="Script" uid="uid://dw8v2ht1kadlv" path="res://scripts/Gameplay/PlacementV2/building_preview_v2.gd" id="33_1dmga"]
@@ -49,6 +50,7 @@
 [ext_resource type="Script" uid="uid://b4vagg00mevci" path="res://scripts/Gameplay/PlacementV2/production_debug_label_v2.gd" id="40_sjxqr"]
 [ext_resource type="Script" uid="uid://dw2h64w8cgx2t" path="res://scripts/Gameplay/PlacementV2/building_registry_v2.gd" id="42_c0ais"]
 [ext_resource type="Script" uid="uid://3xk4gvpw03qk" path="res://scripts/Gameplay/PlacementV2/build_menu_v2.gd" id="42_ustms"]
+[ext_resource type="Script" uid="uid://cso88f44js1le" path="res://scripts/Gameplay/PlacementV2/town_info_panel_v2.gd" id="45_24uct"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -200,6 +202,30 @@ picker = NodePath("../WorldTilePicker")
 
 [node name="GameplayV2" type="Node3D" parent="Builder" unique_id=1441018621]
 
+[node name="BuildingRegistryV2" type="Node" parent="Builder/GameplayV2" unique_id=1573309623 node_paths=PackedStringArray("placement")]
+script = ExtResource("42_c0ais")
+placement = NodePath("../BuildingPlacementV2")
+
+[node name="TownCenterManagerV2" type="Node" parent="Builder/GameplayV2" unique_id=191163510 node_paths=PackedStringArray("registry")]
+script = ExtResource("32_c0ais")
+registry = NodePath("../BuildingRegistryV2")
+town_center_id = &"town_center_2"
+
+[node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
+script = ExtResource("36_v14ik")
+buildings = Array[ExtResource("37_evxj1")]([ExtResource("38_1qxux"), ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy")])
+
+[node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
+script = ExtResource("34_jmmro")
+
+[node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager")]
+script = ExtResource("35_vgicg")
+economy = NodePath("../WorldEconomyV2")
+town_center_manager = NodePath("../TownCenterManagerV2")
+
+[node name="WorldOccupancyV2" type="Node" parent="Builder/GameplayV2" unique_id=1325980519]
+script = ExtResource("36_jmmro")
+
 [node name="PlacedBuildings" type="Node3D" parent="Builder/GameplayV2" unique_id=1112915258]
 
 [node name="BuildingPreviewV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1004577143]
@@ -214,24 +240,6 @@ economy = NodePath("../WorldEconomyV2")
 production = NodePath("../WorldProductionV2")
 registry = NodePath("../BuildingRegistryV2")
 building_root = NodePath("../PlacedBuildings")
-
-[node name="WorldOccupancyV2" type="Node" parent="Builder/GameplayV2" unique_id=1325980519]
-script = ExtResource("36_jmmro")
-
-[node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
-script = ExtResource("34_jmmro")
-
-[node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy")]
-script = ExtResource("35_vgicg")
-economy = NodePath("../WorldEconomyV2")
-
-[node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
-script = ExtResource("36_v14ik")
-buildings = Array[ExtResource("37_evxj1")]([ExtResource("38_1qxux"), ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy")])
-
-[node name="BuildingRegistryV2" type="Node" parent="Builder/GameplayV2" unique_id=1573309623 node_paths=PackedStringArray("placement")]
-script = ExtResource("42_c0ais")
-placement = NodePath("../BuildingPlacementV2")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
@@ -260,6 +268,19 @@ layout_mode = 2
 
 [node name="BuildMenuButtons" type="VBoxContainer" parent="UI/UI/BuildMenuPanel/MarginContainer" unique_id=1342369685]
 layout_mode = 2
+
+[node name="TownInfoPanel" type="Label" parent="UI/UI" unique_id=8331209 node_paths=PackedStringArray("picker", "placement", "registry", "town_center_manager", "production")]
+layout_mode = 0
+offset_left = 165.0
+offset_top = 255.0
+offset_right = 303.0
+offset_bottom = 489.0
+script = ExtResource("45_24uct")
+picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
+placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
+registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
+town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
+production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

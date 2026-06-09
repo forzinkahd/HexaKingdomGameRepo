@@ -7,8 +7,11 @@ signal production_building_unregistered(building: PlacedBuildingV2)
 signal productivity_changed(resource: BuildingDefinition.ProducedResource, multiplier: float)
 
 @export var economy: WorldEconomyV2
+@export var town_center_manager: TownCenterManagerV2
+
 @export var tick_enabled: bool = true
 @export var print_debug: bool = false
+@export var use_town_efficiency: bool = true
 
 @export_group("Global Tick Intervals")
 @export_range(0.1, 9999.0) var wood_tick_seconds: float = 5.0
@@ -29,6 +32,9 @@ var _resource_progress: Dictionary = {}
 func _ready() -> void:
 	if economy == null:
 		economy = get_node_or_null("../WorldEconomyV2") as WorldEconomyV2
+
+	if town_center_manager == null:
+		town_center_manager = get_node_or_null("../TownCenterManagerV2") as TownCenterManagerV2
 
 	_reset_resource_progress()
 
@@ -81,10 +87,7 @@ func get_production_buildings() -> Array[PlacedBuildingV2]:
 	return _production_buildings.duplicate()
 
 
-func set_productivity_multiplier(
-	resource: BuildingDefinition.ProducedResource,
-	multiplier: float
-) -> void:
+func set_productivity_multiplier(resource: BuildingDefinition.ProducedResource, multiplier: float) -> void:
 	multiplier = maxf(0.0, multiplier)
 
 	match resource:
@@ -102,10 +105,7 @@ func set_productivity_multiplier(
 	productivity_changed.emit(resource, multiplier)
 
 
-func add_productivity_multiplier(
-	resource: BuildingDefinition.ProducedResource,
-	additive_bonus: float
-) -> void:
+func add_productivity_multiplier(resource: BuildingDefinition.ProducedResource, additive_bonus: float) -> void:
 	set_productivity_multiplier(resource, get_productivity_multiplier(resource) + additive_bonus)
 
 
@@ -137,10 +137,7 @@ func get_tick_interval(resource: BuildingDefinition.ProducedResource) -> float:
 			return 999999.0
 
 
-func set_tick_interval(
-	resource: BuildingDefinition.ProducedResource,
-	seconds: float
-) -> void:
+func set_tick_interval(resource: BuildingDefinition.ProducedResource, seconds: float) -> void:
 	seconds = maxf(0.1, seconds)
 
 	match resource:
@@ -170,13 +167,7 @@ func get_base_amount_per_tick(resource: BuildingDefinition.ProducedResource) -> 
 	var total := 0
 
 	for building in _production_buildings:
-		if not is_instance_valid(building):
-			continue
-
-		if not building.is_production_building():
-			continue
-
-		if building.definition.produces_resource != resource:
+		if not _is_valid_producer_for_resource(building, resource):
 			continue
 
 		total += building.definition.production_amount
@@ -184,24 +175,52 @@ func get_base_amount_per_tick(resource: BuildingDefinition.ProducedResource) -> 
 	return total
 
 
+func get_effective_base_amount_per_tick(resource: BuildingDefinition.ProducedResource) -> float:
+	var total := 0.0
+
+	for building in _production_buildings:
+		if not _is_valid_producer_for_resource(building, resource):
+			continue
+
+		total += float(building.definition.production_amount) * get_building_town_efficiency(building)
+
+	return total
+
+
 func get_amount_per_tick(resource: BuildingDefinition.ProducedResource) -> int:
-	var base_amount := get_base_amount_per_tick(resource)
+	var base_amount := get_effective_base_amount_per_tick(resource)
 	var multiplier := get_productivity_multiplier(resource)
-	return int(floor(float(base_amount) * multiplier))
+	return int(floor(base_amount * multiplier))
+
+
+func get_building_amount_per_tick(building: PlacedBuildingV2) -> float:
+	if building == null or not is_instance_valid(building):
+		return 0.0
+
+	if not building.is_production_building():
+		return 0.0
+
+	return float(building.definition.production_amount) * get_building_town_efficiency(building)
+
+
+func get_building_town_efficiency(building: PlacedBuildingV2) -> float:
+	if not use_town_efficiency:
+		return 1.0
+
+	if town_center_manager == null:
+		return 1.0
+
+	return town_center_manager.get_efficiency_for_building(building)
 
 
 func get_building_count_for_resource(resource: BuildingDefinition.ProducedResource) -> int:
 	var count := 0
 
 	for building in _production_buildings:
-		if not is_instance_valid(building):
+		if not _is_valid_producer_for_resource(building, resource):
 			continue
 
-		if not building.is_production_building():
-			continue
-
-		if building.definition.produces_resource == resource:
-			count += 1
+		count += 1
 
 	return count
 
@@ -240,14 +259,23 @@ func _tick_resource(resource: BuildingDefinition.ProducedResource, delta: float)
 		print(
 			"Global production: ",
 			resource_name,
-			" +",
-			total_amount,
-			" from ",
-			producer_count,
+			" +", total_amount,
+			" from ", producer_count,
 			" buildings",
-			" multiplier=",
-			get_productivity_multiplier(resource)
+			" base=", get_base_amount_per_tick(resource),
+			" effective_base=", get_effective_base_amount_per_tick(resource),
+			" multiplier=", get_productivity_multiplier(resource)
 		)
+
+
+func _is_valid_producer_for_resource(building: PlacedBuildingV2, resource: BuildingDefinition.ProducedResource) -> bool:
+	if building == null or not is_instance_valid(building):
+		return false
+
+	if not building.is_production_building():
+		return false
+
+	return building.definition.produces_resource == resource
 
 
 func _reset_resource_progress() -> void:

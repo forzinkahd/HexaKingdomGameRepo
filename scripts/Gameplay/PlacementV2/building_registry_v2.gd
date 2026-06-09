@@ -101,6 +101,30 @@ func get_all_buildings() -> Array[PlacedBuildingV2]:
 	return result
 
 
+func get_buildings_by_id(id: StringName) -> Array[PlacedBuildingV2]:
+	var result: Array[PlacedBuildingV2] = []
+
+	for building in _buildings:
+		if not is_instance_valid(building):
+			continue
+
+		if _building_id(building) == id:
+			result.append(building)
+
+	return result
+
+
+func get_first_building_by_id(id: StringName) -> PlacedBuildingV2:
+	for building in _buildings:
+		if not is_instance_valid(building):
+			continue
+
+		if _building_id(building) == id:
+			return building
+
+	return null
+
+
 func is_unlocked(definition: BuildingDefinition) -> bool:
 	if definition == null:
 		return false
