@@ -50,7 +50,9 @@
 [ext_resource type="Script" uid="uid://b4vagg00mevci" path="res://scripts/Gameplay/PlacementV2/production_debug_label_v2.gd" id="40_sjxqr"]
 [ext_resource type="Script" uid="uid://dw2h64w8cgx2t" path="res://scripts/Gameplay/PlacementV2/building_registry_v2.gd" id="42_c0ais"]
 [ext_resource type="Script" uid="uid://3xk4gvpw03qk" path="res://scripts/Gameplay/PlacementV2/build_menu_v2.gd" id="42_ustms"]
+[ext_resource type="Script" uid="uid://bx1doei3ihs1" path="res://scripts/Gameplay/PlacementV2/town_influence_overlay_v2.gd" id="44_11i6k"]
 [ext_resource type="Script" uid="uid://cso88f44js1le" path="res://scripts/Gameplay/PlacementV2/town_info_panel_v2.gd" id="45_24uct"]
+[ext_resource type="Script" uid="uid://dtyywkeejgsnp" path="res://scripts/Gameplay/PlacementV2/selected_building_info_panel_v2.gd" id="47_uapko"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -107,10 +109,11 @@ stretch_mode = 4
 
 [node name="Builder" type="Node" parent="." unique_id=1283482510]
 
-[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190]
+[node name="WorldGenerator" type="Node" parent="Builder" unique_id=736844190 node_paths=PackedStringArray("building_placement_v2")]
 script = ExtResource("3_davhy")
 settings = ExtResource("6_s8ifg")
 world_theme = ExtResource("5_7rq2r")
+building_placement_v2 = NodePath("../GameplayV2/BuildingPlacementV2")
 
 [node name="ObjectPlacer" type="Node" parent="Builder" unique_id=1196252014]
 script = ExtResource("9_p13dw")
@@ -241,6 +244,13 @@ production = NodePath("../WorldProductionV2")
 registry = NodePath("../BuildingRegistryV2")
 building_root = NodePath("../PlacedBuildings")
 
+[node name="TownInfluenceOverlayV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1091534731 node_paths=PackedStringArray("world_gen_controller", "town_center_manager")]
+script = ExtResource("44_11i6k")
+world_gen_controller = NodePath("../../WorldGenerator")
+town_center_manager = NodePath("../TownCenterManagerV2")
+overlay_y_offset = 0.5
+overlay_yaw_offset_degrees = 0.0
+
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
 [node name="UI" type="Control" parent="UI" unique_id=1213390962]
@@ -278,6 +288,19 @@ offset_bottom = 489.0
 script = ExtResource("45_24uct")
 picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
 placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
+registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
+town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
+production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
+
+[node name="SelectedBuildingInfoPanel" type="Label" parent="UI/UI" unique_id=1569300735 node_paths=PackedStringArray("picker", "occupancy", "registry", "town_center_manager", "production")]
+layout_mode = 0
+offset_left = 1070.0
+offset_top = 443.0
+offset_right = 1309.0
+offset_bottom = 640.0
+script = ExtResource("47_uapko")
+picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
+occupancy = NodePath("../../../Builder/GameplayV2/WorldOccupancyV2")
 registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
 production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
