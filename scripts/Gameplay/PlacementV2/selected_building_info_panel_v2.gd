@@ -6,6 +6,7 @@ extends Label
 @export var registry: BuildingRegistryV2
 @export var town_center_manager: TownCenterManagerV2
 @export var production: WorldProductionV2
+@export var resource_map: WorldResourceMapV2
 
 @export_group("Display")
 @export var refresh_seconds: float = 0.25
@@ -41,6 +42,13 @@ func _ready() -> void:
 
 		if not production.production_building_unregistered.is_connected(_refresh):
 			production.production_building_unregistered.connect(_refresh)
+
+	if resource_map != null:
+		if not resource_map.resources_generated.is_connected(_refresh):
+			resource_map.resources_generated.connect(_refresh)
+
+		if not resource_map.resources_cleared.is_connected(_refresh):
+			resource_map.resources_cleared.connect(_refresh)
 
 	_refresh()
 
@@ -124,6 +132,9 @@ func _show_empty_or_tile_info() -> void:
 		if town_center_manager != null:
 			lines.append(town_center_manager.get_efficiency_text_for_tile(selected_tile))
 
+		if resource_map != null:
+			lines.append("Resource: %s" % [resource_map.get_resource_summary_for_tile(selected_tile)])
+
 	text = "\n".join(lines)
 
 
@@ -162,13 +173,17 @@ func _format_building(building: PlacedBuildingV2) -> String:
 		var resource_name := BuildingDefinition.resource_name(definition.produces_resource)
 		var base_amount := definition.production_amount
 		var town_efficiency := _town_efficiency_for_building(building)
-		var effective_amount := float(base_amount) * town_efficiency
+		var resource_multiplier := _resource_multiplier_for_building(building)
+		var effective_amount := float(base_amount) * town_efficiency * resource_multiplier
 		var global_multiplier := _global_multiplier_for_resource(definition.produces_resource)
 		var final_estimate := effective_amount * global_multiplier
 
 		lines.append("Resource: %s" % [resource_name])
 		lines.append("Base: +%d / global tick" % [base_amount])
 		lines.append("Town efficiency: %d%%" % [int(round(town_efficiency * 100.0))])
+		lines.append("Resource bonus: x%.2f" % [resource_multiplier])
+		if resource_map != null:
+			lines.append(resource_map.get_resource_summary_for_building(building))
 		lines.append("Effective base: %.2f / tick" % [effective_amount])
 		lines.append("Global multiplier: x%.2f" % [global_multiplier])
 		lines.append("Estimated contribution: %.2f / tick" % [final_estimate])
@@ -202,6 +217,13 @@ func _town_efficiency_for_building(building: PlacedBuildingV2) -> float:
 		return 1.0
 
 	return town_center_manager.get_efficiency_for_building(building)
+
+
+func _resource_multiplier_for_building(building: PlacedBuildingV2) -> float:
+	if resource_map == null:
+		return 1.0
+
+	return resource_map.get_best_multiplier_for_building(building)
 
 
 func _global_multiplier_for_resource(resource: BuildingDefinition.ProducedResource) -> float:

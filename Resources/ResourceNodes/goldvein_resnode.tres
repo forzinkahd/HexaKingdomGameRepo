@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinitionV2" format=3 uid="uid://bm0ucff0cjso5"]
+
+[ext_resource type="Script" uid="uid://dj67dxradoxcm" path="res://scripts/Gameplay/PlacementV2/resource_node_definition_v2.gd" id="1_4ycgd"]
+
+[resource]
+script = ExtResource("1_4ycgd")
+id = &"gold_vein"
+display_name = "Gold Vein"
+kind = 3
+allowed_biomes = Array[int]([5])
+affected_resource = 4

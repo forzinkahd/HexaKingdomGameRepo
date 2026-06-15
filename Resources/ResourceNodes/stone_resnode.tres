@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinitionV2" format=3 uid="uid://de0h3kjo7njws"]
+
+[ext_resource type="Script" uid="uid://dj67dxradoxcm" path="res://scripts/Gameplay/PlacementV2/resource_node_definition_v2.gd" id="1_63oud"]
+
+[resource]
+script = ExtResource("1_63oud")
+id = &"stone_deposit"
+display_name = "Stone Deposit"
+kind = 1
+spawn_chance = 0.3
+allowed_biomes = Array[int]([4, 5])
+affected_resource = 2
+on_tile_multiplier = 1.6
+nearby_multiplier = 1.25

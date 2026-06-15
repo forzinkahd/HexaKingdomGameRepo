@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinitionV2" format=3 uid="uid://b731mfm5vgcs1"]
+
+[ext_resource type="PackedScene" uid="uid://chdi3bv783s30" path="res://Scenes/NatureResources/obj_base_tree_medium.tscn" id="1_5shte"]
+[ext_resource type="Script" uid="uid://dj67dxradoxcm" path="res://scripts/Gameplay/PlacementV2/resource_node_definition_v2.gd" id="1_a2n3w"]
+
+[resource]
+script = ExtResource("1_a2n3w")
+id = &"forest_node"
+display_name = "Forest"
+kind = 0
+scene = ExtResource("1_5shte")
+spawn_chance = 0.25
+allowed_biomes = Array[int]([3])
+affected_resource = 1

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ResourceNodeDefinitionV2" format=3 uid="uid://chilfissi0w11"]
+
+[ext_resource type="Script" uid="uid://dj67dxradoxcm" path="res://scripts/Gameplay/PlacementV2/resource_node_definition_v2.gd" id="1_vs5g6"]
+
+[resource]
+script = ExtResource("1_vs5g6")
+id = &"fertile_soil"
+display_name = "Fertile Soil"
+kind = 2
+allowed_biomes = Array[int]([1, 2])
+affected_resource = 3

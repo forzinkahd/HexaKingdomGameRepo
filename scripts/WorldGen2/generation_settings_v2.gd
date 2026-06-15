@@ -32,7 +32,7 @@ enum OceanCorner { EAST, NORTH_EAST, NORTH_WEST, WEST, SOUTH_WEST, SOUTH_EAST }
 @export_category("Biomes")
 @export_range(0, 64, 1) var plains_max_height_units: int = 3
 @export_range(1, 64, 1) var hills_max_height_units: int = 8
-@export_range(1, 64, 1) var mountain_min_height_units: int = 10
+@export_range(1, 64, 1) var mountain_min_height_units: int = 8
 @export_range(0.0, 1.0, 0.01) var forest_noise_threshold: float = 0.72
 
 @export_category("Rendering")

@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://dlb4h6awe1qv1"]
+
+[ext_resource type="PackedScene" uid="uid://du6firwj1hmgb" path="res://Assets/Meshes/Decorations/Nature/rock_single_A.gltf" id="1_tjpff"]
+[ext_resource type="PackedScene" uid="uid://cnafp121pufxc" path="res://Assets/Meshes/Decorations/Nature/rock_single_B.gltf" id="2_5ldfu"]
+[ext_resource type="PackedScene" uid="uid://b3mq2ojcew0dt" path="res://Assets/Meshes/Decorations/Nature/rock_single_C.gltf" id="3_4rwkf"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_qymy5"]
+height = 0.2397461
+radius = 0.6459961
+
+[node name="obj_base_rocks_medium" type="Node3D" unique_id=242585001]
+
+[node name="Visual" type="Node3D" parent="." unique_id=2060921869]
+
+[node name="rock_single_A2" parent="Visual" unique_id=1094597095 instance=ExtResource("1_tjpff")]
+transform = Transform3D(1.7314047, 0, -1.0011183, 0, 2, 0, 1.0011183, 0, 1.7314047, 0.025029242, 0, -0.3574382)
+
+[node name="rock_single_B2" parent="Visual" unique_id=1524908793 instance=ExtResource("2_5ldfu")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0.36609173, 0, 0.15391174)
+
+[node name="rock_single_C2" parent="Visual" unique_id=1288848391 instance=ExtResource("3_4rwkf")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -0.2999336, 0, 0.26923054)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=955378729]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=558145512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.122802734, 0)
+shape = SubResource("CylinderShape3D_qymy5")

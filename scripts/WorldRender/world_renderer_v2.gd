@@ -11,7 +11,7 @@ extends RefCounted
 @export var top_tile_y_offset: float = 0.0
 @export var padding_y_offset: float = 0.0
 @export var padding_layer_spacing: float = 0.0
-@export var top_tile_extra_y_offset: float = 0.5
+@export var top_tile_extra_y_offset: float = 0.5		# if top tile offset pisses you off come back here idiot
 
 var _debug_materials: Dictionary = {}
 

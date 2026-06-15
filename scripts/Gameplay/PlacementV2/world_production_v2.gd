@@ -8,10 +8,12 @@ signal productivity_changed(resource: BuildingDefinition.ProducedResource, multi
 
 @export var economy: WorldEconomyV2
 @export var town_center_manager: TownCenterManagerV2
+@export var resource_map: WorldResourceMapV2
 
 @export var tick_enabled: bool = true
 @export var print_debug: bool = false
 @export var use_town_efficiency: bool = true
+@export var use_resource_bonuses: bool = true
 
 @export_group("Global Tick Intervals")
 @export_range(0.1, 9999.0) var wood_tick_seconds: float = 5.0
@@ -35,6 +37,9 @@ func _ready() -> void:
 
 	if town_center_manager == null:
 		town_center_manager = get_node_or_null("../TownCenterManagerV2") as TownCenterManagerV2
+
+	if resource_map == null:
+		resource_map = get_node_or_null("../WorldResourceMapV2") as WorldResourceMapV2
 
 	_reset_resource_progress()
 
@@ -182,7 +187,7 @@ func get_effective_base_amount_per_tick(resource: BuildingDefinition.ProducedRes
 		if not _is_valid_producer_for_resource(building, resource):
 			continue
 
-		total += float(building.definition.production_amount) * get_building_town_efficiency(building)
+		total += get_building_effective_base_amount(building)
 
 	return total
 
@@ -193,14 +198,19 @@ func get_amount_per_tick(resource: BuildingDefinition.ProducedResource) -> int:
 	return int(floor(base_amount * multiplier))
 
 
-func get_building_amount_per_tick(building: PlacedBuildingV2) -> float:
+func get_building_effective_base_amount(building: PlacedBuildingV2) -> float:
 	if building == null or not is_instance_valid(building):
 		return 0.0
 
 	if not building.is_production_building():
 		return 0.0
 
-	return float(building.definition.production_amount) * get_building_town_efficiency(building)
+	var base := float(building.definition.production_amount)
+	return base * get_building_town_efficiency(building) * get_building_resource_multiplier(building)
+
+
+func get_building_amount_per_tick(building: PlacedBuildingV2) -> float:
+	return get_building_effective_base_amount(building)
 
 
 func get_building_town_efficiency(building: PlacedBuildingV2) -> float:
@@ -211,6 +221,16 @@ func get_building_town_efficiency(building: PlacedBuildingV2) -> float:
 		return 1.0
 
 	return town_center_manager.get_efficiency_for_building(building)
+
+
+func get_building_resource_multiplier(building: PlacedBuildingV2) -> float:
+	if not use_resource_bonuses:
+		return 1.0
+
+	if resource_map == null:
+		return 1.0
+
+	return resource_map.get_best_multiplier_for_building(building)
 
 
 func get_building_count_for_resource(resource: BuildingDefinition.ProducedResource) -> int:

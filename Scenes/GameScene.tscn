@@ -52,7 +52,12 @@
 [ext_resource type="Script" uid="uid://3xk4gvpw03qk" path="res://scripts/Gameplay/PlacementV2/build_menu_v2.gd" id="42_ustms"]
 [ext_resource type="Script" uid="uid://bx1doei3ihs1" path="res://scripts/Gameplay/PlacementV2/town_influence_overlay_v2.gd" id="44_11i6k"]
 [ext_resource type="Script" uid="uid://cso88f44js1le" path="res://scripts/Gameplay/PlacementV2/town_info_panel_v2.gd" id="45_24uct"]
+[ext_resource type="Script" uid="uid://cg02ihephla2g" path="res://scripts/Gameplay/PlacementV2/world_resource_map_v2.gd" id="45_rvx5h"]
+[ext_resource type="Script" uid="uid://dj67dxradoxcm" path="res://scripts/Gameplay/PlacementV2/resource_node_definition_v2.gd" id="46_gnabl"]
+[ext_resource type="Resource" uid="uid://b731mfm5vgcs1" path="res://Resources/ResourceNodes/forest_resnode.tres" id="47_6yhpj"]
 [ext_resource type="Script" uid="uid://dtyywkeejgsnp" path="res://scripts/Gameplay/PlacementV2/selected_building_info_panel_v2.gd" id="47_uapko"]
+[ext_resource type="Resource" uid="uid://de0h3kjo7njws" path="res://Resources/ResourceNodes/stone_resnode.tres" id="48_yola1"]
+[ext_resource type="Resource" uid="uid://chilfissi0w11" path="res://Resources/ResourceNodes/fertilesoil_resnode.tres" id="49_btbwo"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -221,10 +226,11 @@ town_center_id = &"town_center_2"
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
 
-[node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager")]
+[node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager", "resource_map")]
 script = ExtResource("35_vgicg")
 economy = NodePath("../WorldEconomyV2")
 town_center_manager = NodePath("../TownCenterManagerV2")
+resource_map = NodePath("../WorldResourceMapV2")
 
 [node name="WorldOccupancyV2" type="Node" parent="Builder/GameplayV2" unique_id=1325980519]
 script = ExtResource("36_jmmro")
@@ -250,6 +256,15 @@ world_gen_controller = NodePath("../../WorldGenerator")
 town_center_manager = NodePath("../TownCenterManagerV2")
 overlay_y_offset = 0.5
 overlay_yaw_offset_degrees = 0.0
+
+[node name="WorldResourceMapV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1009084731 node_paths=PackedStringArray("world_gen_controller", "resource_root")]
+script = ExtResource("45_rvx5h")
+world_gen_controller = NodePath("../../WorldGenerator")
+resource_root = NodePath("../ResourceNodes")
+resource_definitions = Array[ExtResource("46_gnabl")]([ExtResource("47_6yhpj"), ExtResource("48_yola1"), ExtResource("49_btbwo")])
+resource_y_offset = 1.45
+
+[node name="ResourceNodes" type="Node3D" parent="Builder/GameplayV2" unique_id=2048877697]
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
@@ -292,7 +307,7 @@ registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
 production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
 
-[node name="SelectedBuildingInfoPanel" type="Label" parent="UI/UI" unique_id=1569300735 node_paths=PackedStringArray("picker", "occupancy", "registry", "town_center_manager", "production")]
+[node name="SelectedBuildingInfoPanel" type="Label" parent="UI/UI" unique_id=1569300735 node_paths=PackedStringArray("picker", "occupancy", "registry", "town_center_manager", "production", "resource_map")]
 layout_mode = 0
 offset_left = 1070.0
 offset_top = 443.0
@@ -304,6 +319,7 @@ occupancy = NodePath("../../../Builder/GameplayV2/WorldOccupancyV2")
 registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
 production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
+resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
