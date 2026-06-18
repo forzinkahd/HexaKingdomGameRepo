@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BuildingResourceAffinityV2" format=3 uid="uid://bo7eyyp85tavk"]
+
+[ext_resource type="Script" uid="uid://ep66c8v83h6v" path="res://scripts/Gameplay/PlacementV2/building_resource_affinity_v2.gd" id="1_6s400"]
+
+[resource]
+script = ExtResource("1_6s400")
+resource_node_id = &"stone_deposit"
+display_name = "Stone Deposit"
+on_tile_multiplier = 1.8

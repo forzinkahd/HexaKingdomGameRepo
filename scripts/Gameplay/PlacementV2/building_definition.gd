@@ -62,6 +62,10 @@ enum ProducedResource {
 @export_category("Requirements")
 @export var required_building_ids: Array[StringName] = []
 
+# Resourcce Node
+@export_group("Resource Node Rules")
+@export var resource_affinities: Array[BuildingResourceAffinityV2] = []
+@export var use_generic_resource_node_bonuses: bool = true
 
 func has_explicit_biome_rules() -> bool:
 	return not allowed_biomes.is_empty()
@@ -80,6 +84,26 @@ func allows_biome(biome_kind: int) -> bool:
 			return allow_mountain
 		_:
 			return true
+
+
+func resource_affinity_summary() -> String:
+	if resource_affinities.is_empty():
+		if use_generic_resource_node_bonuses:
+			return "Generic resource bonuses"
+		return "No resource bonuses"
+
+	var parts: Array[String] = []
+
+	for affinity in resource_affinities:
+		if affinity == null:
+			continue
+
+		parts.append(affinity.summary())
+
+	if parts.is_empty():
+		return "No resource bonuses"
+
+	return "; ".join(parts)
 
 
 func cost_summary() -> String:

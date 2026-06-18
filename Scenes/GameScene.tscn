@@ -60,6 +60,7 @@
 [ext_resource type="Resource" uid="uid://chilfissi0w11" path="res://Resources/ResourceNodes/fertilesoil_resnode.tres" id="49_btbwo"]
 [ext_resource type="Script" uid="uid://ba3wqdlbprgud" path="res://scripts/Gameplay/PlacementV2/ui_panel_toggle_controller_v2.gd" id="50_btbwo"]
 [ext_resource type="Script" uid="uid://bdykihuri7nl4" path="res://scripts/Gameplay/PlacementV2/ui_panel_toggle_input_bootstrap_v2.gd" id="51_8kd31"]
+[ext_resource type="Script" uid="uid://dsbwoexlih7pp" path="res://scripts/Gameplay/PlacementV2/selected_resource_node_info_panel_v2.gd" id="55_8kd31"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -242,7 +243,7 @@ script = ExtResource("36_jmmro")
 [node name="BuildingPreviewV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1004577143]
 script = ExtResource("33_1dmga")
 
-[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "production", "registry", "building_root")]
+[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "production", "registry", "resource_map", "building_root")]
 script = ExtResource("34_cxw7u")
 picker = NodePath("../../WorldInteraction/WorldTilePicker")
 preview = NodePath("../BuildingPreviewV2")
@@ -250,6 +251,7 @@ occupancy = NodePath("../WorldOccupancyV2")
 economy = NodePath("../WorldEconomyV2")
 production = NodePath("../WorldProductionV2")
 registry = NodePath("../BuildingRegistryV2")
+resource_map = NodePath("../WorldResourceMapV2")
 building_root = NodePath("../PlacedBuildings")
 
 [node name="TownInfluenceOverlayV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1091534731 node_paths=PackedStringArray("world_gen_controller", "town_center_manager")]
@@ -335,6 +337,17 @@ registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
 production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
 resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
+
+[node name="SelectedResourceNodeInfoPanel" type="Label" parent="UI/UI" unique_id=863855761 node_paths=PackedStringArray("picker", "resource_map", "placement")]
+layout_mode = 0
+offset_left = 1264.0
+offset_top = 587.0
+offset_right = 1496.0
+offset_bottom = 718.0
+script = ExtResource("55_8kd31")
+picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
+resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
+placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

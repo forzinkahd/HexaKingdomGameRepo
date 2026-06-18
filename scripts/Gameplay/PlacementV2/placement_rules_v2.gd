@@ -27,7 +27,8 @@ static func validate(
 	occupancy: WorldOccupancyV2 = null,
 	economy: WorldEconomyV2 = null,
 	world_map: WorldMapData = null,
-	registry: BuildingRegistryV2 = null
+	registry: BuildingRegistryV2 = null,
+	resource_map: WorldResourceMapV2 = null
 ) -> PlacementResult:
 	if tile == null:
 		return PlacementResult.fail("No tile selected")
@@ -43,6 +44,10 @@ static func validate(
 
 		if registry.is_unique_limit_reached(definition):
 			return PlacementResult.fail(registry.unique_reason(definition), footprint)
+
+	if resource_map != null:
+		if not resource_map.requirements_met_for_building_on_tile(definition, tile):
+			return PlacementResult.fail(resource_map.requirement_reason_for_tile(definition, tile), footprint)
 
 	if economy != null and not economy.can_afford(definition):
 		return PlacementResult.fail(economy.missing_cost_reason(definition), footprint)

@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://bluey6vavaihx" path="res://Scenes/Kingdom/Buildings/obj_blue_quarry.tscn" id="1_5vrul"]
 [ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="1_aqf3h"]
+[ext_resource type="Script" uid="uid://ep66c8v83h6v" path="res://scripts/Gameplay/PlacementV2/building_resource_affinity_v2.gd" id="1_d3874"]
+[ext_resource type="Resource" uid="uid://bo7eyyp85tavk" path="res://Resources/BuildingAffinities/quarry_affinity_res.tres" id="2_04q61"]
 
 [resource]
 script = ExtResource("1_aqf3h")
@@ -18,4 +20,6 @@ allowed_biomes = Array[int]([3, 4, 5])
 allow_forest = false
 allow_mountain = true
 required_building_ids = Array[StringName]([&"town_center_2"])
+resource_affinities = Array[ExtResource("1_d3874")]([ExtResource("2_04q61")])
+use_generic_resource_node_bonuses = false
 metadata/_custom_type_script = "uid://mcoahjj711n3"
