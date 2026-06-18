@@ -3,9 +3,10 @@ extends Button
 
 signal building_pressed(definition: BuildingDefinition)
 
-@export var show_category: bool = true
+@export var show_category: bool = false
 @export var show_cost: bool = true
 @export var show_production: bool = true
+@export var show_resource_rules: bool = false
 @export var show_unaffordable_reason: bool = true
 @export var show_locked_reason: bool = true
 @export var show_unique_reason: bool = true
@@ -26,7 +27,6 @@ signal building_pressed(definition: BuildingDefinition)
 var definition: BuildingDefinition
 var economy: WorldEconomyV2
 var registry: BuildingRegistryV2
-
 var selected: bool = false
 var affordable: bool = true
 var unlocked: bool = true
@@ -41,11 +41,9 @@ func setup(
 	definition = source_definition
 	economy = source_economy
 	registry = source_registry
-
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	focus_mode = Control.FOCUS_NONE
 	toggle_mode = true
-
 	_refresh_state()
 
 
@@ -140,8 +138,6 @@ func _update_text() -> void:
 		title = unique_blocked_prefix + title
 	elif not affordable:
 		title = unaffordable_prefix + title
-	else:
-		title = affordable_prefix + title
 
 	lines.append(title)
 
@@ -155,6 +151,9 @@ func _update_text() -> void:
 		var production := definition.production_summary()
 		if production != "None":
 			lines.append("Produces: %s" % [production])
+
+	if show_resource_rules and definition.has_method("resource_affinity_summary"):
+		lines.append(definition.resource_affinity_summary())
 
 	if definition.footprint_radius > 0:
 		lines.append("Footprint: r%d" % [definition.footprint_radius])
