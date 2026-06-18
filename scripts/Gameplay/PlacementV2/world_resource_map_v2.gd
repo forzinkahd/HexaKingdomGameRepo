@@ -15,7 +15,7 @@ signal resources_cleared
 @export var max_nodes_per_tile: int = 1
 
 @export_group("Visuals")
-@export var resource_y_offset: float = 0.65
+@export var resource_y_offset: float = 0.0
 @export var fallback_visual_scale: float = 0.45
 
 var _nodes_by_coord: Dictionary = {}
@@ -221,7 +221,19 @@ func _add_resource_node(tile: WorldTile, definition: ResourceNodeDefinitionV2) -
 
 	var visual := _make_resource_visual(definition)
 	visual.name = "ResourceNode_%s_%s_%s" % [definition.id, tile.coord.x, tile.coord.y]
-	visual.position = tile.world_position + Vector3.UP * resource_y_offset
+
+	var visual_y := resource_y_offset
+
+	var settings := _current_settings()
+	if settings != null:
+		visual_y += float(tile.height_units - 2) * settings.height_step				# -2 for visual compensation of hovering resource node placement
+
+	visual.position = Vector3(
+		tile.world_position.x,
+		visual_y,
+		tile.world_position.z
+	)
+
 	visual.set_meta("resource_node_definition", definition)
 	visual.set_meta("world_tile", tile)
 	visual.set_meta("coord", tile.coord)

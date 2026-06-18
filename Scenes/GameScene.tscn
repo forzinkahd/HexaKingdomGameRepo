@@ -58,6 +58,8 @@
 [ext_resource type="Script" uid="uid://dtyywkeejgsnp" path="res://scripts/Gameplay/PlacementV2/selected_building_info_panel_v2.gd" id="47_uapko"]
 [ext_resource type="Resource" uid="uid://de0h3kjo7njws" path="res://Resources/ResourceNodes/stone_resnode.tres" id="48_yola1"]
 [ext_resource type="Resource" uid="uid://chilfissi0w11" path="res://Resources/ResourceNodes/fertilesoil_resnode.tres" id="49_btbwo"]
+[ext_resource type="Script" uid="uid://ba3wqdlbprgud" path="res://scripts/Gameplay/PlacementV2/ui_panel_toggle_controller_v2.gd" id="50_btbwo"]
+[ext_resource type="Script" uid="uid://bdykihuri7nl4" path="res://scripts/Gameplay/PlacementV2/ui_panel_toggle_input_bootstrap_v2.gd" id="51_8kd31"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -265,6 +267,19 @@ resource_definitions = Array[ExtResource("46_gnabl")]([ExtResource("47_6yhpj"), 
 resource_y_offset = 1.45
 
 [node name="ResourceNodes" type="Node3D" parent="Builder/GameplayV2" unique_id=2048877697]
+
+[node name="UIPanelToggleControllerV2" type="Node" parent="Builder/GameplayV2" unique_id=273192751 node_paths=PackedStringArray("build_menu_panel", "town_info_panel", "selected_building_panel", "production_panel", "registry_panel", "town_influence_overlay", "resource_nodes_root")]
+script = ExtResource("50_btbwo")
+build_menu_panel = NodePath("../../../UI/UI/BuildMenuPanel")
+town_info_panel = NodePath("../../../UI/UI/TownInfoPanel")
+selected_building_panel = NodePath("../../../UI/UI/SelectedBuildingInfoPanel")
+production_panel = NodePath("../../../Control/ProductionDebugLavelV2")
+registry_panel = NodePath("../../../Control/PlacementDebugLabelV2")
+town_influence_overlay = NodePath("../TownInfluenceOverlayV2")
+resource_nodes_root = NodePath("../ResourceNodes")
+
+[node name="UIPanelToggleInputBootstrapV2" type="Node" parent="Builder/GameplayV2" unique_id=461899610]
+script = ExtResource("51_8kd31")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
