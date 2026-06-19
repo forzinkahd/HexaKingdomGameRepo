@@ -136,13 +136,12 @@ script = ExtResource("9_p13dw")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "selection_indicator", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root", "road_tool", "tool_controller")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root", "road_tool", "tool_controller")]
 script = ExtResource("12_tt8b8")
 voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
 main_camera = NodePath("../../CameraParent/Camera3D")
 p_finder = NodePath("../Pathfinder")
-selection_indicator = NodePath("")
 placed_objects_root = NodePath("../../PlacedObjects")
 ghost_material = ExtResource("17_yhlfj")
 building_placer = NodePath("../BuildingPlacer")
@@ -305,7 +304,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 1
 
-[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "economy", "registry", "button_container", "tab_container")]
+[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "economy", "registry", "button_container")]
 layout_mode = 0
 offset_left = 502.0
 offset_top = 24.0
@@ -317,7 +316,6 @@ placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 economy = NodePath("../../../Builder/GameplayV2/WorldEconomyV2")
 registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 button_container = NodePath("MarginContainer/BuildMenuButtons")
-tab_container = NodePath("")
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/UI/BuildMenuPanel" unique_id=673339057]
 layout_mode = 2

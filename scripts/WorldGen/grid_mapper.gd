@@ -23,9 +23,9 @@ func calculate_map_positions() -> Array[Voxel]:
 			stagger = true
 			voxels = generate_map(rectangle_bounds(), true, circular_buffer_filter, circle_shape_filter)
 
-	NoiseStage.new().run_voxels(settings, voxels, self)
-	HeightStage.new().run_voxels(settings, voxels, noise_range)
-	WaterStage.new().run_voxels(settings, voxels)
+	#NoiseStage.new().run_voxels(settings, voxels, self)
+	#HeightStage.new().run_voxels(settings, voxels, noise_range)
+	#WaterStage.new().run_voxels(settings, voxels)
 
 	WorldMap.noise_range = noise_range
 	WorldMap.is_map_staggered = stagger

@@ -2,7 +2,7 @@
 class_name WorldGenerationPipeline
 extends RefCounted
 
-func generate(settings: GenerationSettings, theme: WorldTheme) -> GenerationResult:
+"""func generate(settings: GenerationSettings, theme: WorldTheme) -> GenerationResult:
 	var ctx := GenerationBootstrap.setup(settings, theme)
 
 	var tiles := MapLayoutStage.new().run(ctx)
@@ -19,4 +19,4 @@ func generate(settings: GenerationSettings, theme: WorldTheme) -> GenerationResu
 	# RiverResolver.new().run(result)
 	# RoadResolver.new().run(result)
 
-	return result
+	return result"""
