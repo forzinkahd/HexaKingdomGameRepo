@@ -13,7 +13,6 @@
 [ext_resource type="PackedScene" uid="uid://cchityj1npp8j" path="res://Scenes/Cursors/hexagon_cursor.tscn" id="10_6pl24"]
 [ext_resource type="PackedScene" uid="uid://ckoa1wdbhfgii" path="res://Scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
-[ext_resource type="Texture2D" uid="uid://c043hv351ffiv" path="res://Assets/selectsprite.png" id="13_w22tq"]
 [ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 [ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
 [ext_resource type="Script" uid="uid://c0esfdcq17by5" path="res://scripts/Managers/task_manager.gd" id="18_pgw7i"]
@@ -67,6 +66,7 @@
 [ext_resource type="Resource" uid="uid://bah2e6oqviht" path="res://Resources/Policies/ExpansionSubsidy.tres" id="55_aq8tt"]
 [ext_resource type="Resource" uid="uid://b6dp7a42yv43j" path="res://Resources/Policies/LocalStewardship.tres" id="56_me2ev"]
 [ext_resource type="Script" uid="uid://eypynnntxf1m" path="res://scripts/Gameplay/PlacementV2/policy_menu_v2.gd" id="57_p5hnb"]
+[ext_resource type="Script" uid="uid://dpk5mv4uys8" path="res://scripts/Gameplay/PlacementV2/town_center_panel_v2.gd" id="62_uvgqy"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -142,7 +142,7 @@ voxel_cursor_scene = ExtResource("10_6pl24")
 unit_cursor_scene = ExtResource("11_w22tq")
 main_camera = NodePath("../../CameraParent/Camera3D")
 p_finder = NodePath("../Pathfinder")
-selection_indicator = NodePath("../../Control/TextureRect")
+selection_indicator = NodePath("")
 placed_objects_root = NodePath("../../PlacedObjects")
 ghost_material = ExtResource("17_yhlfj")
 building_placer = NodePath("../BuildingPlacer")
@@ -289,10 +289,11 @@ resource_nodes_root = NodePath("../ResourceNodes")
 [node name="UIPanelToggleInputBootstrapV2" type="Node" parent="Builder/GameplayV2" unique_id=461899610]
 script = ExtResource("51_8kd31")
 
-[node name="TownPoliticsManagerV2" type="Node" parent="Builder/GameplayV2" unique_id=894888230 node_paths=PackedStringArray("town_center_manager", "production")]
+[node name="TownPoliticsManagerV2" type="Node" parent="Builder/GameplayV2" unique_id=894888230 node_paths=PackedStringArray("town_center_manager", "production", "registry")]
 script = ExtResource("52_wcenn")
 town_center_manager = NodePath("../TownCenterManagerV2")
 production = NodePath("../WorldProductionV2")
+registry = NodePath("../BuildingRegistryV2")
 available_policies = Array[ExtResource("53_uvgqy")]([ExtResource("54_5jhr0"), ExtResource("55_aq8tt"), ExtResource("56_me2ev")])
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
@@ -304,7 +305,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 1
 
-[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "economy", "registry", "button_container")]
+[node name="BuildMenuPanel" type="PanelContainer" parent="UI/UI" unique_id=435362265 node_paths=PackedStringArray("catalog", "placement", "economy", "registry", "button_container", "tab_container")]
 layout_mode = 0
 offset_left = 502.0
 offset_top = 24.0
@@ -316,6 +317,7 @@ placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 economy = NodePath("../../../Builder/GameplayV2/WorldEconomyV2")
 registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 button_container = NodePath("MarginContainer/BuildMenuButtons")
+tab_container = NodePath("")
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/UI/BuildMenuPanel" unique_id=673339057]
 layout_mode = 2
@@ -361,7 +363,7 @@ picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
 resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
 placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 
-[node name="PolicyPanel" type="Panel" parent="UI/UI" unique_id=1517032758 node_paths=PackedStringArray("politics", "button_container", "status_label", "active_policy_label")]
+[node name="PolicyPanel" type="Panel" parent="UI/UI" unique_id=1517032758 node_paths=PackedStringArray("politics", "button_container", "status_label", "active_policy_label", "consequence_label")]
 layout_mode = 0
 offset_left = 1433.0
 offset_top = 37.0
@@ -372,6 +374,7 @@ politics = NodePath("../../../Builder/GameplayV2/TownPoliticsManagerV2")
 button_container = NodePath("PolicyScroll/PolicyButtons")
 status_label = NodePath("StatusLabel")
 active_policy_label = NodePath("ActivePolicyLabel")
+consequence_label = NodePath("../TownCenterPanel/VBoxContainer/ConsequenceLabel")
 
 [node name="StatusLabel" type="Label" parent="UI/UI/PolicyPanel" unique_id=455281784]
 layout_mode = 0
@@ -395,42 +398,56 @@ offset_bottom = 275.0
 [node name="PolicyButtons" type="VBoxContainer" parent="UI/UI/PolicyPanel/PolicyScroll" unique_id=1911693828]
 layout_mode = 2
 
+[node name="TownCenterPanel" type="PanelContainer" parent="UI/UI" unique_id=2007799689 node_paths=PackedStringArray("picker", "occupancy", "town_center_manager", "politics", "status_label", "active_policy_label", "influence_label", "consequence_label", "policy_menu")]
+layout_mode = 0
+offset_left = 761.0
+offset_top = 329.0
+offset_right = 1217.0
+offset_bottom = 530.0
+script = ExtResource("62_uvgqy")
+picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
+occupancy = NodePath("../../../Builder/GameplayV2/WorldOccupancyV2")
+town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
+politics = NodePath("../../../Builder/GameplayV2/TownPoliticsManagerV2")
+status_label = NodePath("VBoxContainer/StatusLabel")
+active_policy_label = NodePath("VBoxContainer/ActivePolicyLabel")
+influence_label = NodePath("VBoxContainer/InfluenceLabel")
+consequence_label = NodePath("VBoxContainer/ConsequenceLabel")
+policy_menu = NodePath("VBoxContainer/PolicyMenu")
+town_center_id = &"town_center_2"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/TownCenterPanel" unique_id=73103721]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="UI/UI/TownCenterPanel/VBoxContainer" unique_id=1753236865]
+layout_mode = 2
+
+[node name="ActivePolicyLabel" type="Label" parent="UI/UI/TownCenterPanel/VBoxContainer" unique_id=1380136126]
+layout_mode = 2
+
+[node name="InfluenceLabel" type="Label" parent="UI/UI/TownCenterPanel/VBoxContainer" unique_id=860458863]
+layout_mode = 2
+
+[node name="ConsequenceLabel" type="Label" parent="UI/UI/TownCenterPanel/VBoxContainer" unique_id=1607718523]
+layout_mode = 2
+
+[node name="PolicyMenu" type="Control" parent="UI/UI/TownCenterPanel/VBoxContainer" unique_id=1988064635 node_paths=PackedStringArray("politics", "button_container", "status_label", "active_policy_label", "consequence_label")]
+layout_mode = 2
+script = ExtResource("57_p5hnb")
+politics = NodePath("../../../../../Builder/GameplayV2/TownPoliticsManagerV2")
+button_container = NodePath("PolicyButtons")
+status_label = NodePath("../StatusLabel")
+active_policy_label = NodePath("../ActivePolicyLabel")
+consequence_label = NodePath("../ConsequenceLabel")
+
+[node name="PolicyButtons" type="VBoxContainer" parent="UI/UI/TownCenterPanel/VBoxContainer/PolicyMenu" unique_id=2057509234]
+layout_mode = 0
+
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=191441442]
-layout_mode = 0
-offset_right = 100.0
-offset_bottom = 80.0
-
-[node name="Button" type="Button" parent="Control/VBoxContainer" unique_id=180875011]
-layout_mode = 2
-text = "Generate"
-
-[node name="RichTextLabel" type="RichTextLabel" parent="Control/VBoxContainer" unique_id=1638208772]
-layout_mode = 2
-bbcode_enabled = true
-text = "Text Here"
-fit_content = true
-scroll_active = false
-autowrap_mode = 0
-
-[node name="TextureRect" type="TextureRect" parent="Control" unique_id=1729023714]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 552.0
-offset_right = 121.0
-offset_bottom = 665.0
-grow_vertical = 0
-texture = ExtResource("13_w22tq")
-expand_mode = 3
-stretch_mode = 4
 
 [node name="TileDebugLabel" type="Label" parent="Control" unique_id=797205666 node_paths=PackedStringArray("picker")]
 layout_mode = 1
@@ -664,5 +681,3 @@ text = "Train a Builder for 3 logs"
 [node name="Units" type="Node3D" parent="." unique_id=487589458]
 
 [node name="NatResources" type="Node3D" parent="." unique_id=1726380045]
-
-[connection signal="pressed" from="Control/VBoxContainer/Button" to="Builder/WorldGenerator" method="_ready"]

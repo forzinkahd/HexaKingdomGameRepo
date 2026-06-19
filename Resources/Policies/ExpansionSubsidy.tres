@@ -8,6 +8,7 @@ id = &"expansion_subsidy"
 display_name = "Expansion Subsidy"
 description = "Supports production outside the town core."
 category = 2
+required_building_ids = Array[StringName]([&"town_center_2"])
 authority_delta = -5
 stability_delta = -10
 approval_delta = 5

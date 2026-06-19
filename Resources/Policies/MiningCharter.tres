@@ -8,6 +8,7 @@ id = &"mining_charter"
 display_name = "Mining Charter"
 description = "Grants mining rights to local operators."
 category = 0
+required_building_ids = Array[StringName]([&"town_center_2"])
 authority_delta = 5
 stability_delta = -5
 approval_delta = -10

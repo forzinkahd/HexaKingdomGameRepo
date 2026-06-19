@@ -9,6 +9,7 @@ display_name = "Local Stewardship"
 description = "Protects forests and local communities.
 "
 category = 3
+required_building_ids = Array[StringName]([&"town_center_2", &"test_lumber_camp"])
 stability_delta = 10
 approval_delta = 15
 wood_multiplier = 0.85
