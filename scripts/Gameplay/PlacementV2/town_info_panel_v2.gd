@@ -11,6 +11,8 @@ extends Label
 @export var refresh_seconds: float = 0.25
 @export var show_politics_placeholder: bool = true
 
+@export var politics: TownPoliticsManagerV2
+
 var selected_tile: WorldTile
 var selected_visual_node: Node3D
 var _elapsed: float = 0.0
@@ -32,6 +34,12 @@ func _ready() -> void:
 
 	if placement != null and not placement.placement_changed.is_connected(_on_placement_changed):
 		placement.placement_changed.connect(_on_placement_changed)
+
+	if politics != null:
+		if not politics.active_policy_changed.is_connected(_refresh):
+			politics.active_policy_changed.connect(_refresh)
+		if not politics.politics_changed.is_connected(_refresh):
+			politics.politics_changed.connect(_refresh)
 
 	_refresh()
 
@@ -74,9 +82,10 @@ func _refresh(_arg = null) -> void:
 
 	lines.append(town_center_manager.get_town_summary())
 
-	if show_politics_placeholder:
-		lines.append("")
-		lines.append("Politics")
+	if politics != null:
+		lines.append(politics.get_status_summary())
+		lines.append(politics.get_policy_summary())
+	else:
 		lines.append("Authority: %d/100" % [town_center_manager.authority])
 		lines.append("Stability: %d/100" % [town_center_manager.stability])
 		lines.append("Approval: %d/100" % [town_center_manager.approval])

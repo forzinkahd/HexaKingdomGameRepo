@@ -27,6 +27,12 @@ signal productivity_changed(resource: BuildingDefinition.ProducedResource, multi
 @export_range(0.0, 100.0) var food_multiplier: float = 1.0
 @export_range(0.0, 100.0) var gold_multiplier: float = 1.0
 
+@export_group("Policy Multipliers")
+@export_range(0.0, 100.0) var policy_wood_multiplier: float = 1.0
+@export_range(0.0, 100.0) var policy_stone_multiplier: float = 1.0
+@export_range(0.0, 100.0) var policy_food_multiplier: float = 1.0
+@export_range(0.0, 100.0) var policy_gold_multiplier: float = 1.0
+
 var _production_buildings: Array[PlacedBuildingV2] = []
 var _resource_progress: Dictionary = {}
 
@@ -55,6 +61,52 @@ func _process(delta: float) -> void:
 	_tick_resource(BuildingDefinition.ProducedResource.STONE, delta)
 	_tick_resource(BuildingDefinition.ProducedResource.FOOD, delta)
 	_tick_resource(BuildingDefinition.ProducedResource.GOLD, delta)
+
+
+func set_policy_multipliers(wood: float, stone: float, food: float, gold: float) -> void:
+	policy_wood_multiplier = maxf(0.0, wood)
+	policy_stone_multiplier = maxf(0.0, stone)
+	policy_food_multiplier = maxf(0.0, food)
+	policy_gold_multiplier = maxf(0.0, gold)
+
+	productivity_changed.emit(BuildingDefinition.ProducedResource.WOOD, get_productivity_multiplier(BuildingDefinition.ProducedResource.WOOD))
+	productivity_changed.emit(BuildingDefinition.ProducedResource.STONE, get_productivity_multiplier(BuildingDefinition.ProducedResource.STONE))
+	productivity_changed.emit(BuildingDefinition.ProducedResource.FOOD, get_productivity_multiplier(BuildingDefinition.ProducedResource.FOOD))
+	productivity_changed.emit(BuildingDefinition.ProducedResource.GOLD, get_productivity_multiplier(BuildingDefinition.ProducedResource.GOLD))
+
+func _get_base_productivity_multiplier(resource: BuildingDefinition.ProducedResource) -> float:
+	match resource:
+		BuildingDefinition.ProducedResource.WOOD:
+			return wood_multiplier
+		BuildingDefinition.ProducedResource.STONE:
+			return stone_multiplier
+		BuildingDefinition.ProducedResource.FOOD:
+			return food_multiplier
+		BuildingDefinition.ProducedResource.GOLD:
+			return gold_multiplier
+		_:
+			return 0.0
+
+func _get_policy_productivity_multiplier(resource: BuildingDefinition.ProducedResource) -> float:
+	match resource:
+		BuildingDefinition.ProducedResource.WOOD:
+			return policy_wood_multiplier
+		BuildingDefinition.ProducedResource.STONE:
+			return policy_stone_multiplier
+		BuildingDefinition.ProducedResource.FOOD:
+			return policy_food_multiplier
+		BuildingDefinition.ProducedResource.GOLD:
+			return policy_gold_multiplier
+		_:
+			return 1.0
+
+# Replace your existing get_productivity_multiplier() with this:
+func get_productivity_multiplier(resource: BuildingDefinition.ProducedResource) -> float:
+	return _get_base_productivity_multiplier(resource) * _get_policy_productivity_multiplier(resource)
+
+# Replace add_productivity_multiplier() with this, so future tech/progression modifies the base multiplier:
+func add_productivity_multiplier(resource: BuildingDefinition.ProducedResource, additive_bonus: float) -> void:
+	set_productivity_multiplier(resource, _get_base_productivity_multiplier(resource) + additive_bonus)
 
 
 func register_building(building: PlacedBuildingV2) -> void:
@@ -109,8 +161,8 @@ func set_productivity_multiplier(resource: BuildingDefinition.ProducedResource, 
 
 	productivity_changed.emit(resource, multiplier)
 
-
-func add_productivity_multiplier(resource: BuildingDefinition.ProducedResource, additive_bonus: float) -> void:
+# DEPRECATED
+"""func add_productivity_multiplier(resource: BuildingDefinition.ProducedResource, additive_bonus: float) -> void:
 	set_productivity_multiplier(resource, get_productivity_multiplier(resource) + additive_bonus)
 
 
@@ -125,7 +177,7 @@ func get_productivity_multiplier(resource: BuildingDefinition.ProducedResource) 
 		BuildingDefinition.ProducedResource.GOLD:
 			return gold_multiplier
 		_:
-			return 0.0
+			return 0.0"""
 
 
 func get_tick_interval(resource: BuildingDefinition.ProducedResource) -> float:

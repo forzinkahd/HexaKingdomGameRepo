@@ -60,7 +60,13 @@
 [ext_resource type="Resource" uid="uid://chilfissi0w11" path="res://Resources/ResourceNodes/fertilesoil_resnode.tres" id="49_btbwo"]
 [ext_resource type="Script" uid="uid://ba3wqdlbprgud" path="res://scripts/Gameplay/PlacementV2/ui_panel_toggle_controller_v2.gd" id="50_btbwo"]
 [ext_resource type="Script" uid="uid://bdykihuri7nl4" path="res://scripts/Gameplay/PlacementV2/ui_panel_toggle_input_bootstrap_v2.gd" id="51_8kd31"]
+[ext_resource type="Script" uid="uid://cx312a1be5u7l" path="res://scripts/Gameplay/PlacementV2/town_politics_manager_v2.gd" id="52_wcenn"]
+[ext_resource type="Script" uid="uid://cuucgi0bcoyyp" path="res://scripts/Gameplay/PlacementV2/policy_definition_v2.gd" id="53_uvgqy"]
+[ext_resource type="Resource" uid="uid://8skibpoo0m7f" path="res://Resources/Policies/MiningCharter.tres" id="54_5jhr0"]
 [ext_resource type="Script" uid="uid://dsbwoexlih7pp" path="res://scripts/Gameplay/PlacementV2/selected_resource_node_info_panel_v2.gd" id="55_8kd31"]
+[ext_resource type="Resource" uid="uid://bah2e6oqviht" path="res://Resources/Policies/ExpansionSubsidy.tres" id="55_aq8tt"]
+[ext_resource type="Resource" uid="uid://b6dp7a42yv43j" path="res://Resources/Policies/LocalStewardship.tres" id="56_me2ev"]
+[ext_resource type="Script" uid="uid://eypynnntxf1m" path="res://scripts/Gameplay/PlacementV2/policy_menu_v2.gd" id="57_p5hnb"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -283,6 +289,12 @@ resource_nodes_root = NodePath("../ResourceNodes")
 [node name="UIPanelToggleInputBootstrapV2" type="Node" parent="Builder/GameplayV2" unique_id=461899610]
 script = ExtResource("51_8kd31")
 
+[node name="TownPoliticsManagerV2" type="Node" parent="Builder/GameplayV2" unique_id=894888230 node_paths=PackedStringArray("town_center_manager", "production")]
+script = ExtResource("52_wcenn")
+town_center_manager = NodePath("../TownCenterManagerV2")
+production = NodePath("../WorldProductionV2")
+available_policies = Array[ExtResource("53_uvgqy")]([ExtResource("54_5jhr0"), ExtResource("55_aq8tt"), ExtResource("56_me2ev")])
+
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
 [node name="UI" type="Control" parent="UI" unique_id=1213390962]
@@ -348,6 +360,40 @@ script = ExtResource("55_8kd31")
 picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
 resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
 placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
+
+[node name="PolicyPanel" type="Panel" parent="UI/UI" unique_id=1517032758 node_paths=PackedStringArray("politics", "button_container", "status_label", "active_policy_label")]
+layout_mode = 0
+offset_left = 1433.0
+offset_top = 37.0
+offset_right = 1890.0
+offset_bottom = 315.0
+script = ExtResource("57_p5hnb")
+politics = NodePath("../../../Builder/GameplayV2/TownPoliticsManagerV2")
+button_container = NodePath("PolicyScroll/PolicyButtons")
+status_label = NodePath("StatusLabel")
+active_policy_label = NodePath("ActivePolicyLabel")
+
+[node name="StatusLabel" type="Label" parent="UI/UI/PolicyPanel" unique_id=455281784]
+layout_mode = 0
+offset_right = 224.0
+offset_bottom = 29.0
+
+[node name="ActivePolicyLabel" type="Label" parent="UI/UI/PolicyPanel" unique_id=1300192521]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 37.0
+offset_right = 356.0
+offset_bottom = 75.0
+
+[node name="PolicyScroll" type="ScrollContainer" parent="UI/UI/PolicyPanel" unique_id=1156543234]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 90.0
+offset_right = 452.0
+offset_bottom = 275.0
+
+[node name="PolicyButtons" type="VBoxContainer" parent="UI/UI/PolicyPanel/PolicyScroll" unique_id=1911693828]
+layout_mode = 2
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

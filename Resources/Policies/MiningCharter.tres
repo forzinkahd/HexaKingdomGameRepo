@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PolicyDefinitionV2" format=3 uid="uid://8skibpoo0m7f"]
+
+[ext_resource type="Script" uid="uid://cuucgi0bcoyyp" path="res://scripts/Gameplay/PlacementV2/policy_definition_v2.gd" id="1_dua84"]
+
+[resource]
+script = ExtResource("1_dua84")
+id = &"mining_charter"
+display_name = "Mining Charter"
+description = "Grants mining rights to local operators."
+category = 0
+authority_delta = 5
+stability_delta = -5
+approval_delta = -10
+stone_multiplier = 1.25

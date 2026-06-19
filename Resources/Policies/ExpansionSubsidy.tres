@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PolicyDefinitionV2" format=3 uid="uid://bah2e6oqviht"]
+
+[ext_resource type="Script" uid="uid://cuucgi0bcoyyp" path="res://scripts/Gameplay/PlacementV2/policy_definition_v2.gd" id="1_mnepr"]
+
+[resource]
+script = ExtResource("1_mnepr")
+id = &"expansion_subsidy"
+display_name = "Expansion Subsidy"
+description = "Supports production outside the town core."
+category = 2
+authority_delta = -5
+stability_delta = -10
+approval_delta = 5
+minimum_efficiency_bonus = 0.1499999999999999
+minimum_efficiency_radius_delta = 3

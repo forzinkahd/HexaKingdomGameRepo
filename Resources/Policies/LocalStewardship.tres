@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PolicyDefinitionV2" format=3 uid="uid://b6dp7a42yv43j"]
+
+[ext_resource type="Script" uid="uid://cuucgi0bcoyyp" path="res://scripts/Gameplay/PlacementV2/policy_definition_v2.gd" id="1_lxkvq"]
+
+[resource]
+script = ExtResource("1_lxkvq")
+id = &"local_stewardship"
+display_name = "Local Stewardship"
+description = "Protects forests and local communities.
+"
+category = 3
+stability_delta = 10
+approval_delta = 15
+wood_multiplier = 0.85
+food_multiplier = 1.1
