@@ -241,7 +241,7 @@ town_center_id = &"town_center_2"
 
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
-wood = 50
+wood = 30
 
 [node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager", "resource_map")]
 script = ExtResource("35_vgicg")
@@ -380,10 +380,10 @@ placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 
 [node name="TownCenterPanel" type="PanelContainer" parent="UI/UI" unique_id=2007799689 node_paths=PackedStringArray("picker", "occupancy", "town_center_manager", "politics", "status_label", "active_policy_label", "influence_label", "consequence_label", "policy_menu")]
 layout_mode = 0
-offset_left = 761.0
-offset_top = 329.0
-offset_right = 1217.0
-offset_bottom = 530.0
+offset_left = 1422.0
+offset_top = 337.0
+offset_right = 1878.0
+offset_bottom = 538.0
 script = ExtResource("62_uvgqy")
 picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
 occupancy = NodePath("../../../Builder/GameplayV2/WorldOccupancyV2")
@@ -425,23 +425,29 @@ layout_mode = 0
 
 [node name="SettlementGoalsPanel" type="Label" parent="UI/UI" unique_id=305987925 node_paths=PackedStringArray("goals_manager")]
 layout_mode = 0
-offset_left = 774.0
-offset_top = 425.0
-offset_right = 814.0
-offset_bottom = 465.0
+offset_left = 254.0
+offset_top = 468.0
+offset_right = 294.0
+offset_bottom = 508.0
 script = ExtResource("64_w8j51")
 goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
+intro_text = "Welcome to the New Kingdom
+
+A small group of settlers has arrived in an untouched land.
+Choose a safe place for the Town Center, gather wood and stone,
+and guide the first decisions of the settlement."
 
 [node name="SettlementGoalToast" type="Label" parent="UI/UI" unique_id=482238288 node_paths=PackedStringArray("goals_manager")]
 layout_mode = 0
-offset_left = 775.0
-offset_top = 427.0
-offset_right = 815.0
-offset_bottom = 450.0
+offset_left = 257.0
+offset_top = 526.0
+offset_right = 297.0
+offset_bottom = 549.0
 script = ExtResource("65_cuml4")
 goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0

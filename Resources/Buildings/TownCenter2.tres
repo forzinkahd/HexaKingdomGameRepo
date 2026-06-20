@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cnkx87hoiesu4" path="res://Scenes/Kingdom/Buildings/obj_blue_towncenter_2.tscn" id="1_ivbul"]
 [ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="1_rlgeq"]
+[ext_resource type="Script" uid="uid://ep66c8v83h6v" path="res://scripts/Gameplay/PlacementV2/building_resource_affinity_v2.gd" id="1_rvvkc"]
 
 [resource]
 script = ExtResource("1_rlgeq")

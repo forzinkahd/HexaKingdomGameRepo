@@ -10,4 +10,4 @@ target_resource = 2
 target_amount = 50
 prerequisite_goal_ids = Array[StringName]([&"place_town_center"])
 hidden_until_prerequisites_met = true
-reward_gold = 30
+reward_gold = 10
