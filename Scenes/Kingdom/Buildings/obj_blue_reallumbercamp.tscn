@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://dworn654d35nw"]
+
+[ext_resource type="PackedScene" uid="uid://dwqmbawoi1d8n" path="res://Assets/Meshes/Decorations/Props/resource_lumber.gltf" id="1_i72qr"]
+[ext_resource type="PackedScene" uid="uid://cxxspywuwb7md" path="res://Assets/Meshes/Decorations/Nature/tree_single_A_cut.gltf" id="2_k4j88"]
+[ext_resource type="PackedScene" uid="uid://bk01cje78ifyo" path="res://Assets/Meshes/Decorations/Nature/tree_single_B_cut.gltf" id="3_q0rey"]
+[ext_resource type="PackedScene" uid="uid://b6lknrrybygyt" path="res://Assets/Meshes/Decorations/Props/tent.gltf" id="4_xyx5e"]
+[ext_resource type="PackedScene" uid="uid://cpaj143davrdy" path="res://Assets/Meshes/Decorations/Nature/tree_single_A.gltf" id="5_ceybi"]
+[ext_resource type="PackedScene" uid="uid://3673cta2thre" path="res://Assets/Meshes/Decorations/Nature/tree_single_B.gltf" id="6_wp4ut"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vfsac"]
+height = 0.52874756
+radius = 0.7
+
+[node name="obj_blue_lumbercamp" type="Node3D" unique_id=1678680812]
+
+[node name="Visual" type="Node3D" parent="." unique_id=45901773]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0, 0)
+
+[node name="resource_lumber2" parent="Visual" unique_id=985809178 instance=ExtResource("1_i72qr")]
+transform = Transform3D(0.7659098, 0, 0.64294803, 0, 1, 0, -0.64294803, 0, 0.7659098, 0.40753597, 0, 0.46527976)
+
+[node name="tree_single_A_cut2" parent="Visual" unique_id=218210529 instance=ExtResource("2_k4j88")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14311409, 0, -0.4290818)
+
+[node name="tree_single_B_cut2" parent="Visual" unique_id=1268929908 instance=ExtResource("3_q0rey")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30407947, 0, -0.10033035)
+
+[node name="tent2" parent="Visual" unique_id=1679727171 instance=ExtResource("4_xyx5e")]
+transform = Transform3D(0.86510766, 0, -0.50158626, 0, 1, 0, 0.50158626, 0, 0.86510766, -0.43288237, 0, 0.47380376)
+
+[node name="tree_single_A2" parent="Visual" unique_id=1186691000 instance=ExtResource("5_ceybi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6034361, 0, -0.61165446)
+
+[node name="tree_single_B2" parent="Visual" unique_id=344366701 instance=ExtResource("6_wp4ut")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62820077, 0, -0.45372516)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=882236598]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1818614705]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27426147, 0)
+shape = SubResource("CylinderShape3D_vfsac")

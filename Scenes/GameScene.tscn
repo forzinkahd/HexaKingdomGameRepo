@@ -43,6 +43,7 @@
 [ext_resource type="Script" uid="uid://dkfdc7nhihlvk" path="res://scripts/Gameplay/PlacementV2/building_catalog_v2.gd" id="36_v14ik"]
 [ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="37_evxj1"]
 [ext_resource type="Script" uid="uid://cbfp7o673ondm" path="res://scripts/Gameplay/PlacementV2/placement_debug_label_v2.gd" id="37_jmmro"]
+[ext_resource type="Resource" uid="uid://etrqfv6a8hbw" path="res://Resources/Buildings/RealLumberCamp.tres" id="37_uwlof"]
 [ext_resource type="Resource" uid="uid://yv3lrj8hovtr" path="res://Resources/Buildings/TownCenter2.tres" id="38_1qxux"]
 [ext_resource type="Script" uid="uid://b6qet4cr2r73c" path="res://scripts/Gameplay/PlacementV2/economy_debug_label_v2.gd" id="38_vgicg"]
 [ext_resource type="Resource" uid="uid://ckmd5ij17fs8m" path="res://Resources/Buildings/TestQuarry.tres" id="40_p5lqy"]
@@ -227,7 +228,7 @@ picker = NodePath("../WorldTilePicker")
 
 [node name="BuildingCatalogV2" type="Node" parent="Builder/GameplayV2" unique_id=1408759746]
 script = ExtResource("36_v14ik")
-buildings = Array[ExtResource("37_evxj1")]([ExtResource("38_1qxux"), ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy")])
+buildings = Array[ExtResource("37_evxj1")]([ExtResource("38_1qxux"), ExtResource("35_cxw7u"), ExtResource("32_cxw7u"), ExtResource("40_p5lqy"), ExtResource("37_uwlof")])
 
 [node name="BuildingRegistryV2" type="Node" parent="Builder/GameplayV2" unique_id=1573309623 node_paths=PackedStringArray("placement")]
 script = ExtResource("42_c0ais")
@@ -240,7 +241,7 @@ town_center_id = &"town_center_2"
 
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
-wood = 70
+wood = 50
 
 [node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager", "resource_map")]
 script = ExtResource("35_vgicg")

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" format=3 uid="uid://etrqfv6a8hbw"]
+
+[ext_resource type="Script" uid="uid://ep66c8v83h6v" path="res://scripts/Gameplay/PlacementV2/building_resource_affinity_v2.gd" id="1_ntw5g"]
+[ext_resource type="PackedScene" uid="uid://dworn654d35nw" path="res://Scenes/Kingdom/Buildings/obj_blue_reallumbercamp.tscn" id="2_o287l"]
+[ext_resource type="Script" uid="uid://mcoahjj711n3" path="res://scripts/Gameplay/PlacementV2/building_definition.gd" id="2_xe72x"]
+
+[resource]
+script = ExtResource("2_xe72x")
+id = &"lumber_camp"
+display_name = "Lumber Camp"
+category = 1
+scene = ExtResource("2_o287l")
+cost_wood = 15
+produces_resource = 1
+production_amount = 2
+allow_coast = false
+allowed_biomes = Array[int]([2, 3])
+required_building_ids = Array[StringName]([&"town_center_2"])
+metadata/_custom_type_script = "uid://mcoahjj711n3"
