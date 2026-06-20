@@ -65,8 +65,15 @@
 [ext_resource type="Script" uid="uid://dsbwoexlih7pp" path="res://scripts/Gameplay/PlacementV2/selected_resource_node_info_panel_v2.gd" id="55_8kd31"]
 [ext_resource type="Resource" uid="uid://bah2e6oqviht" path="res://Resources/Policies/ExpansionSubsidy.tres" id="55_aq8tt"]
 [ext_resource type="Resource" uid="uid://b6dp7a42yv43j" path="res://Resources/Policies/LocalStewardship.tres" id="56_me2ev"]
+[ext_resource type="Script" uid="uid://crv578bjgpp5m" path="res://scripts/Gameplay/PlacementV2/settlement_goals_manager_v2.gd" id="57_me2ev"]
 [ext_resource type="Script" uid="uid://eypynnntxf1m" path="res://scripts/Gameplay/PlacementV2/policy_menu_v2.gd" id="57_p5hnb"]
+[ext_resource type="Script" uid="uid://da25vshtnje58" path="res://scripts/Gameplay/PlacementV2/settlement_goal_definition_v2.gd" id="58_cuml4"]
+[ext_resource type="Resource" uid="uid://dq16qak3b5xb7" path="res://Resources/Goals/town_center_placed.tres" id="59_grg0d"]
+[ext_resource type="Resource" uid="uid://5wxnds73w3du" path="res://Resources/Goals/gather_wood_100.tres" id="60_grg0d"]
+[ext_resource type="Resource" uid="uid://c2u8hx761pmcw" path="res://Resources/Goals/gather_stone_50.tres" id="61_j10ei"]
 [ext_resource type="Script" uid="uid://dpk5mv4uys8" path="res://scripts/Gameplay/PlacementV2/town_center_panel_v2.gd" id="62_uvgqy"]
+[ext_resource type="Script" uid="uid://cl332imkuqmei" path="res://scripts/Gameplay/PlacementV2/settlement_goals_panel_v2.gd" id="64_w8j51"]
+[ext_resource type="Script" uid="uid://d2cesdskv3vk4" path="res://scripts/Gameplay/PlacementV2/settlement_goal_toast_v2.gd" id="65_cuml4"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -233,6 +240,8 @@ town_center_id = &"town_center_2"
 
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
+wood = 70
+stone = 50
 
 [node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager", "resource_map")]
 script = ExtResource("35_vgicg")
@@ -294,6 +303,14 @@ town_center_manager = NodePath("../TownCenterManagerV2")
 production = NodePath("../WorldProductionV2")
 registry = NodePath("../BuildingRegistryV2")
 available_policies = Array[ExtResource("53_uvgqy")]([ExtResource("54_5jhr0"), ExtResource("55_aq8tt"), ExtResource("56_me2ev")])
+
+[node name="SettlementGoalsManagerV2" type="Node" parent="Builder/GameplayV2" unique_id=781788965 node_paths=PackedStringArray("economy", "registry", "politics", "town_center_manager")]
+script = ExtResource("57_me2ev")
+economy = NodePath("../WorldEconomyV2")
+registry = NodePath("../BuildingRegistryV2")
+politics = NodePath("../TownPoliticsManagerV2")
+town_center_manager = NodePath("../TownCenterManagerV2")
+goals = Array[ExtResource("58_cuml4")]([ExtResource("59_grg0d"), ExtResource("60_grg0d"), ExtResource("61_j10ei")])
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
@@ -361,41 +378,6 @@ picker = NodePath("../../../Builder/WorldInteraction/WorldTilePicker")
 resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
 placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 
-[node name="PolicyPanel" type="Panel" parent="UI/UI" unique_id=1517032758 node_paths=PackedStringArray("politics", "button_container", "status_label", "active_policy_label", "consequence_label")]
-layout_mode = 0
-offset_left = 1433.0
-offset_top = 37.0
-offset_right = 1890.0
-offset_bottom = 315.0
-script = ExtResource("57_p5hnb")
-politics = NodePath("../../../Builder/GameplayV2/TownPoliticsManagerV2")
-button_container = NodePath("PolicyScroll/PolicyButtons")
-status_label = NodePath("StatusLabel")
-active_policy_label = NodePath("ActivePolicyLabel")
-consequence_label = NodePath("../TownCenterPanel/VBoxContainer/ConsequenceLabel")
-
-[node name="StatusLabel" type="Label" parent="UI/UI/PolicyPanel" unique_id=455281784]
-layout_mode = 0
-offset_right = 224.0
-offset_bottom = 29.0
-
-[node name="ActivePolicyLabel" type="Label" parent="UI/UI/PolicyPanel" unique_id=1300192521]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 37.0
-offset_right = 356.0
-offset_bottom = 75.0
-
-[node name="PolicyScroll" type="ScrollContainer" parent="UI/UI/PolicyPanel" unique_id=1156543234]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 90.0
-offset_right = 452.0
-offset_bottom = 275.0
-
-[node name="PolicyButtons" type="VBoxContainer" parent="UI/UI/PolicyPanel/PolicyScroll" unique_id=1911693828]
-layout_mode = 2
-
 [node name="TownCenterPanel" type="PanelContainer" parent="UI/UI" unique_id=2007799689 node_paths=PackedStringArray("picker", "occupancy", "town_center_manager", "politics", "status_label", "active_policy_label", "influence_label", "consequence_label", "policy_menu")]
 layout_mode = 0
 offset_left = 761.0
@@ -440,6 +422,24 @@ consequence_label = NodePath("../ConsequenceLabel")
 
 [node name="PolicyButtons" type="VBoxContainer" parent="UI/UI/TownCenterPanel/VBoxContainer/PolicyMenu" unique_id=2057509234]
 layout_mode = 0
+
+[node name="SettlementGoalsPanel" type="Label" parent="UI/UI" unique_id=305987925 node_paths=PackedStringArray("goals_manager")]
+layout_mode = 0
+offset_left = 774.0
+offset_top = 425.0
+offset_right = 814.0
+offset_bottom = 465.0
+script = ExtResource("64_w8j51")
+goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
+
+[node name="SettlementGoalToast" type="Label" parent="UI/UI" unique_id=482238288 node_paths=PackedStringArray("goals_manager")]
+layout_mode = 0
+offset_left = 775.0
+offset_top = 427.0
+offset_right = 815.0
+offset_bottom = 450.0
+script = ExtResource("65_cuml4")
+goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 layout_mode = 3

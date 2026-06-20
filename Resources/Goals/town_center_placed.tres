@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SettlementGoalDefinitionV2" format=3 uid="uid://dq16qak3b5xb7"]
+
+[ext_resource type="Script" uid="uid://da25vshtnje58" path="res://scripts/Gameplay/PlacementV2/settlement_goal_definition_v2.gd" id="1_ifmir"]
+
+[resource]
+script = ExtResource("1_ifmir")
+id = &"place_town_center"
+display_name = "Central Command"
+goal_type = 2
+target_resource = 0
+target_amount = 0
+target_building_id = &"town_center_2"
+auto_grant_reward = true
+reward_wood = 25
+reward_stone = 10

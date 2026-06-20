@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SettlementGoalDefinitionV2" format=3 uid="uid://5wxnds73w3du"]
+
+[ext_resource type="Script" uid="uid://da25vshtnje58" path="res://scripts/Gameplay/PlacementV2/settlement_goal_definition_v2.gd" id="1_j2ean"]
+
+[resource]
+script = ExtResource("1_j2ean")
+id = &"gather_wood_100"
+display_name = "Beaver's Pride"
+prerequisite_goal_ids = Array[StringName]([&"place_town_center"])

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SettlementGoalDefinitionV2" format=3 uid="uid://c2u8hx761pmcw"]
+
+[ext_resource type="Script" uid="uid://da25vshtnje58" path="res://scripts/Gameplay/PlacementV2/settlement_goal_definition_v2.gd" id="1_x3gey"]
+
+[resource]
+script = ExtResource("1_x3gey")
+id = &"gather_stone_50"
+display_name = "Diggy Diggy Hole"
+target_resource = 2
+target_amount = 50
+prerequisite_goal_ids = Array[StringName]([&"place_town_center"])
+hidden_until_prerequisites_met = true
+reward_gold = 30

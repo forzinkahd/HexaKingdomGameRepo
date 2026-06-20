@@ -4,7 +4,7 @@ extends Node
 signal resources_changed
 
 @export var wood: int = 200
-@export var stone: int = 100
+@export var stone: int = 40
 @export var food: int = 0
 @export var gold: int = 0
 

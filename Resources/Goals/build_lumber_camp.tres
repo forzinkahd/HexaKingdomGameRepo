@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SettlementGoalDefinitionV2" format=3 uid="uid://boqos3rcn71n8"]
+
+[ext_resource type="Script" uid="uid://da25vshtnje58" path="res://scripts/Gameplay/PlacementV2/settlement_goal_definition_v2.gd" id="1_t8skl"]
+
+[resource]
+script = ExtResource("1_t8skl")
+id = &"build_lumber_camp"
+display_name = "Chop Chop"
+goal_type = 1
+target_resource = 0
+target_building_id = &"lumber_camp"
+prerequisite_goal_ids = Array[StringName]([&"place_town_center"])
+auto_grant_reward = true
+reward_food = 10
