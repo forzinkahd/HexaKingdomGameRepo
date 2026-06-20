@@ -161,7 +161,7 @@ func stop_auto_work() -> void:
 
 
 func _auto_work_loop(resource_root: Node3D) -> void:
-	while _auto_running and is_inside_tree():
+	while _auto_running: # and is_inside_tree():
 		if not auto_work_enabled:
 			await get_tree().create_timer(0.3).timeout
 			continue

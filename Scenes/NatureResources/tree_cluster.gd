@@ -102,11 +102,11 @@ func chop_and_harvest(resource_root: Node3D, spawn_y: float) -> Array[LogPickup]
 	start_shake()
 	await get_tree().create_timer(chop_time).timeout
 
-	if not is_inside_tree():
+	"""if not is_inside_tree():
 		#is_being_chopped = false # old, not automated
 		release_claim()
 		stop_shake()
-		return []
+		return []"""
 
 	stop_shake()
 	return harvest_spawn_logs(resource_root, spawn_y)

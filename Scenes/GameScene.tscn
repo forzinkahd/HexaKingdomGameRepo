@@ -241,7 +241,6 @@ town_center_id = &"town_center_2"
 [node name="WorldEconomyV2" type="Node" parent="Builder/GameplayV2" unique_id=1919408263]
 script = ExtResource("34_jmmro")
 wood = 70
-stone = 50
 
 [node name="WorldProductionV2" type="Node" parent="Builder/GameplayV2" unique_id=1415569715 node_paths=PackedStringArray("economy", "town_center_manager", "resource_map")]
 script = ExtResource("35_vgicg")
