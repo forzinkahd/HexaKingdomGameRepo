@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://cn8a1ftsqdtvt"]
+
+[ext_resource type="Texture2D" uid="uid://csg24sf6rc8jc" path="res://Assets/KeyboardMouseIcons/Default/mouse_left.png" id="1_ssgtt"]
+[ext_resource type="Texture2D" uid="uid://bwfc3udxq3j73" path="res://Assets/KeyboardMouseIcons/Default/mouse_right.png" id="2_ahr2n"]
+[ext_resource type="Texture2D" uid="uid://j0wudeahoprh" path="res://Assets/KeyboardMouseIcons/Default/keyboard_wasd.png" id="3_ahr2n"]
+[ext_resource type="Texture2D" uid="uid://ybs0v0x8h1q1" path="res://Assets/KeyboardMouseIcons/Default/mouse_scroll_vertical.png" id="3_ocrxi"]
+[ext_resource type="Texture2D" uid="uid://co6bw5duh5dfu" path="res://Assets/KeyboardMouseIcons/Default/mouse_orbit.png" id="4_001g1"]
+
+[node name="Controls Comp" type="MarginContainer" unique_id=2061781009]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=410776511]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1002507309]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=1578093551]
+layout_mode = 2
+theme_override_constants/separation = -5
+
+[node name="Title" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1382926933]
+layout_mode = 2
+text = "CONTROLS"
+horizontal_alignment = 1
+
+[node name="SelectTiles" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1201351801]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/SelectTiles" unique_id=1953284080]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Select:"
+horizontal_alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/SelectTiles" unique_id=2042322749]
+layout_mode = 2
+texture = ExtResource("1_ssgtt")
+
+[node name="PlaceBuilding" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=642066331]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/PlaceBuilding" unique_id=1090403914]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Place:"
+horizontal_alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/PlaceBuilding" unique_id=503779860]
+layout_mode = 2
+texture = ExtResource("2_ahr2n")
+
+[node name="MoveCam" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=956616871]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/MoveCam" unique_id=1067110428]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Move Camera:"
+horizontal_alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/MoveCam" unique_id=1734308306]
+layout_mode = 2
+texture = ExtResource("3_ahr2n")
+
+[node name="Zoom" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1898703663]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/Zoom" unique_id=1176001825]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Zoom Camera:"
+horizontal_alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/Zoom" unique_id=1715534458]
+layout_mode = 2
+texture = ExtResource("3_ocrxi")
+
+[node name="Orbit" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1313617813]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/Orbit" unique_id=686772440]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Orbit Camera:"
+horizontal_alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/Orbit" unique_id=864594544]
+layout_mode = 2
+texture = ExtResource("4_001g1")

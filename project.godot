@@ -46,6 +46,10 @@ pickup_logs=""
 buildings=""
 workshop=""
 
+[gui]
+
+theme/custom="uid://bulcurisgb06y"
+
 [input]
 
 MoveForward={
