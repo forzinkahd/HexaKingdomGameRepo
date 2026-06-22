@@ -73,7 +73,6 @@
 [ext_resource type="Resource" uid="uid://5wxnds73w3du" path="res://Resources/Goals/gather_wood_100.tres" id="60_grg0d"]
 [ext_resource type="Resource" uid="uid://c2u8hx761pmcw" path="res://Resources/Goals/gather_stone_50.tres" id="61_j10ei"]
 [ext_resource type="Script" uid="uid://dpk5mv4uys8" path="res://scripts/Gameplay/PlacementV2/town_center_panel_v2.gd" id="62_uvgqy"]
-[ext_resource type="Script" uid="uid://hsn74lns1fuk" path="res://scripts/Gameplay/PlacementV2/settlement_intro_panel_v2.gd" id="63_ljflx"]
 [ext_resource type="Script" uid="uid://cl332imkuqmei" path="res://scripts/Gameplay/PlacementV2/settlement_goals_panel_v2.gd" id="64_w8j51"]
 [ext_resource type="Script" uid="uid://d2cesdskv3vk4" path="res://scripts/Gameplay/PlacementV2/settlement_goal_toast_v2.gd" id="65_cuml4"]
 [ext_resource type="PackedScene" uid="uid://cn8a1ftsqdtvt" path="res://Scenes/UIelements/controls_comp.tscn" id="72_r2h41"]
@@ -315,57 +314,6 @@ politics = NodePath("../TownPoliticsManagerV2")
 town_center_manager = NodePath("../TownCenterManagerV2")
 goals = Array[ExtResource("58_cuml4")]([ExtResource("59_grg0d"), ExtResource("60_grg0d"), ExtResource("61_j10ei")])
 
-[node name="CentralCentralUI" type="CanvasLayer" parent="." unique_id=1357025032]
-
-[node name="CentralCentralNode" type="Control" parent="CentralCentralUI" unique_id=1780888326]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="SettlementIntroPanel" type="PanelContainer" parent="CentralCentralUI/CentralCentralNode" unique_id=905872842 node_paths=PackedStringArray("title_label", "body_label", "dismiss_button")]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("63_ljflx")
-title_label = NodePath("VBoxContainer/TitleLabel")
-body_label = NodePath("VBoxContainer/BodyLabel")
-dismiss_button = NodePath("VBoxContainer/DismissButton")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CentralCentralUI/CentralCentralNode/SettlementIntroPanel" unique_id=782177343]
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="CentralCentralUI/CentralCentralNode/SettlementIntroPanel/VBoxContainer" unique_id=210994338]
-layout_mode = 2
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
-
-[node name="BodyLabel" type="Label" parent="CentralCentralUI/CentralCentralNode/SettlementIntroPanel/VBoxContainer" unique_id=977868443]
-layout_mode = 2
-
-[node name="DismissButton" type="Button" parent="CentralCentralUI/CentralCentralNode/SettlementIntroPanel/VBoxContainer" unique_id=1559304802]
-layout_mode = 2
-
 [node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
 
 [node name="UI" type="Control" parent="UI" unique_id=1213390962]
@@ -395,6 +343,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="TownInfoPanel" type="Label" parent="UI/UI" unique_id=8331209 node_paths=PackedStringArray("picker", "placement", "registry", "town_center_manager", "production")]
+visible = false
 layout_mode = 0
 offset_left = 165.0
 offset_top = 255.0
@@ -408,6 +357,7 @@ town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2"
 production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
 
 [node name="SelectedBuildingInfoPanel" type="Label" parent="UI/UI" unique_id=1569300735 node_paths=PackedStringArray("picker", "occupancy", "registry", "town_center_manager", "production", "resource_map")]
+visible = false
 layout_mode = 0
 offset_left = 1070.0
 offset_top = 443.0
@@ -422,6 +372,7 @@ production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
 resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
 
 [node name="SelectedResourceNodeInfoPanel" type="Label" parent="UI/UI" unique_id=863855761 node_paths=PackedStringArray("picker", "resource_map", "placement")]
+visible = false
 layout_mode = 0
 offset_left = 1264.0
 offset_top = 587.0
@@ -433,6 +384,7 @@ resource_map = NodePath("../../../Builder/GameplayV2/WorldResourceMapV2")
 placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 
 [node name="TownCenterPanel" type="PanelContainer" parent="UI/UI" unique_id=2007799689 node_paths=PackedStringArray("picker", "occupancy", "town_center_manager", "politics", "status_label", "active_policy_label", "influence_label", "consequence_label", "policy_menu")]
+visible = false
 layout_mode = 0
 offset_left = 1422.0
 offset_top = 337.0
@@ -478,25 +430,26 @@ consequence_label = NodePath("../ConsequenceLabel")
 layout_mode = 0
 
 [node name="SettlementGoalsPanel" type="Label" parent="UI/UI" unique_id=305987925 node_paths=PackedStringArray("goals_manager")]
+visible = false
 layout_mode = 0
 offset_left = 254.0
 offset_top = 468.0
 offset_right = 294.0
 offset_bottom = 508.0
+theme_override_font_sizes/font_size = 24
 script = ExtResource("64_w8j51")
 goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
-intro_text = "Welcome to the New Kingdom
-
-A small group of settlers has arrived in an untouched land.
-Choose a safe place for the Town Center, gather wood and stone,
-and guide the first decisions of the settlement."
+title = ""
+intro_text = ""
 
 [node name="SettlementGoalToast" type="Label" parent="UI/UI" unique_id=482238288 node_paths=PackedStringArray("goals_manager")]
+visible = false
 layout_mode = 0
 offset_left = 257.0
 offset_top = 526.0
 offset_right = 297.0
 offset_bottom = 549.0
+theme_override_font_sizes/font_size = 24
 script = ExtResource("65_cuml4")
 goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
 
