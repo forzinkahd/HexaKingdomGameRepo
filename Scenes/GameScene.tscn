@@ -77,6 +77,7 @@
 [ext_resource type="Script" uid="uid://cl332imkuqmei" path="res://scripts/Gameplay/PlacementV2/settlement_goals_panel_v2.gd" id="64_w8j51"]
 [ext_resource type="Script" uid="uid://d2cesdskv3vk4" path="res://scripts/Gameplay/PlacementV2/settlement_goal_toast_v2.gd" id="65_cuml4"]
 [ext_resource type="PackedScene" uid="uid://cn8a1ftsqdtvt" path="res://Scenes/UIelements/controls_comp.tscn" id="72_r2h41"]
+[ext_resource type="PackedScene" uid="uid://cqa8v8yddn6ho" path="res://Scenes/UIelements/intro.tscn" id="73_ygwwr"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
 dof_blur_far_enabled = true
@@ -509,6 +510,19 @@ offset_bottom = 0.0
 grow_vertical = 0
 size_flags_horizontal = 8
 size_flags_vertical = 4
+
+[node name="Intro" parent="UI" unique_id=1693170231 instance=ExtResource("73_ygwwr")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -131.5
+offset_right = 300.0
+offset_bottom = 131.5
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Control" type="Control" parent="." unique_id=1520664124]
 visible = false

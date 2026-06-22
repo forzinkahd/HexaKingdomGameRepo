@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://cqa8v8yddn6ho"]
+
+[ext_resource type="Script" uid="uid://f7kbx0heamtf" path="res://scripts/UIscripts/dismiss_panel.gd" id="1_h3b1v"]
+
+[node name="Intro" type="MarginContainer" unique_id=1693170231 node_paths=PackedStringArray("dismiss_button")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_h3b1v")
+dismiss_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/DismissButton")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=677963526]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=829276943]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=1264678988]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=687124683]
+layout_mode = 2
+text = "Welcome to your new Realm"
+horizontal_alignment = 1
+
+[node name="MainText" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=445347311]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+theme_override_constants/line_spacing = 6
+theme_override_font_sizes/font_size = 30
+text = "A small group of settlers has arrived in an untouched land. Choose a safe place for the Town Center, gather wood and stone, and guide the first decisions of the settlement."
+autowrap_mode = 3
+
+[node name="DismissButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=250567696]
+layout_mode = 2
+text = "Dismiss"
