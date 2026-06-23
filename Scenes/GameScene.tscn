@@ -19,7 +19,6 @@
 [ext_resource type="Script" uid="uid://c3rn4fk4pr1lk" path="res://scripts/Managers/unit_manager.gd" id="18_v7xhk"]
 [ext_resource type="PackedScene" uid="uid://b4tb1r4fpi0y3" path="res://Scenes/Units/blue_villager.tscn" id="19_wukv0"]
 [ext_resource type="PackedScene" uid="uid://3v4vv8oddvo6" path="res://Scenes/Units/blue_builder.tscn" id="21_ebcm8"]
-[ext_resource type="Script" uid="uid://x168kplgypou" path="res://scripts/hud.gd" id="22_wukv0"]
 [ext_resource type="Script" uid="uid://cfcvw2va2hsk6" path="res://scripts/Managers/construction_manager.gd" id="23_4v654"]
 [ext_resource type="PackedScene" uid="uid://cna658c6oodob" path="res://Scenes/Kingdom/Buildings/construction_site.tscn" id="24_leul7"]
 [ext_resource type="Script" uid="uid://l61lh7mn7ain" path="res://scripts/WorldGen/overlay_visuals.gd" id="25_wp4mh"]
@@ -73,9 +72,9 @@
 [ext_resource type="Resource" uid="uid://5wxnds73w3du" path="res://Resources/Goals/gather_wood_100.tres" id="60_grg0d"]
 [ext_resource type="Resource" uid="uid://c2u8hx761pmcw" path="res://Resources/Goals/gather_stone_50.tres" id="61_j10ei"]
 [ext_resource type="Script" uid="uid://dpk5mv4uys8" path="res://scripts/Gameplay/PlacementV2/town_center_panel_v2.gd" id="62_uvgqy"]
-[ext_resource type="Script" uid="uid://cl332imkuqmei" path="res://scripts/Gameplay/PlacementV2/settlement_goals_panel_v2.gd" id="64_w8j51"]
-[ext_resource type="Script" uid="uid://d2cesdskv3vk4" path="res://scripts/Gameplay/PlacementV2/settlement_goal_toast_v2.gd" id="65_cuml4"]
+[ext_resource type="PackedScene" uid="uid://5siivuktckdo" path="res://Scenes/UIelements/quest_completed_popup.tscn" id="72_ljflx"]
 [ext_resource type="PackedScene" uid="uid://cn8a1ftsqdtvt" path="res://Scenes/UIelements/controls_comp.tscn" id="72_r2h41"]
+[ext_resource type="PackedScene" uid="uid://bi4u20t1qbr0c" path="res://Scenes/UIelements/settlement_goals_widget.tscn" id="73_r2h41"]
 [ext_resource type="PackedScene" uid="uid://cqa8v8yddn6ho" path="res://Scenes/UIelements/intro.tscn" id="73_ygwwr"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_1lvu4"]
@@ -291,10 +290,12 @@ script = ExtResource("50_btbwo")
 build_menu_panel = NodePath("../../../UI/UI/BuildMenuPanel")
 town_info_panel = NodePath("../../../UI/UI/TownInfoPanel")
 selected_building_panel = NodePath("../../../UI/UI/SelectedBuildingInfoPanel")
-production_panel = NodePath("../../../Control/ProductionDebugLavelV2")
-registry_panel = NodePath("../../../Control/PlacementDebugLabelV2")
+production_panel = NodePath("../../../DebugLabels/ProductionDebugLavelV2")
+registry_panel = NodePath("../../../DebugLabels/PlacementDebugLabelV2")
 town_influence_overlay = NodePath("../TownInfluenceOverlayV2")
 resource_nodes_root = NodePath("../ResourceNodes")
+town_info_visible_on_ready = false
+selected_building_visible_on_ready = false
 
 [node name="UIPanelToggleInputBootstrapV2" type="Node" parent="Builder/GameplayV2" unique_id=461899610]
 script = ExtResource("51_8kd31")
@@ -342,7 +343,7 @@ layout_mode = 2
 [node name="BuildMenuButtons" type="VBoxContainer" parent="UI/UI/BuildMenuPanel/MarginContainer" unique_id=1342369685]
 layout_mode = 2
 
-[node name="TownInfoPanel" type="Label" parent="UI/UI" unique_id=8331209 node_paths=PackedStringArray("picker", "placement", "registry", "town_center_manager", "production")]
+[node name="TownInfoPanel" type="Label" parent="UI/UI" unique_id=8331209 node_paths=PackedStringArray("picker", "placement", "registry", "town_center_manager", "production", "politics")]
 visible = false
 layout_mode = 0
 offset_left = 165.0
@@ -355,6 +356,7 @@ placement = NodePath("../../../Builder/GameplayV2/BuildingPlacementV2")
 registry = NodePath("../../../Builder/GameplayV2/BuildingRegistryV2")
 town_center_manager = NodePath("../../../Builder/GameplayV2/TownCenterManagerV2")
 production = NodePath("../../../Builder/GameplayV2/WorldProductionV2")
+politics = NodePath("../../../Builder/GameplayV2/TownPoliticsManagerV2")
 
 [node name="SelectedBuildingInfoPanel" type="Label" parent="UI/UI" unique_id=1569300735 node_paths=PackedStringArray("picker", "occupancy", "registry", "town_center_manager", "production", "resource_map")]
 visible = false
@@ -429,30 +431,6 @@ consequence_label = NodePath("../ConsequenceLabel")
 [node name="PolicyButtons" type="VBoxContainer" parent="UI/UI/TownCenterPanel/VBoxContainer/PolicyMenu" unique_id=2057509234]
 layout_mode = 0
 
-[node name="SettlementGoalsPanel" type="Label" parent="UI/UI" unique_id=305987925 node_paths=PackedStringArray("goals_manager")]
-visible = false
-layout_mode = 0
-offset_left = 254.0
-offset_top = 468.0
-offset_right = 294.0
-offset_bottom = 508.0
-theme_override_font_sizes/font_size = 24
-script = ExtResource("64_w8j51")
-goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
-title = ""
-intro_text = ""
-
-[node name="SettlementGoalToast" type="Label" parent="UI/UI" unique_id=482238288 node_paths=PackedStringArray("goals_manager")]
-visible = false
-layout_mode = 0
-offset_left = 257.0
-offset_top = 526.0
-offset_right = 297.0
-offset_bottom = 549.0
-theme_override_font_sizes/font_size = 24
-script = ExtResource("65_cuml4")
-goals_manager = NodePath("../../../Builder/GameplayV2/SettlementGoalsManagerV2")
-
 [node name="Controls Comp" parent="UI" unique_id=2061781009 instance=ExtResource("72_r2h41")]
 anchors_preset = 2
 anchor_top = 1.0
@@ -477,14 +455,32 @@ offset_bottom = 131.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Control" type="Control" parent="." unique_id=1520664124]
+[node name="SettlementGoalsWidget" parent="UI" unique_id=1173119978 node_paths=PackedStringArray("goals_manager") instance=ExtResource("73_r2h41")]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -44.0
+offset_right = 0.0
+offset_bottom = 44.0
+grow_horizontal = 0
+grow_vertical = 2
+goals_manager = NodePath("../../Builder/GameplayV2/SettlementGoalsManagerV2")
+
+[node name="QuestCompletedPopup" parent="UI" unique_id=68811244 node_paths=PackedStringArray("goals_manager") instance=ExtResource("72_ljflx")]
+goals_manager = NodePath("../../Builder/GameplayV2/SettlementGoalsManagerV2")
+use_goal_id = false
+
+[node name="DebugLabels" type="Control" parent="." unique_id=1520664124]
 visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="TileDebugLabel" type="Label" parent="Control" unique_id=797205666 node_paths=PackedStringArray("picker")]
+[node name="TileDebugLabel" type="Label" parent="DebugLabels" unique_id=797205666 node_paths=PackedStringArray("picker")]
 layout_mode = 1
 offset_left = 18.0
 offset_top = 328.0
@@ -493,7 +489,7 @@ offset_bottom = 553.0
 script = ExtResource("34_rsfko")
 picker = NodePath("../../Builder/WorldInteraction/WorldTilePicker")
 
-[node name="PlacementDebugLabelV2" type="Label" parent="Control" unique_id=500742387 node_paths=PackedStringArray("placement", "economy")]
+[node name="PlacementDebugLabelV2" type="Label" parent="DebugLabels" unique_id=500742387 node_paths=PackedStringArray("placement", "economy")]
 layout_mode = 0
 offset_left = 433.0
 offset_top = 483.0
@@ -503,7 +499,7 @@ script = ExtResource("37_jmmro")
 placement = NodePath("../../Builder/GameplayV2/BuildingPlacementV2")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
-[node name="EconomyDebugLabelV2" type="Label" parent="Control" unique_id=1737414156 node_paths=PackedStringArray("economy")]
+[node name="EconomyDebugLabelV2" type="Label" parent="DebugLabels" unique_id=1737414156 node_paths=PackedStringArray("economy")]
 visible = false
 layout_mode = 0
 offset_left = 1024.0
@@ -513,7 +509,7 @@ offset_bottom = 544.0
 script = ExtResource("38_vgicg")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
-[node name="ProductionDebugLavelV2" type="Label" parent="Control" unique_id=671436826 node_paths=PackedStringArray("production", "economy")]
+[node name="ProductionDebugLavelV2" type="Label" parent="DebugLabels" unique_id=671436826 node_paths=PackedStringArray("production", "economy")]
 layout_mode = 0
 offset_left = 1348.0
 offset_top = 222.0
@@ -524,192 +520,6 @@ production = NodePath("../../Builder/GameplayV2/WorldProductionV2")
 economy = NodePath("../../Builder/GameplayV2/WorldEconomyV2")
 
 [node name="Chunks" type="Node3D" parent="." unique_id=1209535752]
-
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1102239484]
-visible = false
-script = ExtResource("22_wukv0")
-
-[node name="BuildPanel" type="Panel" parent="HUD" unique_id=1532613484]
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="TownCenterButton" type="Button" parent="HUD/BuildPanel" unique_id=1202341235]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 200.0
-offset_right = 137.0
-offset_bottom = 232.0
-text = "Town Center"
-
-[node name="WorkshopButton" type="Button" parent="HUD/BuildPanel" unique_id=54437274]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 240.0
-offset_right = 117.0
-offset_bottom = 272.0
-text = "Workshop"
-
-[node name="ConfirmButton" type="Button" parent="HUD/BuildPanel" unique_id=1351332747]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 280.0
-offset_right = 101.0
-offset_bottom = 312.0
-text = "Confirm"
-
-[node name="CancelButton" type="Button" parent="HUD/BuildPanel" unique_id=1909977597]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 320.0
-offset_right = 90.0
-offset_bottom = 352.0
-text = "Cancel"
-
-[node name="RotateLeftButton" type="Button" parent="HUD/BuildPanel" unique_id=975939322]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 360.0
-offset_right = 124.0
-offset_bottom = 392.0
-text = "Rotate Left"
-
-[node name="RotateRightButton" type="Button" parent="HUD/BuildPanel" unique_id=75588407]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 400.0
-offset_right = 131.0
-offset_bottom = 432.0
-text = "Rotate right"
-
-[node name="PlaceRoadButton" type="Button" parent="HUD/BuildPanel" unique_id=74775609]
-layout_mode = 0
-offset_left = 156.0
-offset_top = 200.0
-offset_right = 263.0
-offset_bottom = 232.0
-text = "Place Road"
-
-[node name="EditRoadButton" type="Button" parent="HUD/BuildPanel" unique_id=1417050880]
-layout_mode = 0
-offset_left = 156.0
-offset_top = 240.0
-offset_right = 263.0
-offset_bottom = 272.0
-text = "Edit Road"
-
-[node name="RotateRoadRightButton" type="Button" parent="HUD/BuildPanel" unique_id=348501452]
-layout_mode = 0
-offset_left = 156.0
-offset_top = 280.0
-offset_right = 297.0
-offset_bottom = 311.0
-text = "Rotate road right"
-
-[node name="RotateRoadLeftButton" type="Button" parent="HUD/BuildPanel" unique_id=1068788027]
-layout_mode = 0
-offset_left = 157.0
-offset_top = 318.0
-offset_right = 287.0
-offset_bottom = 349.0
-text = "Rotate road left
-"
-
-[node name="CycleForwardButton" type="Button" parent="HUD/BuildPanel" unique_id=538743787]
-layout_mode = 0
-offset_left = 159.0
-offset_top = 359.0
-offset_right = 276.0
-offset_bottom = 390.0
-text = "Cycle Forward"
-
-[node name="CycleBackwardButton" type="Button" parent="HUD/BuildPanel" unique_id=1916187829]
-layout_mode = 0
-offset_left = 161.0
-offset_top = 400.0
-offset_right = 290.0
-offset_bottom = 431.0
-text = "Cycle Backward"
-
-[node name="PopupFounded" type="AcceptDialog" parent="HUD" unique_id=1212512145]
-oversampling_override = 1.0
-title = "Achievement"
-initial_position = 2
-size = Vector2i(200, 100)
-dialog_text = "Wazzup"
-
-[node name="WoodLabel" type="Label" parent="HUD" unique_id=1117784124]
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -11.5
-offset_right = -37.0
-offset_bottom = 11.5
-grow_horizontal = 0
-grow_vertical = 2
-text = "Wood: 0"
-
-[node name="WorkshopPanel" type="Panel" parent="HUD" unique_id=1775454089]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -225.0
-offset_top = -100.0
-offset_right = 225.0
-offset_bottom = 100.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="TrainBuilderButton" type="Button" parent="HUD/WorkshopPanel" unique_id=1241963273]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -125.0
-offset_top = 30.0
-offset_right = -17.0
-offset_bottom = 61.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Train Builder"
-
-[node name="CloseWorkshopButton" type="Button" parent="HUD/WorkshopPanel" unique_id=414151117]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 25.0
-offset_top = 30.0
-offset_right = 75.0
-offset_bottom = 61.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Close"
-
-[node name="Label" type="Label" parent="HUD/WorkshopPanel" unique_id=388099581]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -11.5
-offset_right = 20.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "Train a Builder for 3 logs"
 
 [node name="PlacedObjects" type="Node3D" parent="." unique_id=2018501954]
 

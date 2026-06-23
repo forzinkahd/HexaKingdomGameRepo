@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://5siivuktckdo"]
+
+[ext_resource type="Script" uid="uid://d2cesdskv3vk4" path="res://scripts/Gameplay/PlacementV2/settlement_goal_toast_v2.gd" id="1_g4nie"]
+
+[node name="QuestCompletedPopup" type="MarginContainer" unique_id=68811244 node_paths=PackedStringArray("label")]
+visible = false
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.33
+anchor_right = 0.5
+anchor_bottom = 0.33
+offset_left = -260.0
+offset_top = -20.0
+offset_right = 260.0
+offset_bottom = 20.0
+mouse_filter = 2
+script = ExtResource("1_g4nie")
+label = NodePath("PanelContainer/MarginContainer/QuestCompletedLabel")
+vertical_screen_ratio = 0.33
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1766174281]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1926985358]
+layout_mode = 2
+
+[node name="QuestCompletedLabel" type="Label" parent="PanelContainer/MarginContainer" unique_id=1082580986]
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
+theme_override_constants/line_spacing = 6
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

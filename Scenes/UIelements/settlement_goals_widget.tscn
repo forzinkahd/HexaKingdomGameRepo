@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bi4u20t1qbr0c"]
+
+[ext_resource type="Script" uid="uid://bcnk3adxnuc4g" path="res://scripts/Gameplay/PlacementV2/settlement_goals_widget_v2.gd" id="1_7kiek"]
+[ext_resource type="Script" uid="uid://cl332imkuqmei" path="res://scripts/Gameplay/PlacementV2/settlement_goals_panel_v2.gd" id="3_yonfl"]
+
+[node name="SettlementGoalsWidget" type="MarginContainer" unique_id=1173119978 node_paths=PackedStringArray("goals_panel")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_7kiek")
+goals_panel = NodePath("PanelContainer/MarginContainer/VBoxContainer/SettlementGoalsPanel")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1739638457]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=995878934]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=973298995]
+layout_mode = 2
+
+[node name="SettlementGoalsPanel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1697657398]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 3
+script = ExtResource("3_yonfl")
