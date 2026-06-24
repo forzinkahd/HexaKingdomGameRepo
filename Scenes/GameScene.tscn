@@ -10,10 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Cursors/path_overlay.tscn" id="9_6pl24"]
 [ext_resource type="Script" uid="uid://dal880y43rf11" path="res://scripts/WorldGen/object_placer.gd" id="9_p13dw"]
 [ext_resource type="Script" uid="uid://dxy4k3g3kax0c" path="res://scripts/pathfinder.gd" id="10_0b4my"]
-[ext_resource type="PackedScene" uid="uid://cchityj1npp8j" path="res://Scenes/Cursors/hexagon_cursor.tscn" id="10_6pl24"]
-[ext_resource type="PackedScene" uid="uid://ckoa1wdbhfgii" path="res://Scenes/Cursors/unit_cursor.tscn" id="11_w22tq"]
 [ext_resource type="Script" uid="uid://d1hyrsiry3aym" path="res://scripts/interaction.gd" id="12_tt8b8"]
-[ext_resource type="Material" uid="uid://ua40iqp1j8ef" path="res://Assets/Materials/Shaders/ghost_preview.tres" id="17_yhlfj"]
 [ext_resource type="Script" uid="uid://3wh2c30ur4pn" path="res://scripts/WorldGen/building_placer.gd" id="18_gipt1"]
 [ext_resource type="Script" uid="uid://c0esfdcq17by5" path="res://scripts/Managers/task_manager.gd" id="18_pgw7i"]
 [ext_resource type="Script" uid="uid://c3rn4fk4pr1lk" path="res://scripts/Managers/unit_manager.gd" id="18_v7xhk"]
@@ -145,20 +142,8 @@ script = ExtResource("9_p13dw")
 script = ExtResource("10_0b4my")
 highlight_marker = ExtResource("9_6pl24")
 
-[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142 node_paths=PackedStringArray("main_camera", "p_finder", "placed_objects_root", "building_placer", "unit_manager", "task_manager", "resource_root", "road_tool", "tool_controller")]
+[node name="Interaction_tracker" type="Node3D" parent="Builder" unique_id=780243142]
 script = ExtResource("12_tt8b8")
-voxel_cursor_scene = ExtResource("10_6pl24")
-unit_cursor_scene = ExtResource("11_w22tq")
-main_camera = NodePath("../../CameraParent/Camera3D")
-p_finder = NodePath("../Pathfinder")
-placed_objects_root = NodePath("../../PlacedObjects")
-ghost_material = ExtResource("17_yhlfj")
-building_placer = NodePath("../BuildingPlacer")
-unit_manager = NodePath("../UnitManager")
-task_manager = NodePath("../TaskManager")
-resource_root = NodePath("../../NatResources")
-road_tool = NodePath("../RoadTool")
-tool_controller = NodePath("../ToolController")
 
 [node name="BuildingPlacer" type="Node" parent="Builder" unique_id=1643215593 node_paths=PackedStringArray("placed_root", "construction_manager")]
 script = ExtResource("18_gipt1")

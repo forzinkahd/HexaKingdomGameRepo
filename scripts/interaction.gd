@@ -1,7 +1,7 @@
 extends Node3D
 
 
-
+"""
 @export var voxel_cursor_scene : PackedScene
 @export var unit_cursor_scene : PackedScene
 @export var main_camera : Camera3D
@@ -552,15 +552,7 @@ func _rotate_ghost(dir: int) -> void:
 	ghost.rotation.y = ghost_yaw
 
 
-"""func _rotate_road(dir: int) -> void:
-	selected_voxel = _surface_voxel(selected_voxel)
-	if not selected_voxel.has_road_or_preview():
-		push_warning("no road on this tile (and no preview)")
-		return
-	if dir > 0:
-		road_tool.rotate_right()
-	else:
-		road_tool.rotate_left()"""
+
 
 
 func _make_node_transparent(n: Node) -> void:
@@ -829,7 +821,6 @@ func _voxel_from_hit(hit: HitData) -> Voxel:
 	if hit_chunk == null:
 		return null
 	return _surface_voxel(hit_chunk.voxel_at_point(hit))
-	"""return hit_chunk.voxel_at_point(hit)"""
 
 
 func _surface_voxel(v: Voxel) -> Voxel:
@@ -882,4 +873,4 @@ func _cap_y_for_world_xz(world_pos: Vector3) -> float:
 		0
 	))
 	# ^ ignore this fallback if you do the chunk mapping approach below
-	return world_pos.y
+	return world_pos.y"""
