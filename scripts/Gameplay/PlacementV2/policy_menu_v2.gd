@@ -16,7 +16,7 @@ var _clear_button: Button
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	if politics == null:
-		politics = get_node_or_null("../TownPoliticsManagerV2") as TownPoliticsManagerV2
+		politics = get_tree().get_first_node_in_group("town_politics_manager") as TownPoliticsManagerV2
 	if button_container == null:
 		push_warning("button container is null")
 		#button_container = self as Container

@@ -32,6 +32,8 @@ signal policy_availability_changed
 var active_policy: PolicyDefinitionV2
 
 func _ready() -> void:
+	add_to_group("town_politics_manager")
+	
 	if town_center_manager == null:
 		town_center_manager = get_node_or_null("../TownCenterManagerV2") as TownCenterManagerV2
 	if production == null:

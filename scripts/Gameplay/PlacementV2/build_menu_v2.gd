@@ -1,5 +1,5 @@
 class_name BuildMenuV2
-extends Control
+extends MarginContainer
 
 @export var catalog: BuildingCatalogV2
 @export var placement: BuildingPlacementV2

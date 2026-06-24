@@ -1,5 +1,5 @@
 class_name TownCenterPanelV2
-extends PanelContainer
+extends MarginContainer
 
 @export var picker: WorldTilePicker
 @export var occupancy: WorldOccupancyV2

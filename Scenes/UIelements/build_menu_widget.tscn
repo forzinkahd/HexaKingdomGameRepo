@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://c35tl6o8asagl"]
+
+[ext_resource type="Script" uid="uid://3xk4gvpw03qk" path="res://scripts/Gameplay/PlacementV2/build_menu_v2.gd" id="1_8aatc"]
+
+[node name="BuildMenuWidget" type="MarginContainer" unique_id=601534593 node_paths=PackedStringArray("button_container", "tab_container")]
+custom_minimum_size = Vector2(560, 220)
+offset_right = 560.0
+offset_bottom = 220.0
+script = ExtResource("1_8aatc")
+button_container = NodePath("")
+tab_container = NodePath("PanelContainer/MarginContainer/TabContainer")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=689553307]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1392737485]
+layout_mode = 2
+
+[node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer" unique_id=1091941803]
+layout_mode = 2

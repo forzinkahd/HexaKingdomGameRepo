@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://b7jls4v16a8mn"]
+
+[ext_resource type="Script" uid="uid://dpk5mv4uys8" path="res://scripts/Gameplay/PlacementV2/town_center_panel_v2.gd" id="1_j61eq"]
+[ext_resource type="Script" uid="uid://eypynnntxf1m" path="res://scripts/Gameplay/PlacementV2/policy_menu_v2.gd" id="2_vhbss"]
+
+[node name="TownCenterWidget" type="MarginContainer" unique_id=986873389 node_paths=PackedStringArray("status_label", "active_policy_label", "influence_label", "consequence_label", "policy_menu")]
+custom_minimum_size = Vector2(480, 360)
+offset_right = 480.0
+offset_bottom = 360.0
+script = ExtResource("1_j61eq")
+status_label = NodePath("PanelContainer/MarginContainer/VBoxContainer/StatusLabel")
+active_policy_label = NodePath("PanelContainer/MarginContainer/VBoxContainer/ActivePolicyLabel")
+influence_label = NodePath("PanelContainer/MarginContainer/VBoxContainer/InfluenceLabel")
+consequence_label = NodePath("PanelContainer/MarginContainer/VBoxContainer/ConsequenceLabel")
+policy_menu = NodePath("PanelContainer/MarginContainer/VBoxContainer/PolicyMenu")
+town_center_id = &"town_center_2"
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1832586847]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1651227936]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=197626000]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=759326431]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=2120047288]
+layout_mode = 2
+
+[node name="ActivePolicyLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=858714214]
+layout_mode = 2
+
+[node name="InfluenceLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=726288800]
+layout_mode = 2
+
+[node name="ConsequenceLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1296519282]
+layout_mode = 2
+
+[node name="PolicyMenu" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=146152829 node_paths=PackedStringArray("button_container", "status_label", "active_policy_label", "consequence_label")]
+layout_mode = 2
+script = ExtResource("2_vhbss")
+button_container = NodePath("PolicyButtons")
+status_label = NodePath("../StatusLabel")
+active_policy_label = NodePath("../ActivePolicyLabel")
+consequence_label = NodePath("../ConsequenceLabel")
+
+[node name="PolicyButtons" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/PolicyMenu" unique_id=449220216]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
