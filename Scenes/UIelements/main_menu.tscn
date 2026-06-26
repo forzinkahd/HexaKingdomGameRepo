@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://c8c8qqyjg3mm1"]
+
+[ext_resource type="Script" uid="uid://byokhanmfpvbg" path="res://scripts/UIscripts/main_menu.gd" id="1_bo4sp"]
+[ext_resource type="Texture2D" uid="uid://dvla5s46crqtl" path="res://Assets/UIbackgrounds/temporaryTitleScreen.png" id="2_8y6ri"]
+
+[node name="MainMenu" type="Control" unique_id=1182005029]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bo4sp")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1088551109]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_8y6ri")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2063861370]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -28.0
+offset_right = 20.0
+offset_bottom = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=1741582304]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=1801690582]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer" unique_id=1473403626]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+
+[node name="NewGameButton" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1251035387]
+layout_mode = 2
+
+[node name="ContinueGameButton" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1181121885]
+layout_mode = 2
+
+[node name="QuitButton" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1586768384]
+layout_mode = 2
