@@ -65,6 +65,7 @@
 [ext_resource type="Script" uid="uid://da25vshtnje58" path="res://scripts/Gameplay/PlacementV2/settlement_goal_definition_v2.gd" id="58_cuml4"]
 [ext_resource type="Resource" uid="uid://dq16qak3b5xb7" path="res://Resources/Goals/town_center_placed.tres" id="59_grg0d"]
 [ext_resource type="Resource" uid="uid://5wxnds73w3du" path="res://Resources/Goals/gather_wood_100.tres" id="60_grg0d"]
+[ext_resource type="Script" uid="uid://pqcrgqtgvjx3" path="res://scripts/Gameplay/PlacementV2/ui_onboarding_flow_v2.gd" id="60_j10ei"]
 [ext_resource type="Resource" uid="uid://c2u8hx761pmcw" path="res://Resources/Goals/gather_stone_50.tres" id="61_j10ei"]
 [ext_resource type="PackedScene" uid="uid://c35tl6o8asagl" path="res://Scenes/UIelements/build_menu_widget.tscn" id="69_grg0d"]
 [ext_resource type="PackedScene" uid="uid://b7jls4v16a8mn" path="res://Scenes/UIelements/town_center_widget.tscn" id="70_j10ei"]
@@ -298,7 +299,13 @@ politics = NodePath("../TownPoliticsManagerV2")
 town_center_manager = NodePath("../TownCenterManagerV2")
 goals = Array[ExtResource("58_cuml4")]([ExtResource("59_grg0d"), ExtResource("60_grg0d"), ExtResource("61_j10ei")])
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=980856356]
+[node name="UI" type="CanvasLayer" parent="." unique_id=980856356 node_paths=PackedStringArray("intro_panel", "controls_panel", "build_menu_panel", "goals_panel", "town_center_panel")]
+script = ExtResource("60_j10ei")
+intro_panel = NodePath("Intro")
+controls_panel = NodePath("Controls Comp")
+build_menu_panel = NodePath("BuildMenuWidget")
+goals_panel = NodePath("SettlementGoalsWidget")
+town_center_panel = NodePath("TownCenterWidget")
 
 [node name="UI" type="Control" parent="UI" unique_id=1213390962]
 layout_mode = 3
