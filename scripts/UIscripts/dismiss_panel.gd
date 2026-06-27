@@ -15,6 +15,8 @@ func _ready() -> void:
 
 
 func dismiss() -> void:
+	SaveGameManagerV2.mark_intro_dismissed()
+	
 	dismissed.emit()
 
 	if free_on_dismiss:

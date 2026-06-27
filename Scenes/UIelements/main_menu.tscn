@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://byokhanmfpvbg" path="res://scripts/UIscripts/main_menu.gd" id="1_bo4sp"]
 [ext_resource type="Texture2D" uid="uid://dvla5s46crqtl" path="res://Assets/UIbackgrounds/temporaryTitleScreen.png" id="2_8y6ri"]
 
-[node name="MainMenu" type="Control" unique_id=1182005029]
+[node name="MainMenu" type="Control" unique_id=1182005029 node_paths=PackedStringArray("continue_button", "new_game_button", "quit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,6 +11,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_bo4sp")
+continue_button = NodePath("MarginContainer/PanelContainer/MarginContainer/VBoxContainer/ContinueGameButton")
+new_game_button = NodePath("MarginContainer/PanelContainer/MarginContainer/VBoxContainer/NewGameButton")
+quit_button = NodePath("MarginContainer/PanelContainer/MarginContainer/VBoxContainer/QuitButton")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1088551109]
 layout_mode = 1
@@ -49,9 +52,12 @@ size_flags_vertical = 0
 
 [node name="NewGameButton" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1251035387]
 layout_mode = 2
+text = "Start New Game"
 
 [node name="ContinueGameButton" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1181121885]
 layout_mode = 2
+text = "Continue Game"
 
 [node name="QuitButton" type="Button" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1586768384]
 layout_mode = 2
+text = "Quit"
