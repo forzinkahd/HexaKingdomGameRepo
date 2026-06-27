@@ -79,6 +79,13 @@ func get_buildings() -> Array[BuildingDefinition]:
 	return result
 
 
+func get_building_by_id(building_id: StringName) -> BuildingDefinition:
+	for definition in get_buildings():
+		if definition != null and definition.id == building_id:
+			return definition
+	return null
+
+
 func find_by_id(id: StringName) -> BuildingDefinition:
 	for definition in buildings:
 		if definition != null and definition.id == id:

@@ -13,6 +13,8 @@ var _count_by_id: Dictionary = {}
 
 
 func _ready() -> void:
+	add_to_group("building_registry")
+
 	if auto_connect_placement:
 		_connect_placement()
 
@@ -28,12 +30,12 @@ func _connect_placement() -> void:
 		placement.building_placed.connect(_on_building_placed)
 
 
-func _on_building_placed(building: PlacedBuildingV2, tile: WorldTile) -> void:
+func _on_building_placed(building: PlacedBuildingV2, _tile: WorldTile) -> void:
 	register_building(building)
 
 
 func register_building(building: PlacedBuildingV2) -> void:
-	if building == null:
+	if building == null or not is_instance_valid(building):
 		return
 
 	if _buildings.has(building):
@@ -88,14 +90,17 @@ func get_count(id: StringName) -> int:
 
 
 func get_total_count() -> int:
+	_prune_invalid_buildings()
 	return _buildings.size()
 
 
 func get_all_buildings() -> Array[PlacedBuildingV2]:
+	_prune_invalid_buildings()
+
 	var result: Array[PlacedBuildingV2] = []
 
 	for building in _buildings:
-		if is_instance_valid(building):
+		if building != null and is_instance_valid(building):
 			result.append(building)
 
 	return result
@@ -104,10 +109,7 @@ func get_all_buildings() -> Array[PlacedBuildingV2]:
 func get_buildings_by_id(id: StringName) -> Array[PlacedBuildingV2]:
 	var result: Array[PlacedBuildingV2] = []
 
-	for building in _buildings:
-		if not is_instance_valid(building):
-			continue
-
+	for building in get_all_buildings():
 		if _building_id(building) == id:
 			result.append(building)
 
@@ -115,10 +117,7 @@ func get_buildings_by_id(id: StringName) -> Array[PlacedBuildingV2]:
 
 
 func get_first_building_by_id(id: StringName) -> PlacedBuildingV2:
-	for building in _buildings:
-		if not is_instance_valid(building):
-			continue
-
+	for building in get_all_buildings():
 		if _building_id(building) == id:
 			return building
 
@@ -181,6 +180,7 @@ func is_unique_limit_reached(definition: BuildingDefinition) -> bool:
 		return false
 
 	var is_unique_value = definition.get("is_unique")
+
 	if is_unique_value == null or not bool(is_unique_value):
 		return false
 
@@ -235,6 +235,43 @@ func availability_reason(definition: BuildingDefinition) -> String:
 	return "Available"
 
 
+func get_save_data() -> Array:
+	var result: Array = []
+
+	for building in get_all_buildings():
+		if building == null or not is_instance_valid(building):
+			continue
+
+		if building.definition == null:
+			continue
+
+		var tile: WorldTile = building.tile
+
+		if tile == null:
+			push_warning("BuildingRegistryV2: skipped building without origin_tile: %s" % [building.get_display_name()])
+			continue
+
+		result.append({
+			"building_id": str(building.definition.id),
+			"coord_x": tile.coord.x,
+			"coord_y": tile.coord.y
+		})
+
+	return result
+
+
+func debug_print_registry() -> void:
+	print("BuildingRegistryV2: buildings=", get_total_count(), " counts=", _count_by_id)
+
+	for building in get_all_buildings():
+		var tile_text := "no tile"
+
+		if building.origin_tile != null:
+			tile_text = str(building.origin_tile.coord)
+
+		print("- ", building.get_display_name(), " id=", str(_building_id(building)), " tile=", tile_text)
+
+
 func _building_id(building: PlacedBuildingV2) -> StringName:
 	if building == null:
 		return &""
@@ -243,3 +280,32 @@ func _building_id(building: PlacedBuildingV2) -> StringName:
 		return &""
 
 	return building.definition.id
+
+
+func _prune_invalid_buildings() -> void:
+	var changed := false
+	var kept: Array[PlacedBuildingV2] = []
+
+	for building in _buildings:
+		if building != null and is_instance_valid(building):
+			kept.append(building)
+		else:
+			changed = true
+
+	if not changed:
+		return
+
+	_buildings = kept
+	_rebuild_counts()
+
+	registry_changed.emit()
+
+
+func _rebuild_counts() -> void:
+	_count_by_id.clear()
+
+	for building in _buildings:
+		var id := _building_id(building)
+
+		if id != &"":
+			_count_by_id[id] = get_count(id) + 1

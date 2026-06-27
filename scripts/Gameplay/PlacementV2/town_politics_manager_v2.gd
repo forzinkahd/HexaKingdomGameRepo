@@ -158,3 +158,34 @@ func _apply_town_influence_effects() -> void:
 	town_center_manager.minimum_efficiency = clamp(min_eff, 0.0, 1.0)
 	town_center_manager.full_efficiency_radius = max(0, full_r)
 	town_center_manager.minimum_efficiency_radius = max(town_center_manager.full_efficiency_radius + 1, min_r)
+
+
+func get_save_data() -> Dictionary:
+	var active_policy_id := ""
+	if active_policy != null:
+		active_policy_id = str(active_policy.id)
+	return {"active_policy_id": active_policy_id}
+
+
+func get_policy_by_id(policy_id: StringName) -> PolicyDefinitionV2:
+	for policy in available_policies:
+		if policy == null:
+			continue
+
+		if policy.id == policy_id:
+			return policy
+
+	return null
+
+
+func load_save_data(data: Dictionary) -> void:
+	var policy_id := StringName(str(data.get("active_policy_id", "")))
+	if policy_id == &"":
+		clear_active_policy()
+		return
+	var policy := get_policy_by_id(policy_id)
+	if policy == null:
+		push_warning("TownPoliticsManagerV2: saved policy not found: %s" % [str(policy_id)])
+		clear_active_policy()
+		return
+	set_active_policy(policy)

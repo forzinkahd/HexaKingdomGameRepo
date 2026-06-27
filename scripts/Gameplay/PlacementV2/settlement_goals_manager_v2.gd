@@ -228,6 +228,29 @@ func _has_town_center() -> bool:
 	return registry != null and registry.has_building(&"town_center")
 
 
+func get_save_data() -> Dictionary:
+	var completed_ids: Array[String] = []
+	for goal_id in _completed_goal_ids.keys():
+		completed_ids.append(str(goal_id))
+	var rewarded_ids: Array[String] = []
+	for goal_id in _rewarded_goal_ids.keys():
+		rewarded_ids.append(str(goal_id))
+	return {
+		"completed_goal_ids": completed_ids,
+		"rewarded_goal_ids": rewarded_ids
+	}
+
+
+func load_save_data(data: Dictionary) -> void:
+	_completed_goal_ids.clear()
+	_rewarded_goal_ids.clear()
+	for raw_id in data.get("completed_goal_ids", []):
+		_completed_goal_ids[StringName(str(raw_id))] = true
+	for raw_id in data.get("rewarded_goal_ids", []):
+		_rewarded_goal_ids[StringName(str(raw_id))] = true
+	goals_changed.emit()
+
+
 func _get_active_policy_id() -> StringName:
 	if politics == null:
 		return &""

@@ -1,4 +1,4 @@
-class_name MainMenuV2
+#class_name MainMenuV2
 extends Control
 
 @export_file("*.tscn") var game_scene_path: String = "res://Scenes/GameScene.tscn"

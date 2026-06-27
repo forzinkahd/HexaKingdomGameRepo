@@ -137,3 +137,35 @@ func get_amount(resource: BuildingDefinition.ProducedResource) -> int:
 
 func summary() -> String:
 	return "Wood: %d   Stone: %d   Food: %d   Gold: %d" % [wood, stone, food, gold]
+
+
+func get_save_data() -> Dictionary:
+	return {
+		"wood": get_amount(BuildingDefinition.ProducedResource.WOOD),
+		"stone": get_amount(BuildingDefinition.ProducedResource.STONE),
+		"food": get_amount(BuildingDefinition.ProducedResource.FOOD),
+		"gold": get_amount(BuildingDefinition.ProducedResource.GOLD)
+	}
+
+
+func load_save_data(data: Dictionary) -> void:
+	set_resource(BuildingDefinition.ProducedResource.WOOD, int(data.get("wood", 0)))
+	set_resource(BuildingDefinition.ProducedResource.STONE, int(data.get("stone", 0)))
+	set_resource(BuildingDefinition.ProducedResource.FOOD, int(data.get("food", 0)))
+	set_resource(BuildingDefinition.ProducedResource.GOLD, int(data.get("gold", 0)))
+
+
+func set_resource(resource: BuildingDefinition.ProducedResource, amount: int) -> void:
+	amount = max(0, amount)
+	match resource:
+		BuildingDefinition.ProducedResource.WOOD:
+			wood = amount
+		BuildingDefinition.ProducedResource.STONE:
+			stone = amount
+		BuildingDefinition.ProducedResource.FOOD:
+			food = amount
+		BuildingDefinition.ProducedResource.GOLD:
+			gold = amount
+		_:
+			return
+	resources_changed.emit()
