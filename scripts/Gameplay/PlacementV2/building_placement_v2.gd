@@ -65,6 +65,10 @@ func configure_world_map(source_world_map: WorldMapData) -> void:
 	_update_current_result()
 
 
+func configure_world_visual_root(source_root: Node3D) -> void:
+	world_visual_root = source_root
+
+
 func set_active_definition(definition: BuildingDefinition) -> void:
 	active_definition = definition
 	_update_current_result()
@@ -414,7 +418,7 @@ func _get_visual_node_for_tile(tile: WorldTile) -> Node3D:
 	if tile == null:
 		return null
 
-	if world_visual_root == null:
+	if world_visual_root == null or not is_instance_valid(world_visual_root):
 		return null
 
 	var matches: Array[Node3D] = []

@@ -13,26 +13,51 @@ var current_settings: GenerationSettingsV2
 var current_map: WorldMapData
 var current_world_root: Node3D
 
+var current_seed: int = 0		# for SaveLoad
+var _has_seed_override: bool = false
+var _seed_override: int = 0
+
+signal world_generated(world_map: WorldMapData)
+
 func _ready() -> void:
 	if render_on_ready:
 		call_deferred("generate_world")
+	
+	add_to_group("world_gen_controller")
+
+
+func generate_world_with_seed(seed_value: int) -> void:
+	_has_seed_override = true
+	_seed_override = seed_value
+	generate_world()
+	_has_seed_override = false
+
 
 func generate_world() -> void:
 	current_settings = _settings_as_v2(settings)
+	
+	if _has_seed_override:
+		current_settings.map_seed = _seed_override
+	
 	_clear_previous_world()
 
 	current_map = WorldGeneratorV2.new().generate(current_settings)
+	current_seed = current_map.seed
 	current_world_root = WorldRendererV2.new().render(current_map, current_settings, world_theme)
 	
 	if building_placement_v2 != null:
 		building_placement_v2.configure_world_map(current_map)
+		building_placement_v2.configure_world_visual_root(current_world_root)
 	
 	_get_output_parent().add_child(current_world_root)
-
 	_print_generation_summary()
+	
+	world_generated.emit(current_map)
+
 
 func regenerate() -> void:
 	generate_world()
+
 
 func get_placeable_tiles() -> Array[WorldTile]:
 	if current_map == null:
@@ -53,6 +78,9 @@ func _clear_previous_world() -> void:
 	if not clear_existing_world:
 		return
 	if current_world_root != null and is_instance_valid(current_world_root):
+		if current_world_root.get_parent() != null:
+			current_world_root.get_parent().remove_child(current_world_root)
+		
 		current_world_root.queue_free()
 		current_world_root = null
 	var parent := _get_output_parent()
