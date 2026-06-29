@@ -21,6 +21,17 @@ extends Control
 
 
 func _ready() -> void:
+	var save_controller := get_tree().get_first_node_in_group("game_save_controller") as GameSaveControllerV2
+	
+	if save_controller != null:
+		if save_controller.has_signal("load_started"):
+			if not save_controller.load_started.is_connected(_on_load_started):
+				save_controller.load_started.connect(_on_load_started)
+	
+		if save_controller.has_signal("load_finished"):
+			if not save_controller.load_finished.is_connected(_on_load_finished):
+				save_controller.load_finished.connect(_on_load_finished)
+	
 	if goals_manager == null and find_manager_by_group:
 		goals_manager = get_tree().get_first_node_in_group(manager_group_name) as SettlementGoalsManagerV2
 
@@ -63,3 +74,20 @@ func _apply_display_settings() -> void:
 		goals_panel.show_rewards = show_rewards
 		goals_panel.show_progress_percent = show_progress_percent
 		goals_panel.refresh_panel()
+
+
+func _on_load_started() -> void:
+	goals_panel.title = "Loading goals..."
+	
+	
+func _on_load_finished() -> void:
+	call_deferred("_refresh_after_load")
+
+
+func _refresh_after_load() -> void:
+	if goals_manager != null:
+		if goals_manager.has_signal("goals_changed"):
+			# optional, not necessary if already connected
+			pass
+	
+	goals_panel.refresh_panel()

@@ -30,15 +30,15 @@ func show_preview(
 	if tile == null:
 		visible = false
 		return
-
+	
 	if definition != _last_definition or _preview_visual == null:
 		_rebuild_preview(definition)
-
+	
 	var base_position := tile.world_position
-
+	
 	if visual_node != null:
 		base_position = visual_node.global_position
-
+	
 	global_position = base_position + Vector3.UP * y_offset
 	_apply_preview_material(is_valid)
 	_rebuild_footprint(tile, is_valid, footprint_coords, world_map)
@@ -47,6 +47,13 @@ func show_preview(
 
 func hide_preview() -> void:
 	visible = false
+
+
+func clear_preview() -> void:
+	hide()
+	
+	for child in get_children():
+		child.queue_free()
 
 
 func _rebuild_preview(definition: BuildingDefinition) -> void:

@@ -69,6 +69,7 @@
 [ext_resource type="Resource" uid="uid://c2u8hx761pmcw" path="res://Resources/Goals/gather_stone_50.tres" id="61_j10ei"]
 [ext_resource type="PackedScene" uid="uid://c35tl6o8asagl" path="res://Scenes/UIelements/build_menu_widget.tscn" id="69_grg0d"]
 [ext_resource type="PackedScene" uid="uid://b7jls4v16a8mn" path="res://Scenes/UIelements/town_center_widget.tscn" id="70_j10ei"]
+[ext_resource type="PackedScene" uid="uid://dp5y8vpjs1d3s" path="res://Scenes/UIelements/pause_menu.tscn" id="70_uwlof"]
 [ext_resource type="PackedScene" uid="uid://5siivuktckdo" path="res://Scenes/UIelements/quest_completed_popup.tscn" id="72_ljflx"]
 [ext_resource type="PackedScene" uid="uid://cn8a1ftsqdtvt" path="res://Scenes/UIelements/controls_comp.tscn" id="72_r2h41"]
 [ext_resource type="PackedScene" uid="uid://bi4u20t1qbr0c" path="res://Scenes/UIelements/settlement_goals_widget.tscn" id="73_r2h41"]
@@ -397,8 +398,9 @@ grow_horizontal = 0
 grow_vertical = 2
 goals_manager = NodePath("../../Builder/GameplayV2/SettlementGoalsManagerV2")
 
-[node name="QuestCompletedPopup" parent="UI" unique_id=68811244 node_paths=PackedStringArray("goals_manager") instance=ExtResource("72_ljflx")]
+[node name="QuestCompletedPopup" parent="UI" unique_id=68811244 node_paths=PackedStringArray("goals_manager", "save_controller") instance=ExtResource("72_ljflx")]
 goals_manager = NodePath("../../Builder/GameplayV2/SettlementGoalsManagerV2")
+save_controller = NodePath("../../GameSaveControllerV2")
 use_goal_id = false
 
 [node name="BuildMenuWidget" parent="UI" unique_id=601534593 node_paths=PackedStringArray("catalog", "placement", "economy", "registry") instance=ExtResource("69_grg0d")]
@@ -419,6 +421,9 @@ picker = NodePath("../../Builder/WorldInteraction/WorldTilePicker")
 occupancy = NodePath("../../Builder/GameplayV2/WorldOccupancyV2")
 town_center_manager = NodePath("../../Builder/GameplayV2/TownCenterManagerV2")
 politics = NodePath("../../Builder/GameplayV2/TownPoliticsManagerV2")
+
+[node name="PauseMenu" parent="UI" unique_id=878952909 node_paths=PackedStringArray("save_controller") instance=ExtResource("70_uwlof")]
+save_controller = NodePath("../../GameSaveControllerV2")
 
 [node name="DebugLabels" type="Control" parent="." unique_id=1520664124]
 visible = false

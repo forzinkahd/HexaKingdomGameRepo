@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://dp5y8vpjs1d3s"]
+
+[ext_resource type="Script" uid="uid://ci8ox78rxdvvs" path="res://scripts/UIscripts/pause_menu_v2.gd" id="1_8p0ii"]
+
+[node name="PauseMenu" type="Control" unique_id=878952909 node_paths=PackedStringArray("resume_button", "save_button", "load_button", "main_menu_button", "quit_button", "status_label")]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8p0ii")
+resume_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/ResumeButton")
+save_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/SaveButton")
+load_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/LoadButton")
+main_menu_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/MainMenuButton")
+quit_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/QuitButton")
+status_label = NodePath("PanelContainer/MarginContainer/VBoxContainer/StatusLabel")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=847317487]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -74.0
+offset_right = 16.0
+offset_bottom = 74.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=892921496]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=287448996]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1144738040]
+layout_mode = 2
+text = "PAUSE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1094666661]
+layout_mode = 2
+text = "Resume"
+
+[node name="SaveButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1832216055]
+layout_mode = 2
+text = "Save Game"
+
+[node name="LoadButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=371094094]
+layout_mode = 2
+text = "Load Game"
+
+[node name="MainMenuButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1596663001]
+layout_mode = 2
+text = "Main Menu"
+
+[node name="QuitButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=2132117970]
+layout_mode = 2
+text = "Quit Game"
+
+[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=447875105]
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1

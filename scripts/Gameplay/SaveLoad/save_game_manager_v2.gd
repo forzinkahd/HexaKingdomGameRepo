@@ -32,7 +32,7 @@ func request_new_game() -> void:
 	pending_loaded_data.clear()
 
 	# If the player has dismissed the intro before, keep it hidden.
-	skip_intro_on_next_game_start = intro_dismissed
+	skip_intro_on_next_game_start = false
 
 
 func request_load_game(path: String = DEFAULT_SAVE_PATH) -> bool:

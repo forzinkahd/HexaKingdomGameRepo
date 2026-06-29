@@ -16,7 +16,7 @@ extends Node
 
 func _ready() -> void:
 	var skip_intro_for_session : Variant = SaveGameManagerV2.consume_skip_intro_on_next_game_start()
-	var show_intro : Variant = SaveGameManagerV2.should_show_intro() and not skip_intro_for_session
+	var show_intro : Variant = not skip_intro_for_session
 
 	if show_intro:
 		if hide_gameplay_panels_on_ready:

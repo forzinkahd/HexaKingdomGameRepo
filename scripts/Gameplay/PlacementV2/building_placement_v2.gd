@@ -61,8 +61,8 @@ func _ready() -> void:
 
 
 func configure_world_map(source_world_map: WorldMapData) -> void:
+	clear_current_selection_and_preview()
 	world_map = source_world_map
-	_update_current_result()
 
 
 func configure_world_visual_root(source_root: Node3D) -> void:
@@ -105,6 +105,9 @@ func _on_tile_selected(tile: WorldTile, visual_node: Node3D) -> void:
 
 
 func _update_current_result() -> void:
+	if current_visual_node != null and not is_instance_valid(current_visual_node):
+		current_visual_node = null
+	
 	current_result = PlacementRulesV2.validate(
 		current_tile,
 		active_definition,
@@ -114,8 +117,17 @@ func _update_current_result() -> void:
 		registry,
 		resource_map
 	)
-
+	
 	if preview != null:
+		if current_tile == null:
+			if preview.has_method("clear_preview"):
+				preview.clear_preview()
+			else:
+				preview.hide()
+	
+			placement_changed.emit(current_tile, current_result)
+			return
+	
 		preview.show_preview(
 			current_tile,
 			current_visual_node,
@@ -124,7 +136,7 @@ func _update_current_result() -> void:
 			current_result.footprint_coords,
 			world_map
 		)
-
+	
 	placement_changed.emit(current_tile, current_result)
 
 
@@ -489,3 +501,19 @@ func _find_visual_node_for_coord_recursive(node: Node, coord: Vector2i) -> Node3
 			return found
 
 	return null
+
+# failsafe for loading game file while preview is active
+func clear_current_selection_and_preview() -> void:
+	current_tile = null
+	current_visual_node = null
+	current_result = null
+
+	if preview != null:
+		if preview.has_method("clear_preview"):
+			preview.clear_preview()
+		else:
+			preview.hide()
+
+
+func prepare_for_load() -> void:
+	clear_current_selection_and_preview()

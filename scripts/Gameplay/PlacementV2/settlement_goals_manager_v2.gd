@@ -17,6 +17,7 @@ signal goal_reward_granted(goal: SettlementGoalDefinitionV2)
 
 var _completed_goal_ids: Dictionary = {}
 var _rewarded_goal_ids: Dictionary = {}
+var _loading_save_data: bool = false
 
 
 func _ready() -> void:
@@ -174,15 +175,36 @@ func _is_goal_condition_met(goal: SettlementGoalDefinitionV2) -> bool:
 
 
 func _mark_goal_completed(goal: SettlementGoalDefinitionV2) -> void:
+	if goal == null:
+		return
+	
+	if _loading_save_data:
+		return
+	
+	if _completed_goal_ids.has(goal.id):
+		return
+	
 	_completed_goal_ids[goal.id] = true
-	if print_debug:
-		print("Settlement goal completed: ", goal.display_name)
+	
 	if goal.auto_grant_reward and not _rewarded_goal_ids.has(goal.id):
 		_grant_reward(goal)
+	
 	goal_completed.emit(goal)
+	goals_changed.emit()
 
 
 func _grant_reward(goal: SettlementGoalDefinitionV2) -> void:
+	if goal == null:
+		return
+	
+	if _loading_save_data:
+		return
+	
+	if _rewarded_goal_ids.has(goal.id):
+		return
+	
+	_rewarded_goal_ids[goal.id] = true
+	
 	if economy == null:
 		return
 	_rewarded_goal_ids[goal.id] = true
@@ -191,6 +213,7 @@ func _grant_reward(goal: SettlementGoalDefinitionV2) -> void:
 	_add_resource(BuildingDefinition.ProducedResource.FOOD, goal.reward_food)
 	_add_resource(BuildingDefinition.ProducedResource.GOLD, goal.reward_gold)
 	goal_reward_granted.emit(goal)
+	goals_changed.emit()
 
 
 func _add_resource(resource: BuildingDefinition.ProducedResource, amount: int) -> void:
@@ -241,13 +264,29 @@ func get_save_data() -> Dictionary:
 	}
 
 
+func prepare_for_load() -> void:
+	_loading_save_data = true
+
+
 func load_save_data(data: Dictionary) -> void:
+	_loading_save_data = true
+
 	_completed_goal_ids.clear()
 	_rewarded_goal_ids.clear()
+
 	for raw_id in data.get("completed_goal_ids", []):
 		_completed_goal_ids[StringName(str(raw_id))] = true
+
 	for raw_id in data.get("rewarded_goal_ids", []):
 		_rewarded_goal_ids[StringName(str(raw_id))] = true
+
+	goals_changed.emit()
+
+	call_deferred("_finish_loading_save_data")
+
+
+func _finish_loading_save_data() -> void:
+	_loading_save_data = false
 	goals_changed.emit()
 
 

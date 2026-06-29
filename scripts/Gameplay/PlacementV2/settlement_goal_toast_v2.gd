@@ -3,6 +3,7 @@ extends MarginContainer
 
 @export var goals_manager: SettlementGoalsManagerV2
 @export var label: Label
+@export var save_controller: GameSaveControllerV2
 
 @export_group("Display")
 @export var visible_seconds: float = 2.5
@@ -15,14 +16,21 @@ extends MarginContainer
 @export_range(0.0, 1.0) var vertical_screen_ratio: float = 0.66
 
 var _timer: float = 0.0
+var _is_loading: bool = false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 
 	if label == null:
 		label = find_child("QuestCompletedLabel", true, false) as Label
+
+	if save_controller == null:
+		save_controller = get_tree().get_first_node_in_group("game_save_controller") as GameSaveControllerV2
+
+	_connect_save_controller()
 
 	if center_horizontally_on_ready:
 		call_deferred("_apply_screen_position")
@@ -37,7 +45,7 @@ func _process(delta: float) -> void:
 	_timer -= delta
 
 	if _timer <= 0.0:
-		hide()
+		hide_message()
 
 
 func set_goals_manager(source_manager: SettlementGoalsManagerV2) -> void:
@@ -60,6 +68,9 @@ func reconnect_manager() -> void:
 
 
 func show_message(message: String) -> void:
+	if _is_loading:
+		return
+
 	if label != null:
 		label.text = message
 	else:
@@ -75,10 +86,27 @@ func show_message(message: String) -> void:
 
 func hide_message() -> void:
 	_timer = 0.0
+
+	if label != null:
+		label.text = ""
+
 	hide()
 
 
+func prepare_for_load() -> void:
+	_is_loading = true
+	hide_message()
+
+
+func finish_load() -> void:
+	_is_loading = false
+	hide_message()
+
+
 func _on_goal_completed(goal: SettlementGoalDefinitionV2) -> void:
+	if _is_loading:
+		return
+
 	if goal == null:
 		return
 
@@ -92,6 +120,19 @@ func _on_goal_completed(goal: SettlementGoalDefinitionV2) -> void:
 		goal_text = str(goal.id)
 
 	show_message(prefix + goal_text)
+
+
+func _connect_save_controller() -> void:
+	if save_controller == null:
+		return
+
+	if save_controller.has_signal("load_started"):
+		if not save_controller.load_started.is_connected(prepare_for_load):
+			save_controller.load_started.connect(prepare_for_load)
+
+	if save_controller.has_signal("load_finished"):
+		if not save_controller.load_finished.is_connected(finish_load):
+			save_controller.load_finished.connect(finish_load)
 
 
 func _apply_screen_position() -> void:

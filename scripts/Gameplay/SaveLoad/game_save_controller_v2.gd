@@ -23,6 +23,10 @@ var _world_ready: bool = false
 var _waiting_for_load_world_regeneration: bool = false
 
 
+signal load_started
+signal load_finished
+
+
 func _ready() -> void:
 	add_to_group("game_save_controller")
 	_find_missing_references()
@@ -83,7 +87,9 @@ func collect_save_data() -> Dictionary:
 func apply_save_data(data: Dictionary) -> void:
 	if data.is_empty():
 		return
-
+	
+	load_started.emit()
+	
 	var saved_seed := _saved_seed_from_data(data)
 
 	if saved_seed != 0 and world_generator != null:
@@ -144,6 +150,9 @@ func _regenerate_world_for_load(saved_seed: int, data: Dictionary) -> bool:
 		push_warning("GameSaveControllerV2: world_generator needs generate_world_with_seed(seed_value).")
 		return false
 
+	if placement != null and placement.has_method("prepare_for_load"):
+		placement.prepare_for_load()
+
 	_pending_load_data = data.duplicate(true)
 	_world_ready = false
 	_waiting_for_load_world_regeneration = true
@@ -158,18 +167,41 @@ func _regenerate_world_for_load(saved_seed: int, data: Dictionary) -> bool:
 func _apply_save_data_after_world_ready(data: Dictionary) -> void:
 	if data.is_empty():
 		return
-
+	
 	if print_debug:
 		print("GameSaveControllerV2: applying save data.")
-
+	
+	load_started.emit()
+	
+	if goals_manager != null and goals_manager.has_method("prepare_for_load"):
+		goals_manager.prepare_for_load()
+	
+	if placement != null and placement.has_method("prepare_for_load"):
+		placement.prepare_for_load()
+	
+	# Load saved goal flags first so restored buildings cannot re-complete old goals.
 	_apply_goals_save_data(data.get("goals", {}))
+	
+	# Restore saved resources before and after reconstruction.
 	_apply_resource_save_data(data.get("resources", {}))
+	
+	# Restore world entities.
 	_apply_building_save_data(data.get("placed_buildings", []))
+	
+	# Restore policy after buildings/registry exist.
 	_apply_politics_save_data(data.get("politics", {}))
+	
+	# Final resource override. This cancels accidental rewards during reconstruction.
 	_apply_resource_save_data(data.get("resources", {}))
-
+	
 	if print_debug:
 		print("GameSaveControllerV2: save data applied.")
+	
+	call_deferred("_finish_load")
+
+
+func _finish_load() -> void:
+	load_finished.emit()
 
 
 func _find_missing_references() -> void:
@@ -285,10 +317,13 @@ func _apply_building_save_data(buildings_data: Array) -> void:
 	if placement == null:
 		push_warning("GameSaveControllerV2: placement missing, cannot restore buildings.")
 		return
-
+	
+	if placement.has_method("prepare_for_load"):
+		placement.prepare_for_load()
+	
 	if placement.has_method("clear_placed_buildings"):
 		placement.clear_placed_buildings()
-
+	
 	for entry in buildings_data:
 		if typeof(entry) != TYPE_DICTIONARY:
 			continue
