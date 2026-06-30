@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://bipya0xmf22mg"]
+
+[ext_resource type="Script" uid="uid://dl3uctnajd3gn" path="res://scripts/UIscripts/placement_cursor_feedback_V2.gd" id="1_8h2d8"]
+
+[node name="PlacementCursorFeedback" type="PanelContainer" unique_id=610838780 node_paths=PackedStringArray("label")]
+offset_right = 24.0
+offset_bottom = 24.0
+script = ExtResource("1_8h2d8")
+label = NodePath("MarginContainer/Label")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1861794899]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer" unique_id=430685032]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24

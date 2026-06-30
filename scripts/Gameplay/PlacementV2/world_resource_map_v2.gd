@@ -627,28 +627,48 @@ func _get_generic_bonus_source_for_definition_on_tile(
 ) -> String:
 	if definition == null or tile == null:
 		return ""
-
+	
 	var resource := definition.produces_resource
 	var best := 1.0
 	var label := ""
-
+	
 	for node_def in get_nodes_at_coord(tile.coord):
 		if node_def.affected_resource == resource and node_def.on_tile_multiplier > best:
 			best = node_def.on_tile_multiplier
 			label = "%s on tile" % [node_def.display_name]
-
+	
 	for node_coord in _nodes_by_coord.keys():
 		var distance := _hex_distance(tile.coord, node_coord)
-
+	
 		for node_def in get_nodes_at_coord(node_coord):
 			if node_def.affected_resource != resource:
 				continue
-
+	
 			if distance > 0 and distance <= node_def.nearby_radius and node_def.nearby_multiplier > best:
 				best = node_def.nearby_multiplier
 				label = "%s nearby d%d" % [node_def.display_name, distance]
-
+	
 	return label
+
+
+func get_best_bonus_for_building(definition: BuildingDefinition, tile: WorldTile) -> Dictionary:
+	var result := {
+		"multiplier": 1.0,
+		"description": ""
+	}
+	
+	if definition == null or tile == null:
+		return result
+	
+	var multiplier := get_projected_multiplier_for_definition_on_tile(definition, tile)
+	var source := get_projected_bonus_source_for_definition_on_tile(definition, tile)
+	
+	result["multiplier"] = multiplier
+	
+	if source != "" and multiplier > 1.001:
+		result["description"] = "%s x%.2f" % [source, multiplier]
+	
+	return result
 
 
 func _fallback_visual(definition: ResourceNodeDefinitionV2) -> Node3D:

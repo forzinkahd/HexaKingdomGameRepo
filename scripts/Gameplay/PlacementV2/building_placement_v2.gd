@@ -23,6 +23,11 @@ signal placement_failed(tile: WorldTile, reason: String)
 
 @export var world_visual_root: Node3D
 
+@export_category("Cursor Feedback")
+@export var cursor_feedback: PlacementCursorFeedbackV2
+@export var show_cursor_feedback: bool = true
+@export var show_valid_production_preview: bool = true
+
 var world_map: WorldMapData
 var current_tile: WorldTile
 var current_visual_node: Node3D
@@ -138,61 +143,206 @@ func _update_current_result() -> void:
 		)
 	
 	placement_changed.emit(current_tile, current_result)
+	_update_cursor_feedback()
+
+
+func _update_cursor_feedback() -> void:
+	if not show_cursor_feedback:
+		if cursor_feedback != null:
+			cursor_feedback.hide_feedback()
+		return
+	
+	if cursor_feedback == null:
+		return
+	
+	if current_tile == null or active_definition == null:
+		cursor_feedback.hide_feedback()
+		return
+	
+	var text := _build_cursor_feedback_text()
+	var mouse_pos := get_viewport().get_mouse_position()
+	cursor_feedback.show_feedback(text, mouse_pos)
+
+
+func _build_cursor_feedback_text() -> String:
+	if current_result == null:
+		return ""
+	
+	var lines: Array[String] = []
+	
+	if not current_result.valid:
+		lines.append("Placement: INVALID")
+		lines.append(current_result.reason)
+		return "\n".join(lines)
+	
+	lines.append("Placement: VALID")
+	
+	if show_valid_production_preview:
+		var production_text := _build_production_preview_text(active_definition, current_tile)
+		if production_text != "":
+			lines.append(production_text)
+	
+	return "\n".join(lines)
+
+
+func _build_production_preview_text(definition: BuildingDefinition, tile: WorldTile) -> String:
+	if definition == null or tile == null:
+		return ""
+	
+	var resource = definition.get("produces_resource")
+	var base_amount := float(definition.get("production_amount"))
+	
+	if resource == null or base_amount <= 0.0:
+		return "Production: none"
+	
+	var resource_name := _resource_name(resource)
+	
+	var town_efficiency := _get_town_efficiency(tile)
+	var resource_bonus := _get_resource_bonus(definition, tile)
+	var policy_multiplier := _get_policy_multiplier(resource)
+	
+	var final_amount :float = base_amount * resource_bonus.multiplier * town_efficiency * policy_multiplier
+	
+	var lines: Array[String] = []
+	
+	if town_efficiency < 1.0:
+		lines.append("Town efficiency: %d%%" % [int(round(town_efficiency * 100.0))])
+	else:
+		lines.append("Town efficiency: 100%")
+	
+	if resource_bonus.description != "":
+		lines.append("Bonus: " + resource_bonus.description)
+	
+	lines.append(
+		"Production: %s +%.1f × %.2f × %.2f × %.2f = +%.2f / tick"
+		% [
+			resource_name,
+			base_amount,
+			resource_bonus.multiplier,
+			town_efficiency,
+			policy_multiplier,
+			final_amount
+		]
+	)
+	
+	return "\n".join(lines)
+
+
+func _resource_bonus_result(multiplier: float, description: String) -> Dictionary:
+	return {
+		"multiplier": multiplier,
+		"description": description
+	}
+
+
+func _get_town_efficiency(tile: WorldTile) -> float:
+	var town_manager := get_tree().get_first_node_in_group("town_center_manager")
+	
+	if town_manager != null and town_manager.has_method("get_efficiency_at_tile"):
+		return float(town_manager.call("get_efficiency_at_tile", tile))
+	
+	if town_manager != null and town_manager.has_method("get_efficiency_at_coord"):
+		return float(town_manager.call("get_efficiency_at_coord", tile.coord))
+	
+	return 1.0
+
+
+func _get_resource_bonus(definition: BuildingDefinition, tile: WorldTile) -> Dictionary:
+	if resource_map == null:
+		return _resource_bonus_result(1.0, "")
+	
+	if resource_map.has_method("get_best_bonus_for_building"):
+		var bonus = resource_map.call("get_best_bonus_for_building", definition, tile)
+		if bonus is Dictionary:
+			return bonus
+	
+	if resource_map.has_method("get_bonus_multiplier_for_building"):
+		var multiplier := float(resource_map.call("get_bonus_multiplier_for_building", definition, tile))
+		if multiplier != 1.0:
+			return _resource_bonus_result(multiplier, "Resource node x%.2f" % [multiplier])
+	
+	return _resource_bonus_result(1.0, "")
+
+
+func _get_policy_multiplier(resource) -> float:
+	var production_manager := production
+	
+	if production_manager == null:
+		return 1.0
+	
+	if production_manager.has_method("get_policy_multiplier_for_resource"):
+		return float(production_manager.call("get_policy_multiplier_for_resource", resource))
+	
+	return 1.0
+
+
+func _resource_name(resource) -> String:
+	match resource:
+		BuildingDefinition.ProducedResource.WOOD:
+			return "Wood"
+		BuildingDefinition.ProducedResource.STONE:
+			return "Stone"
+		BuildingDefinition.ProducedResource.FOOD:
+			return "Food"
+		BuildingDefinition.ProducedResource.GOLD:
+			return "Gold"
+		_:
+			return "Resource"
 
 
 func try_place_current() -> bool:
 	_update_current_result()
-
+	
 	if current_result == null or not current_result.valid:
 		var reason := "Invalid placement"
-
+	
 		if current_result != null:
 			reason = current_result.reason
-
+	
 		placement_failed.emit(current_tile, reason)
-
+	
 		if print_debug:
 			print("Placement failed: ", reason)
-
+	
 		return false
-
+	
 	if economy != null and not economy.spend_for(active_definition):
 		var reason := economy.missing_cost_reason(active_definition)
 		placement_failed.emit(current_tile, reason)
 		_update_current_result()
 		return false
-
+	
 	var building := _spawn_building(current_tile, active_definition, current_result.footprint_coords)
-
+	
 	if building == null:
 		if economy != null:
 			economy.refund_for(active_definition)
-
+	
 		placement_failed.emit(current_tile, "Could not spawn building")
 		return false
-
+	
 	if occupancy != null:
 		if not occupancy.occupy_coords(current_result.footprint_coords, building, current_tile):
 			building.queue_free()
-
+	
 			if economy != null:
 				economy.refund_for(active_definition)
-
+	
 			placement_failed.emit(current_tile, "Footprint overlaps occupied tile")
 			_update_current_result()
 			return false
-
+	
 	if production != null:
 		production.register_building(building)
-
+	
 	if registry != null:
 		registry.register_building(building)
-
+	
 	building_placed.emit(building, current_tile)
-
+	
 	if print_debug:
 		print("Placed building: ", building.get_display_name(), " at ", current_tile.coord)
-
+	
 	_update_current_result()
 	return true
 
@@ -353,7 +503,7 @@ func _get_tile_by_coord(coord: Vector2i) -> WorldTile:
 
 func _place_loaded_building(definition: BuildingDefinition, tile: WorldTile) -> bool:
 	# Loading restores state and bypasses resource cost.
-
+	
 	var result := PlacementRulesV2.validate(
 		tile,
 		definition,
@@ -363,22 +513,22 @@ func _place_loaded_building(definition: BuildingDefinition, tile: WorldTile) -> 
 		registry,
 		resource_map
 	)
-
+	
 	if result == null or not result.valid:
 		var reason := "invalid loaded placement"
-
+	
 		if result != null:
 			reason = result.reason
-
+	
 		push_warning(
 			"BuildingPlacementV2: could not load %s at %s: %s"
 			% [definition.display_name, str(tile.coord), reason]
 		)
 		return false
-
+	
 	var visual_node := _get_visual_node_for_tile(tile)
 	var spawn_position := tile.world_position
-
+	
 	if visual_node != null:
 		spawn_position = visual_node.global_position
 	else:
@@ -386,32 +536,32 @@ func _place_loaded_building(definition: BuildingDefinition, tile: WorldTile) -> 
 			"BuildingPlacementV2: no visual node found for loaded building at %s, using tile.world_position"
 			% [str(tile.coord)]
 		)
-
+	
 	var building := _spawn_building_at_position(
 		tile,
 		definition,
 		result.footprint_coords,
 		spawn_position
 	)
-
+	
 	if building == null:
 		push_warning("BuildingPlacementV2: could not spawn loaded building.")
 		return false
-
+	
 	if occupancy != null:
 		if not occupancy.occupy_coords(result.footprint_coords, building, tile):
 			building.queue_free()
 			push_warning("BuildingPlacementV2: loaded building overlaps occupied tile.")
 			return false
-
+	
 	if production != null:
 		production.register_building(building)
-
+	
 	if registry != null:
 		registry.register_building(building)
-
+	
 	building_placed.emit(building, tile)
-
+	
 	if print_debug:
 		print(
 			"Loaded building: ",
@@ -507,12 +657,15 @@ func clear_current_selection_and_preview() -> void:
 	current_tile = null
 	current_visual_node = null
 	current_result = null
-
+	
 	if preview != null:
 		if preview.has_method("clear_preview"):
 			preview.clear_preview()
 		else:
 			preview.hide()
+	
+	if cursor_feedback != null:
+		cursor_feedback.hide_feedback()
 
 
 func prepare_for_load() -> void:

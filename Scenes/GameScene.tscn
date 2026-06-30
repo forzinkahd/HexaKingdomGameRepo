@@ -70,6 +70,7 @@
 [ext_resource type="PackedScene" uid="uid://c35tl6o8asagl" path="res://Scenes/UIelements/build_menu_widget.tscn" id="69_grg0d"]
 [ext_resource type="PackedScene" uid="uid://b7jls4v16a8mn" path="res://Scenes/UIelements/town_center_widget.tscn" id="70_j10ei"]
 [ext_resource type="PackedScene" uid="uid://dp5y8vpjs1d3s" path="res://Scenes/UIelements/pause_menu.tscn" id="70_uwlof"]
+[ext_resource type="PackedScene" uid="uid://bipya0xmf22mg" path="res://Scenes/UIelements/placement_cursor_feedback.tscn" id="71_ljflx"]
 [ext_resource type="PackedScene" uid="uid://5siivuktckdo" path="res://Scenes/UIelements/quest_completed_popup.tscn" id="72_ljflx"]
 [ext_resource type="PackedScene" uid="uid://cn8a1ftsqdtvt" path="res://Scenes/UIelements/controls_comp.tscn" id="72_r2h41"]
 [ext_resource type="PackedScene" uid="uid://bi4u20t1qbr0c" path="res://Scenes/UIelements/settlement_goals_widget.tscn" id="73_r2h41"]
@@ -245,7 +246,7 @@ script = ExtResource("36_jmmro")
 [node name="BuildingPreviewV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1004577143]
 script = ExtResource("33_1dmga")
 
-[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "production", "registry", "resource_map", "building_root", "catalog", "world_visual_root")]
+[node name="BuildingPlacementV2" type="Node" parent="Builder/GameplayV2" unique_id=894365943 node_paths=PackedStringArray("picker", "preview", "occupancy", "economy", "production", "registry", "resource_map", "building_root", "catalog", "world_visual_root", "cursor_feedback")]
 script = ExtResource("34_cxw7u")
 picker = NodePath("../../WorldInteraction/WorldTilePicker")
 preview = NodePath("../BuildingPreviewV2")
@@ -257,6 +258,7 @@ resource_map = NodePath("../WorldResourceMapV2")
 building_root = NodePath("../PlacedBuildings")
 catalog = NodePath("../BuildingCatalogV2")
 world_visual_root = NodePath("../../../Chunks")
+cursor_feedback = NodePath("../../../UI/PlacementCursorFeedback")
 
 [node name="TownInfluenceOverlayV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1091534731 node_paths=PackedStringArray("world_gen_controller", "town_center_manager")]
 script = ExtResource("44_11i6k")
@@ -424,6 +426,8 @@ politics = NodePath("../../Builder/GameplayV2/TownPoliticsManagerV2")
 
 [node name="PauseMenu" parent="UI" unique_id=878952909 node_paths=PackedStringArray("save_controller") instance=ExtResource("70_uwlof")]
 save_controller = NodePath("../../GameSaveControllerV2")
+
+[node name="PlacementCursorFeedback" parent="UI" unique_id=610838780 instance=ExtResource("71_ljflx")]
 
 [node name="DebugLabels" type="Control" parent="." unique_id=1520664124]
 visible = false
