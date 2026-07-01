@@ -18,6 +18,9 @@ extends Node
 @export var save_path: String = "user://save_slot_1.json"
 @export var print_debug: bool = true
 
+@export_group("Roads")
+@export var road_network: RoadNetworkV2
+
 var _pending_load_data: Dictionary = {}
 var _world_ready: bool = false
 var _waiting_for_load_world_regeneration: bool = false
@@ -75,7 +78,8 @@ func collect_save_data() -> Dictionary:
 		"resources": _collect_resource_save_data(),
 		"placed_buildings": _collect_building_save_data(),
 		"politics": _collect_politics_save_data(),
-		"goals": _collect_goals_save_data()
+		"goals": _collect_goals_save_data(),
+		"roads": _collect_road_save_data()
 	}
 
 	if print_debug:
@@ -185,6 +189,8 @@ func _apply_save_data_after_world_ready(data: Dictionary) -> void:
 	# Restore saved resources before and after reconstruction.
 	_apply_resource_save_data(data.get("resources", {}))
 	
+	_apply_road_save_data(data.get("roads", []))
+	
 	# Restore world entities.
 	_apply_building_save_data(data.get("placed_buildings", []))
 	
@@ -207,24 +213,27 @@ func _finish_load() -> void:
 func _find_missing_references() -> void:
 	if world_generator == null:
 		world_generator = get_tree().get_first_node_in_group("world_gen_controller")
-
+	
 	if economy == null:
 		economy = get_tree().get_first_node_in_group("world_economy") as WorldEconomyV2
-
+	
 	if registry == null:
 		registry = get_tree().get_first_node_in_group("building_registry") as BuildingRegistryV2
-
+	
 	if placement == null:
 		placement = get_tree().get_first_node_in_group("building_placement") as BuildingPlacementV2
-
+	
 	if catalog == null:
 		catalog = get_tree().get_first_node_in_group("building_catalog") as BuildingCatalogV2
-
+	
 	if politics == null:
 		politics = get_tree().get_first_node_in_group("town_politics_manager") as TownPoliticsManagerV2
-
+	
 	if goals_manager == null:
 		goals_manager = get_tree().get_first_node_in_group("settlement_goals_manager") as SettlementGoalsManagerV2
+	
+	if road_network == null:
+		road_network = get_tree().get_first_node_in_group("road_network") as RoadNetworkV2
 
 
 func _connect_world_ready_signal() -> void:
@@ -360,6 +369,24 @@ func _collect_goals_save_data() -> Dictionary:
 func _apply_goals_save_data(data: Dictionary) -> void:
 	if goals_manager != null and goals_manager.has_method("load_save_data"):
 		goals_manager.load_save_data(data)
+
+
+func _collect_road_save_data() -> Array:
+	if road_network == null:
+		return []
+	
+	if road_network.has_method("get_save_data"):
+		return road_network.get_save_data()
+	
+	return []
+
+
+func _apply_road_save_data(data: Array) -> void:
+	if road_network == null:
+		return
+	
+	if road_network.has_method("load_save_data"):
+		road_network.load_save_data(data)
 
 
 func _get_economy_amount(resource: BuildingDefinition.ProducedResource) -> int:

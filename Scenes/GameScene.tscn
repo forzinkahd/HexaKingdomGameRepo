@@ -45,6 +45,9 @@
 [ext_resource type="Resource" uid="uid://ckmd5ij17fs8m" path="res://Resources/Buildings/TestQuarry.tres" id="40_p5lqy"]
 [ext_resource type="Script" uid="uid://b4vagg00mevci" path="res://scripts/Gameplay/PlacementV2/production_debug_label_v2.gd" id="40_sjxqr"]
 [ext_resource type="Script" uid="uid://dw2h64w8cgx2t" path="res://scripts/Gameplay/PlacementV2/building_registry_v2.gd" id="42_c0ais"]
+[ext_resource type="Script" uid="uid://bbwe8grr54165" path="res://scripts/Gameplay/PlacementV2/road_network_v2.gd" id="42_ygwwr"]
+[ext_resource type="Script" uid="uid://cf3iuvfyryjw" path="res://scripts/Gameplay/PlacementV2/road_tool_v2.gd" id="43_bmduy"]
+[ext_resource type="PackedScene" uid="uid://c5lcx0gbg0nx7" path="res://Scenes/TerrainVoxels/Roads/tile_base_road_a.tscn" id="43_xb52p"]
 [ext_resource type="Script" uid="uid://bx1doei3ihs1" path="res://scripts/Gameplay/PlacementV2/town_influence_overlay_v2.gd" id="44_11i6k"]
 [ext_resource type="Script" uid="uid://cso88f44js1le" path="res://scripts/Gameplay/PlacementV2/town_info_panel_v2.gd" id="45_24uct"]
 [ext_resource type="Script" uid="uid://cg02ihephla2g" path="res://scripts/Gameplay/PlacementV2/world_resource_map_v2.gd" id="45_rvx5h"]
@@ -259,6 +262,21 @@ building_root = NodePath("../PlacedBuildings")
 catalog = NodePath("../BuildingCatalogV2")
 world_visual_root = NodePath("../../../Chunks")
 cursor_feedback = NodePath("../../../UI/PlacementCursorFeedback")
+
+[node name="RoadNetworkV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1964296392 node_paths=PackedStringArray("economy", "occupancy", "road_root")]
+script = ExtResource("42_ygwwr")
+economy = NodePath("../WorldEconomyV2")
+occupancy = NodePath("../WorldOccupancyV2")
+road_root = NodePath("../RoadRoot")
+road_scene = ExtResource("43_xb52p")
+
+[node name="RoadToolV2" type="Node" parent="Builder/GameplayV2" unique_id=903454925 node_paths=PackedStringArray("picker", "road_network", "cursor_feedback")]
+script = ExtResource("43_bmduy")
+picker = NodePath("../../WorldInteraction/WorldTilePicker")
+road_network = NodePath("../RoadNetworkV2")
+cursor_feedback = NodePath("../../../UI/PlacementCursorFeedback")
+
+[node name="RoadRoot" type="Node3D" parent="Builder/GameplayV2" unique_id=69077295]
 
 [node name="TownInfluenceOverlayV2" type="Node3D" parent="Builder/GameplayV2" unique_id=1091534731 node_paths=PackedStringArray("world_gen_controller", "town_center_manager")]
 script = ExtResource("44_11i6k")
