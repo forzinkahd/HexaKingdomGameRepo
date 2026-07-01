@@ -7,6 +7,7 @@ signal tile_selected(tile: WorldTile, visual_node: Node3D)
 @export var ray_length: float = 2000.0
 @export var print_debug: bool = false
 @export var ignore_clicks_over_ui: bool = true
+@export var tile_query: WorldTileQueryV2
 
 var selected_tile: WorldTile
 var selected_node: Node3D
@@ -37,46 +38,29 @@ func _is_pointer_over_ui() -> bool:
 
 
 func _pick_tile(screen_position: Vector2) -> bool:
-	if camera == null:
-		camera = get_viewport().get_camera_3d()
-
-	if camera == null:
-		push_warning("WorldTilePicker: no camera available.")
+	if tile_query == null:
+		tile_query = get_node_or_null("../WorldTileQueryV2") as WorldTileQueryV2
+	
+	if tile_query == null:
+		push_warning("WorldTilePicker: missing WorldTileQueryV2.")
 		return false
-
-	var origin := camera.project_ray_origin(screen_position)
-	var direction := camera.project_ray_normal(screen_position)
-	var end := origin + direction * ray_length
-
-	var params := PhysicsRayQueryParameters3D.create(origin, end)
-	params.collide_with_areas = true
-	params.collide_with_bodies = true
-
-	var result := camera.get_world_3d().direct_space_state.intersect_ray(params)
-
+	
+	var result := tile_query.query_screen_position(screen_position)
+	
 	if result.is_empty():
 		return false
-
-	var collider := result.get("collider") as Object
-	var node := collider as Node
-
-	while node != null:
-		if node.has_meta("world_tile"):
-			selected_tile = node.get_meta("world_tile")
-			selected_node = _find_node3d_with_tile(node)
-
-			if selected_node == null:
-				selected_node = node as Node3D
-
-			if print_debug:
-				_print_tile(selected_tile)
-
-			tile_selected.emit(selected_tile, selected_node)
-			return true
-
-		node = node.get_parent()
-
-	return false
+	
+	selected_tile = result.get("tile") as WorldTile
+	selected_node = result.get("visual_node") as Node3D
+	
+	if selected_tile == null:
+		return false
+	
+	if print_debug:
+		_print_tile(selected_tile)
+	
+	tile_selected.emit(selected_tile, selected_node)
+	return true
 
 
 func _find_node3d_with_tile(start: Node) -> Node3D:
